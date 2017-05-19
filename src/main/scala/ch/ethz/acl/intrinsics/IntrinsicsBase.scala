@@ -1,7 +1,7 @@
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType.MicroArchType
-import passera.unsigned.{UByte, UInt, ULong, UShort}
+import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
 
 import scala.lms.common.EffectExp
 import scala.language.higherKinds

@@ -3,7 +3,7 @@ package ch.ethz.acl.intrinsics
 import java.io.{File, FileOutputStream, PrintStream}
 
 import ch.ethz.acl.intrinsics.MicroArchType._
-import passera.unsigned.{UByte, UInt, ULong, UShort}
+import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
 
 import scala.xml.{Node, XML}
 import scala.lms.common.{ArrayOpsExp, BooleanOpsExp, PrimitiveOpsExp, SeqOpsExp}
