@@ -89,7 +89,11 @@ trait IntrinsicsBase extends EffectExp {
     val header: String
   }
 
-  abstract class VoidPointerIntrinsicsDef[V:Typ, T:Manifest] extends IntrinsicsDef[T] {
+  abstract class PointerIntrinsicsDef[U:Integral, T:Manifest] extends IntrinsicsDef[T] {
+    val integralType = implicitly[Integral[U]]
+  }
+
+  abstract class VoidPointerIntrinsicsDef[V:Typ, U:Integral, T:Manifest] extends PointerIntrinsicsDef[U, T] {
     val voidType = typ[V]
   }
 

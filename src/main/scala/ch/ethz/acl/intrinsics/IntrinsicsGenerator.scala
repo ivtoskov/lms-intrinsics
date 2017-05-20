@@ -8,7 +8,7 @@ import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
 import scala.xml.{Node, XML}
 import scala.lms.common.{ArrayOpsExp, BooleanOpsExp, PrimitiveOpsExp, SeqOpsExp}
 
-class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with PrimitiveOpsExp with BooleanOpsExp {
+protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with PrimitiveOpsExp with BooleanOpsExp {
   implicit def uIntTyp    : Typ[UInt] = manifestTyp
   implicit def uByteTyp   : Typ[UByte] = manifestTyp
   implicit def uShortTyp  : Typ[UShort] = manifestTyp
@@ -28,8 +28,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
     "_bnd_narrow_ptr_bounds",
     "_bnd_set_ptr_bounds",
     "_bnd_store_ptr_bounds",
-    "_mm_malloc",
-    "_mm512_i32extscatter_ps")
+    "_mm_malloc")
 
   case class Parameter (varName: String, pType: String)
 
@@ -79,7 +78,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     def getLMSParams = {
       allParams.map(p => {
-        p.varName + ": Exp[" + remap(p.pType) + "]" + (if (offsetParams.contains(p)) " = Const(0)" else "")
+        p.varName + ": Exp[" + (if (offsetParams.contains(p)) "U" else remap(p.pType)) + "]"
       }).mkString(", ")
     }
 
@@ -109,7 +108,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     def typeParams = {
       if (hasArrayTypes) {
-        if (hasVoidPointers) "[A[_], T:Typ]" else "[A[_]]"
+        if (hasVoidPointers) "[A[_], T:Typ, U:Integral]" else "[A[_], U:Integral]"
       } else {
         ""
       }
@@ -133,17 +132,19 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     def optionallyAddImplContMirror = {
       if (hasArrayTypes) {
-        if (hasVoidPointers) "(iDef.voidType, iDef.cont)" else "(iDef.cont)"
+        if (hasVoidPointers) "(iDef.voidType, iDef.integralType, iDef.cont)" else "(iDef.integralType, iDef.cont)"
       } else {
         ""
       }
     }
 
-    def addImplCont() = if (hasVoidPointers) "(typ[T], cont)" else "(cont)"
+    def addImplCont() = if (hasVoidPointers) "(typ[T], implicitly[Integral[U]], cont)" else "(implicitly[Integral[U]], cont)"
 
     def addSuperClass() = {
       if (hasVoidPointers)
-        s"VoidPointerIntrinsicsDef[T, $getReturnType]"
+        s"VoidPointerIntrinsicsDef[T, U, $getReturnType]"
+      else if (extractArrayParams.nonEmpty)
+        s"PointerIntrinsicsDef[U, $getReturnType]"
       else
         s"IntrinsicsDef[$getReturnType]"
     }
@@ -339,16 +340,12 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
   }
 
 
-  def generateISA(isa: String, intrinsics: List[Intrinsic], out: PrintStream) = {
-
-    val statsOutputFile = new File(rootPath + "/stats/" + isa + ".txt")
-    statsOutputFile.createNewFile()
-    val statsOutput = new PrintStream(new FileOutputStream(statsOutputFile), false)
-    statsOutput.println(s"$isa statistics:\n\n")
+  def generateISA(isa: String, intrinsics: List[Intrinsic], out: PrintStream, statsOutput: PrintStream, parent: String = "") = {
+    if (parent == "") statsOutput.println(s"$isa statistics:\n\n")
 
     out.println(getPreamble)
-
-    out.println("trait " + isa + " extends IntrinsicsBase {")
+    val optionalProtectedModifier = if (parent == "") "" else "protected "
+    out.println(optionalProtectedModifier + "trait " + isa + " extends IntrinsicsBase {")
 
     var numberOfPointerArguments = 0
     var pointerArgumentsNames: List[String] = List()
@@ -423,7 +420,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
       }
     }
 
-    statsOutput.println(s"Number of $isa intrinsics: ${intrinsics.size}")
+    if (parent == "") statsOutput.println(s"Number of $isa intrinsics: ${intrinsics.size}")
     statsOutput.println(s"Number of intrinsics with pointer arguments: $numberOfPointerArguments")
     pointerArgumentsNames foreach statsOutput.println
 
@@ -447,9 +444,9 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     // Generate trait for code generation
     out.println(
-      s"""trait CGen$isa extends CGenIntrinsics {
+      s"""${optionalProtectedModifier}trait CGen$isa extends CGenIntrinsics {
           |
-         |  val IR: $isa
+          |  val IR: ${if (parent == "") isa else parent}
           |  import IR._
           |
          |  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -556,32 +553,50 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
   }
 
-  def createISA(isa: String, allIntrinsics: List[Intrinsic]) = {
-    val intrinsics = allIntrinsics.filter(in => in.tech.equals(isa)).filterNot(in => temporaryDisabledIntrinsics.contains(in.name))
+  def createISA(name: String, allIntrinsics: List[Intrinsic]) = {
+    val intrinsics = allIntrinsics.filter(in => in.tech.equals(name)).filterNot(in => temporaryDisabledIntrinsics.contains(in.name))
     if (intrinsics.size < nrIntrinsicsPerFile) {
-      createSimpleISA(isa, intrinsics)
+      val path = srcPath + name + ".scala"
+      val output = new PrintStream(new FileOutputStream(path))
+      val statsOutputFile = new File(rootPath + "/stats/" + name + ".txt")
+      statsOutputFile.createNewFile()
+      val statsOutput = new PrintStream(new FileOutputStream(statsOutputFile), false)
+      generateISA(name, intrinsics, output, statsOutput)
     } else {
-      createComplexISA(isa, intrinsics)
+      createComplexISA(name, intrinsics)
     }
   }
 
-  def createSimpleISA(name: String, intrinsics: List[Intrinsic]) = {
-    val path = srcPath + name + ".scala"
-    val output = new PrintStream(new FileOutputStream(path))
-    generateISA(name, intrinsics, output)
-  }
-
   def createComplexISA(name: String, intrinsics: List[Intrinsic]) = {
+    val statsOutputFile = new File(rootPath + "/stats/" + name + ".txt")
+    statsOutputFile.createNewFile()
+    val statsOutput = new PrintStream(new FileOutputStream(statsOutputFile), false)
+    statsOutput.println(s"$name statistics:\n\n")
+    statsOutput.println(s"Number of $name intrinsics: ${intrinsics.size}")
+
     val subFiles = intrinsics.grouped(nrIntrinsicsPerFile).toList.zipWithIndex
-    subFiles foreach {case (subIntrinsics, index) => createSimpleISA(name + index, subIntrinsics)}
+    subFiles foreach {case (subIntrinsics, index) =>
+      val newName = name + "0" + index
+      val path = srcPath + newName + ".scala"
+      val output = new PrintStream(new FileOutputStream(path))
+      generateISA(newName, subIntrinsics, output, statsOutput, name)
+    }
     val path = srcPath + name + ".scala"
     val out = new PrintStream(new FileOutputStream(path))
     out.println("package ch.ethz.acl.intrinsics")
     out.println()
-    out.print("trait " + name + " extends IntrinsicsBase")
-    subFiles foreach {case (_, index) => out.print(" with " + name + index)}
-    if ((name == "AVX512" || name == "KNC") && new java.io.File(srcPath + "AVX512_KNC.scala").exists) {
+    out.print(s"trait $name extends IntrinsicsBase")
+    subFiles foreach {case (_, index) => out.print(" with " + name + "0" + index)}
+    val shouldAdd512KNC = (name == "AVX512" || name == "KNC") && new java.io.File(srcPath + "AVX512_KNC.scala").exists
+    if (shouldAdd512KNC) {
       out.print(" with AVX512_KNC")
+    }
+    out.println("\n")
+
+    out.print(s"trait CGen$name extends CGenIntrinsics")
+    subFiles foreach {case (_, index) => out.print(" with CGen" + name + "0" + index)}
+    if (shouldAdd512KNC) {
+      out.print(" with CGenAVX512_KNC")
     }
     out.println()
   }
@@ -595,15 +610,15 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     //    createISA("MMX", intrinsics)
 
-        createISA("SSE", intrinsics)
-    //    createISA("SSE2", intrinsics)
+//        createISA("SSE", intrinsics)
+        createISA("SSE2", intrinsics)
     //    createISA("SSE3", intrinsics)
     //    createISA("SSSE3", intrinsics)
     //    createISA("SSE41", intrinsics)
     //    createISA("SSE42", intrinsics)
     //
-    //    createISA("AVX", intrinsics)
-    //    createISA("AVX2", intrinsics)
+//        createISA("AVX", intrinsics)
+//        createISA("AVX2", intrinsics)
     //
     //    createISA("AVX512_KNC", intrinsics)
     //    createISA("AVX512", intrinsics)
@@ -663,7 +678,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
     """package ch.ethz.acl.intrinsics
       |
       |import ch.ethz.acl.intrinsics.MicroArchType._
-      |import passera.unsigned.{UByte, UInt, ULong, UShort}
+      |import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
       |
       |import scala.reflect.SourceContext
       |import scala.language.higherKinds
