@@ -9,6 +9,11 @@ import scala.xml.{Node, XML}
 import scala.lms.common.{ArrayOpsExp, BooleanOpsExp, PrimitiveOpsExp, SeqOpsExp}
 
 class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with PrimitiveOpsExp with BooleanOpsExp {
+  implicit def uIntTyp    : Typ[UInt] = manifestTyp
+  implicit def uByteTyp   : Typ[UByte] = manifestTyp
+  implicit def uShortTyp  : Typ[UShort] = manifestTyp
+  implicit def uLongTyp   : Typ[ULong] = manifestTyp
+  implicit def anyTyp     : Typ[Any] = manifestTyp
 
   val rootPath = new File(".").getAbsolutePath
   val srcPath = rootPath + "/src/main/scala/ch/ethz/acl/intrinsics/"
@@ -120,7 +125,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
 
     def genMirror(varName: String) = {
       if (extractArrayParams.nonEmpty) {
-        s"iDef.cont.apply($varName, f)"
+        s"iDef.cont.applyTransformer($varName, f)"
       } else {
         s"f($varName)"
       }
@@ -341,7 +346,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
     val statsOutput = new PrintStream(new FileOutputStream(statsOutputFile), false)
     statsOutput.println(s"$isa statistics:\n\n")
 
-    out.println(getLogo)
+    out.println(getPreamble)
 
     out.println("trait " + isa + " extends IntrinsicsBase {")
 
@@ -654,7 +659,7 @@ class ZGenerator extends IntrinsicsBase with ArrayOpsExp with SeqOpsExp with Pri
     }
   }
 
-  def getLogo = {
+  def getPreamble = {
     """package ch.ethz.acl.intrinsics
       |
       |import ch.ethz.acl.intrinsics.MicroArchType._

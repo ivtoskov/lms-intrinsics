@@ -3,7 +3,7 @@ package ch.ethz.acl.intrinsics
 import ch.ethz.acl.intrinsics.MicroArchType.MicroArchType
 import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
 
-import scala.lms.common.EffectExp
+import scala.lms.common._
 import scala.language.higherKinds
 import scala.lms.internal.CCodegen
 
@@ -28,6 +28,12 @@ trait IntrinsicsBase extends EffectExp {
   implicit def floatTyp   : Typ[Float]
   implicit def doubleTyp  : Typ[Double]
 
+  implicit def uIntTyp    : Typ[UInt]
+  implicit def uByteTyp   : Typ[UByte]
+  implicit def uShortTyp  : Typ[UShort]
+  implicit def uLongTyp   : Typ[ULong]
+  implicit def anyTyp     : Typ[Any]
+
   implicit def __m64Typ   : Typ[__m64]     = manifestTyp
   implicit def __m128Typ  : Typ[__m128]    = manifestTyp
   implicit def __m128dTyp : Typ[__m128d]   = manifestTyp
@@ -38,12 +44,6 @@ trait IntrinsicsBase extends EffectExp {
   implicit def __m512Typ  : Typ[__m512]    = manifestTyp
   implicit def __m512dTyp : Typ[__m512d]   = manifestTyp
   implicit def __m512iTyp : Typ[__m512i]   = manifestTyp
-
-  implicit def uIntTyp    : Typ[UInt]      = manifestTyp
-  implicit def uByteTyp   : Typ[UByte]     = manifestTyp
-  implicit def uShortTyp  : Typ[UShort]    = manifestTyp
-  implicit def uLongTyp   : Typ[ULong]     = manifestTyp
-  implicit def anyTyp     : Typ[Any]       = manifestTyp
 
   case class Performance (latency: Option[Double], throughput: Option[Double])
 
@@ -96,10 +96,13 @@ trait IntrinsicsBase extends EffectExp {
   abstract class Container[C[_]] {
     def write[A:Typ, T:Typ](c: Exp[C[T]]*)(writeObject: Def[A]): Exp[A]
     def read[A:Typ, T:Typ](c: Exp[C[T]]*)(readObject: Def[A]): Exp[A]
-    def apply[A](x: Exp[A], f: Transformer): Exp[A]
+//    def apply[T:Typ](c: Exp[C[T]], i: Exp[Int]): Exp[T]
+//    def update[T:Typ](c: Exp[C[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit]
+    def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A]
   }
 
   implicit object ArrayContainerExp extends Container[Array] {
+
     def write[A:Typ, T:Typ](c: Exp[Array[T]]*)(writeObject: Def[A]): Exp[A] = {
       reflectWrite(c.toArray:_*)(writeObject)
     }
@@ -108,7 +111,15 @@ trait IntrinsicsBase extends EffectExp {
       toAtom(readObject)
     }
 
-    def apply[A](x: Exp[A], f: Transformer): Exp[A] = {
+//    def apply[T:ib.Typ](c: ib.Exp[Array[T]], i: ib.Exp[Int]): ib.Exp[T] = {
+//      array_apply(c.asInstanceOf[ArrayContainerExp.Exp[Array[T]]], i.asInstanceOf[ArrayContainerExp.Exp[Int]]).asInstanceOf[ib.Exp[T]]
+//    }
+
+//    def update[T:Typ](c: Exp[Array[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit] = {
+//      array_update(c, i, elem)
+//    }
+
+    def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A] = {
       f(x)
     }
   }
