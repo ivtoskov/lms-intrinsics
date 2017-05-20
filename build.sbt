@@ -4,7 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.11.2"
 
-organization := "ETHZ"
+organization := "ch.ethz.acl"
 
 version := "0.1"
 
