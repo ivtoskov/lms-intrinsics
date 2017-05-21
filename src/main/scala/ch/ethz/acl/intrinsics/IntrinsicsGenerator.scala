@@ -610,7 +610,9 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     if (shouldAdd512KNC) {
       out.print(" with CGenAVX512_KNC")
     }
-    out.println()
+    out.println(" {")
+    out.println(s"  val IR: $name")
+    out.println("}\n")
   }
 
   def generate (): Unit = {
@@ -620,24 +622,24 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     val intrinsics = parseIntrinsics(nodes)
     //    generateISAs(ch.ethz.acl.intrinsics)
 
-    //    createISA("MMX", intrinsics)
+        createISA("MMX", intrinsics)
 
-//        createISA("SSE", intrinsics)
-//        createISA("SSE2", intrinsics)
-    //    createISA("SSE3", intrinsics)
-    //    createISA("SSSE3", intrinsics)
-    //    createISA("SSE41", intrinsics)
-    //    createISA("SSE42", intrinsics)
-    //
-//        createISA("AVX", intrinsics)
-//        createISA("AVX2", intrinsics)
-    //
-    //    createISA("AVX512_KNC", intrinsics)
-    //    createISA("AVX512", intrinsics)
-    //    createISA("FMA", intrinsics)
-    //    createISA("KNC", intrinsics)
-    //    createISA("SVML", intrinsics)
-    //
+        createISA("SSE", intrinsics)
+        createISA("SSE2", intrinsics)
+        createISA("SSE3", intrinsics)
+        createISA("SSSE3", intrinsics)
+        createISA("SSE41", intrinsics)
+        createISA("SSE42", intrinsics)
+
+        createISA("AVX", intrinsics)
+        createISA("AVX2", intrinsics)
+
+        createISA("AVX512_KNC", intrinsics)
+        createISA("AVX512", intrinsics)
+        createISA("FMA", intrinsics)
+        createISA("KNC", intrinsics)
+        createISA("SVML", intrinsics)
+
         createISA("Other", intrinsics)
   }
 

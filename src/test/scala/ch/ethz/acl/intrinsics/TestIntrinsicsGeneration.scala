@@ -5,8 +5,8 @@ import org.scalatest.FunSpec
 class TestIntrinsicsGeneration extends FunSpec {
 
   describe("Generate intrinsics") {
-    val zgen = new ch.ethz.acl.intrinsics.IntrinsicsGenerator
-    zgen.generate()
+//    val zgen = new ch.ethz.acl.intrinsics.IntrinsicsGenerator
+//    zgen.generate()
   }
 
   describe("Vector product with intrinsics test") {
@@ -37,7 +37,7 @@ class VectorProductIr extends ch.ethz.acl.intrinsics.SSE2 with TestIr { q =>
     override def emitNode(sym: Sym[Any], rhs: Def[Any]) = {
       rhs match {
         case RangeForeach(start, end, i, body) =>
-          gen"""for(int $i=$start; $i < $end; $i = $i + 2) {
+          gen"""for(int $i = $start; $i < $end; $i = $i + 2) {
                 |${nestedBlock(body)}
                 |}"""
         case _ => super.emitNode(sym, rhs)
