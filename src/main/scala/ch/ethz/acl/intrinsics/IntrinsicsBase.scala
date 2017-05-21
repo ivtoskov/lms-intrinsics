@@ -19,6 +19,8 @@ trait IntrinsicsBase extends EffectExp {
   abstract class __m512
   abstract class __m512d
   abstract class __m512i
+  abstract class VoidPointer
+  abstract class DoubleVoidPointer
 
   implicit def byteTyp    : Typ[Byte]
   implicit def charTyp    : Typ[Char]
@@ -44,6 +46,8 @@ trait IntrinsicsBase extends EffectExp {
   implicit def __m512Typ  : Typ[__m512]    = manifestTyp
   implicit def __m512dTyp : Typ[__m512d]   = manifestTyp
   implicit def __m512iTyp : Typ[__m512i]   = manifestTyp
+  implicit def voidPointerTyp: Typ[VoidPointer] = manifestTyp
+  implicit def doubleVoidPointerTyp: Typ[DoubleVoidPointer] = manifestTyp
 
   case class Performance (latency: Option[Double], throughput: Option[Double])
 
@@ -163,6 +167,8 @@ trait CGenIntrinsics extends CCodegen {
     case _ if m <:< ManifestTyp(manifest[__m512])    => "__m512"
     case _ if m <:< ManifestTyp(manifest[__m512d])   => "__m512d"
     case _ if m <:< ManifestTyp(manifest[__m512i])   => "__m512i"
+    case _ if m <:< ManifestTyp(manifest[VoidPointer])   => "void*"
+    case _ if m <:< ManifestTyp(manifest[DoubleVoidPointer])   => "void**"
     case _ => super.remap(m)
   }
 

@@ -17,14 +17,6 @@ class TestIntrinsicsGeneration extends FunSpec {
 
 class VectorProductIr extends ch.ethz.acl.intrinsics.SSE2 with TestIr { q =>
 
-  def vecProd(arr1: Rep[Array[Double]], arr2: Rep[Array[Double]], result: Rep[Array[Double]], size: Rep[Int]) = {
-    for (i <- infix_until(0, size)) {
-      result(i) = infix_*(arr1(i), arr2(i))
-    }
-
-    result
-  }
-
   def vecProdIntrinsics(
                          arr1:   Rep[Array[Double]],
                          arr2:   Rep[Array[Double]],

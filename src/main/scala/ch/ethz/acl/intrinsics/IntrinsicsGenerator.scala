@@ -20,15 +20,6 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
   val resourcePath = rootPath + "/src/main/resources/"
   val xmlFile = resourcePath + "data-3.3.16.xml"
   val nrIntrinsicsPerFile = 175
-  val temporaryDisabledIntrinsics = List(
-    "_bnd_copy_ptr_bounds",
-    "_bnd_get_ptr_lbound",
-    "_bnd_get_ptr_ubound",
-    "_bnd_init_ptr_bounds",
-    "_bnd_narrow_ptr_bounds",
-    "_bnd_set_ptr_bounds",
-    "_bnd_store_ptr_bounds",
-    "_mm_malloc")
 
   case class Parameter (varName: String, pType: String)
 
@@ -87,7 +78,8 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     }
 
     def getReturnType = {
-      remap(returnType)
+      val standardRetType = remap(returnType)
+      if (standardRetType == "A[T]") "VoidPointer" else standardRetType
     }
 
     def extractArrayParams = {
@@ -99,11 +91,11 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     }
 
     def hasVoidPointers = {
-      nonOffsetParams.exists(p => remap(p.pType) == "A[T]") || getReturnType == "A[T]"
+      nonOffsetParams.exists(p => remap(p.pType) == "A[T]")
     }
 
     def hasArrayTypes = {
-      extractArrayParams.nonEmpty || typeMappings(returnType).typeArguments.nonEmpty
+      extractArrayParams.nonEmpty || getReturnType.startsWith("A[")
     }
 
     def typeParams = {
@@ -117,6 +109,14 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     def abstractContainer = {
       if (hasArrayTypes) {
         "(implicit val cont: Container[A])"
+      } else {
+        ""
+      }
+    }
+
+    def abstractNonValContainer = {
+      if (hasArrayTypes) {
+        "(implicit cont: Container[A])"
       } else {
         ""
       }
@@ -138,7 +138,13 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
       }
     }
 
-    def addImplCont() = if (hasVoidPointers) "(typ[T], implicitly[Integral[U]], cont)" else "(implicitly[Integral[U]], cont)"
+    def addImplCont() = {
+      if (hasArrayTypes) {
+        if (hasVoidPointers) "(typ[T], implicitly[Integral[U]], cont)" else "(implicitly[Integral[U]], cont)"
+      } else {
+        ""
+      }
+    }
 
     def addSuperClass() = {
       if (hasVoidPointers)
@@ -331,7 +337,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     "void const*"        -> typ[Array[Any]],
     "void const *"       -> typ[Array[Any]],
     "const void *"       -> typ[Array[Any]],
-    "const void **"      -> typ[Array[Array[Any]]]
+    "const void **"      -> typ[DoubleVoidPointer]
   )
 
 
@@ -389,6 +395,12 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     // Generate code for LMS methods
     intrinsics foreach { in =>
       in.getReturnType match {
+        case _ if in.getReturnType == "VoidPointer" || in.getReturnType.startsWith("A[") =>
+          out.println(
+            s"""  def ${in.name}${in.typeParams}(${in.getLMSParams})${in.abstractNonValContainer}: Exp[${in.getReturnType}] = {
+                |    reflectMutable(${in.getDefName}(${in.getParams})${in.addImplCont()})
+                |  }
+            """.stripMargin)
         case _ if in.category.contains(IntrinsicsCategory.Load) =>
           out.println(
             s"""  def ${in.name}${in.typeParams}(${in.getLMSParams})(implicit cont: Container[A]): Exp[${in.getReturnType}] = {
@@ -554,7 +566,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
   }
 
   def createISA(name: String, allIntrinsics: List[Intrinsic]) = {
-    val intrinsics = allIntrinsics.filter(in => in.tech.equals(name)).filterNot(in => temporaryDisabledIntrinsics.contains(in.name))
+    val intrinsics = allIntrinsics.filter(in => in.tech.equals(name))
     if (intrinsics.size < nrIntrinsicsPerFile) {
       val path = srcPath + name + ".scala"
       val output = new PrintStream(new FileOutputStream(path))
@@ -611,7 +623,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     //    createISA("MMX", intrinsics)
 
 //        createISA("SSE", intrinsics)
-        createISA("SSE2", intrinsics)
+//        createISA("SSE2", intrinsics)
     //    createISA("SSE3", intrinsics)
     //    createISA("SSSE3", intrinsics)
     //    createISA("SSE41", intrinsics)
@@ -626,7 +638,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     //    createISA("KNC", intrinsics)
     //    createISA("SVML", intrinsics)
     //
-    //    createISA("Other", intrinsics)
+        createISA("Other", intrinsics)
   }
 
   def strToMicroArchType(s: String): MicroArchType = s match {
