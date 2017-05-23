@@ -1,16 +1,23 @@
 name := "lms-intrinsics"
 
-version := "1.0"
-
 scalaVersion := "2.11.2"
 
 organization := "ch.ethz.acl"
 
-version := "0.1"
+licenses := Seq("Apache License, Version 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaOrganization := "org.scala-lang.virtualized"
+homepage := Some(url("https://github.com/ivtoskov/lms-intrinsics"))
+
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/ivtoskov/lms-intrinsics"),
+    "scm:git@github.com:ivtoskov/lms-intrinsics.git"
+  )
+)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
+
+scalaOrganization := "org.scala-lang.virtualized"
 
 libraryDependencies += "org.scala-lang.lms" %% "lms-core" % "1.0.0-SNAPSHOT"
 
