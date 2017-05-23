@@ -15,7 +15,7 @@ class TestIntrinsicsGeneration extends FunSpec {
   }
 }
 
-class VectorProductIr extends ch.ethz.acl.intrinsics.SSE2 with TestIr { q =>
+class VectorProductIr extends SSE2 with TestIr { q =>
 
   def vecProdIntrinsics(
                          arr1:   Rep[Array[Double]],
@@ -31,7 +31,7 @@ class VectorProductIr extends ch.ethz.acl.intrinsics.SSE2 with TestIr { q =>
     }
   }
 
-  val codegen = new BaseTestCgen with ch.ethz.acl.intrinsics.CGenSSE2 {
+  val codegen = new BaseTestCgen with CGenSSE2 {
     override val IR: q.type = q
 
     override def emitNode(sym: Sym[Any], rhs: Def[Any]) = {
