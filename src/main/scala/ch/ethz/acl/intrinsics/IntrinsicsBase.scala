@@ -104,45 +104,22 @@ trait IntrinsicsBase extends EffectExp {
   abstract class Container[C[_]] {
     def write[A:Typ, T:Typ](c: Exp[C[T]]*)(writeObject: Def[A]): Exp[A]
     def read[A:Typ, T:Typ](c: Exp[C[T]]*)(readObject: Def[A]): Exp[A]
-//    def apply[T:Typ](c: Exp[C[T]], i: Exp[Int]): Exp[T]
-//    def update[T:Typ](c: Exp[C[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit]
+    def apply[T:Typ](c: Exp[C[T]], i: Exp[Int]): Exp[T]
+    def update[T:Typ](c: Exp[C[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit]
     def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A]
   }
 
-  implicit object ArrayContainerExp extends Container[Array] {
-
-    def write[A:Typ, T:Typ](c: Exp[Array[T]]*)(writeObject: Def[A]): Exp[A] = {
-      reflectWrite(c.toArray:_*)(writeObject)
-    }
-
-    def read[A:Typ, T:Typ](c: Exp[Array[T]]*)(readObject: Def[A]): Exp[A] = {
-      toAtom(readObject)
-    }
-
-//    def apply[T:ib.Typ](c: ib.Exp[Array[T]], i: ib.Exp[Int]): ib.Exp[T] = {
-//      array_apply(c.asInstanceOf[ArrayContainerExp.Exp[Array[T]]], i.asInstanceOf[ArrayContainerExp.Exp[Int]]).asInstanceOf[ib.Exp[T]]
-//    }
-
-//    def update[T:Typ](c: Exp[Array[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit] = {
-//      array_update(c, i, elem)
-//    }
-
-    def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A] = {
-      f(x)
-    }
-  }
-
   def isIntrinsicType[T](m: Typ[T]): Boolean = m match {
-    case _ if m <:< manifestTyp[__m64]     => true
-    case _ if m <:< manifestTyp[__m128]    => true
-    case _ if m <:< manifestTyp[__m128d]   => true
-    case _ if m <:< manifestTyp[__m128i]   => true
-    case _ if m <:< manifestTyp[__m256]    => true
-    case _ if m <:< manifestTyp[__m256d]   => true
-    case _ if m <:< manifestTyp[__m256i]   => true
-    case _ if m <:< manifestTyp[__m512]    => true
-    case _ if m <:< manifestTyp[__m512d]   => true
-    case _ if m <:< manifestTyp[__m512i]   => true
+    case _ if m <:< manifestTyp[__m64]   => true
+    case _ if m <:< manifestTyp[__m128]  => true
+    case _ if m <:< manifestTyp[__m128d] => true
+    case _ if m <:< manifestTyp[__m128i] => true
+    case _ if m <:< manifestTyp[__m256]  => true
+    case _ if m <:< manifestTyp[__m256d] => true
+    case _ if m <:< manifestTyp[__m256i] => true
+    case _ if m <:< manifestTyp[__m512]  => true
+    case _ if m <:< manifestTyp[__m512d] => true
+    case _ if m <:< manifestTyp[__m512i] => true
     case _ => false
   }
 
@@ -151,24 +128,51 @@ trait IntrinsicsBase extends EffectExp {
   }
 }
 
+trait IntrinsicsArrays extends IntrinsicsBase with ArrayOps {
+
+  implicit object ArrayContainerExp extends Container[Array]
+  {
+    def write[A:Typ, T:Typ](c: Exp[Array[T]]*)(writeObject: Def[A]): Exp[A] = {
+      reflectWrite(c.toArray:_*)(writeObject)
+    }
+
+    def read[A:Typ, T:Typ](c: Exp[Array[T]]*)(readObject: Def[A]): Exp[A] = {
+      toAtom(readObject)
+    }
+
+    def apply[T:Typ](c: Exp[Array[T]], i: Exp[Int]): Exp[T] = {
+      array_apply(c, i)
+    }
+
+    def update[T:Typ](c: Exp[Array[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit] = {
+      array_update(c, i, elem)
+    }
+
+    def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A] = {
+      f(x)
+    }
+  }
+
+}
+
 trait CGenIntrinsics extends CCodegen {
 
   val IR: IntrinsicsBase
   import IR._
 
   override def remap[T](m: Typ[T]): String = m match {
-    case _ if m <:< ManifestTyp(manifest[__m64])     => "__m64"
-    case _ if m <:< ManifestTyp(manifest[__m128])    => "__m128"
-    case _ if m <:< ManifestTyp(manifest[__m128d])   => "__m128d"
-    case _ if m <:< ManifestTyp(manifest[__m128i])   => "__m128i"
-    case _ if m <:< ManifestTyp(manifest[__m256])    => "__m256"
-    case _ if m <:< ManifestTyp(manifest[__m256d])   => "__m256d"
-    case _ if m <:< ManifestTyp(manifest[__m256i])   => "__m256i"
-    case _ if m <:< ManifestTyp(manifest[__m512])    => "__m512"
-    case _ if m <:< ManifestTyp(manifest[__m512d])   => "__m512d"
-    case _ if m <:< ManifestTyp(manifest[__m512i])   => "__m512i"
-    case _ if m <:< ManifestTyp(manifest[VoidPointer])   => "void*"
-    case _ if m <:< ManifestTyp(manifest[DoubleVoidPointer])   => "void**"
+    case _ if m <:< ManifestTyp(manifest[__m64])             => "__m64"
+    case _ if m <:< ManifestTyp(manifest[__m128])            => "__m128"
+    case _ if m <:< ManifestTyp(manifest[__m128d])           => "__m128d"
+    case _ if m <:< ManifestTyp(manifest[__m128i])           => "__m128i"
+    case _ if m <:< ManifestTyp(manifest[__m256])            => "__m256"
+    case _ if m <:< ManifestTyp(manifest[__m256d])           => "__m256d"
+    case _ if m <:< ManifestTyp(manifest[__m256i])           => "__m256i"
+    case _ if m <:< ManifestTyp(manifest[__m512])            => "__m512"
+    case _ if m <:< ManifestTyp(manifest[__m512d])           => "__m512d"
+    case _ if m <:< ManifestTyp(manifest[__m512i])           => "__m512i"
+    case _ if m <:< ManifestTyp(manifest[VoidPointer])       => "void*"
+    case _ if m <:< ManifestTyp(manifest[DoubleVoidPointer]) => "void**"
     case _ => super.remap(m)
   }
 
