@@ -12,13 +12,15 @@ publishTo := {
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
-developers := List(
-  Developer(
-    id    = "ivtoskov",
-    name  = "Ivaylo Toskov",
-    email = "kennelcrash@gmail.com",
-    url   = url("https://github.com/ivtoskov")
-  )
-)
+pomExtra in Global := {
+  <developers>
+    <developer>
+      <id>ivtoskov</id>
+      <name>Ivaylo Toskov</name>
+      <url>https://github.com/ivtoskov</url>
+    </developer>
+  </developers>
+}
 
 sonatypeProfileName := "ch.ethz.acl"
+
