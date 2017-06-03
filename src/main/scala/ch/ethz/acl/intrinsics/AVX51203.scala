@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51203 extends IntrinsicsBase {
+trait AVX51203 extends IntrinsicsBase {
   /**
    * Load 512-bits (composed of 16 packed single-precision (32-bit) floating-point
    * elements) from memory into "dst". 

@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51206 extends IntrinsicsBase {
+trait AVX51206 extends IntrinsicsBase {
   /**
    * Cast vector of type __m512 to type __m256. 
    * 	This intrinsic is only used for

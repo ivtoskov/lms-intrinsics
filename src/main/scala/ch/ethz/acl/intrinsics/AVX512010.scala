@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512010 extends IntrinsicsBase {
+trait AVX512010 extends IntrinsicsBase {
   /**
    * Duplicate even-indexed double-precision (64-bit) floating-point elements from
    * "a", and store the results in "dst" using writemask "k" (elements are copied

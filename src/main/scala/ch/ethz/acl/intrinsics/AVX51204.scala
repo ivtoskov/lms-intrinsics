@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51204 extends IntrinsicsBase {
+trait AVX51204 extends IntrinsicsBase {
   /**
    * Convert packed 32-bit integers in "a" to packed 8-bit integers with
    * truncation, and store the active results (those with their respective bit set

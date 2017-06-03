@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512018 extends IntrinsicsBase {
+trait AVX512018 extends IntrinsicsBase {
   /**
    * Subtract packed unsigned 8-bit integers in "b" from packed unsigned 8-bit
    * integers in "a" using saturation, and store the results in "dst" using

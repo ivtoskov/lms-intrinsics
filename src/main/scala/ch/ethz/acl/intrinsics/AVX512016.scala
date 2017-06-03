@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512016 extends IntrinsicsBase {
+trait AVX512016 extends IntrinsicsBase {
   /**
    * Zero extend packed unsigned 8-bit integers in th elow 4 bytes of "a" to packed
    * 32-bit integers, and store the results in "dst" using zeromask "k" (elements

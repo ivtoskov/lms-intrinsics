@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51201 extends IntrinsicsBase {
+trait AVX51201 extends IntrinsicsBase {
   /**
    * Convert packed single-precision (32-bit) floating-point elements in "a" to
    * packed unsigned 32-bit integers with truncation, and store the results in

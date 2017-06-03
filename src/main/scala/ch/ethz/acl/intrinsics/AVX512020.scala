@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512020 extends IntrinsicsBase {
+trait AVX512020 extends IntrinsicsBase {
   /**
    * Shuffle 8-bit integers in "a" across lanes using the corresponding index in
    * "idx", and store the results in "dst" using zeromask "k" (elements are zeroed

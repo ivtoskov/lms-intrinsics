@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51200 extends IntrinsicsBase {
+trait AVX51200 extends IntrinsicsBase {
   /**
    * Compute the bitwise NOT of 16-bit masks "a" and then AND with "b", and store
    * the result in "k".

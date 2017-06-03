@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512017 extends IntrinsicsBase {
+trait AVX512017 extends IntrinsicsBase {
   /**
    * Shift packed 32-bit integers in "a" left by "imm8" while shifting in zeros,
    * and store the results in "dst" using zeromask "k" (elements are zeroed out

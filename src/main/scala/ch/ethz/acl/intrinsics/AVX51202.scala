@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51202 extends IntrinsicsBase {
+trait AVX51202 extends IntrinsicsBase {
   /**
    * Multiply packed single-precision (32-bit) floating-point elements in "a" and
    * "b", alternatively subtract and add packed elements in "c" from/to the

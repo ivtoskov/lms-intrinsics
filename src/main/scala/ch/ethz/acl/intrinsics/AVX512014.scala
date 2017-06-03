@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512014 extends IntrinsicsBase {
+trait AVX512014 extends IntrinsicsBase {
   /**
    * Load contiguous active 32-bit integers from "a" (those with their respective
    * bit set in mask "k"), and store the results in "dst" using zeromask "k"

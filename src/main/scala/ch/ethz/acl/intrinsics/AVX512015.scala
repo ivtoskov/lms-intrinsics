@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512015 extends IntrinsicsBase {
+trait AVX512015 extends IntrinsicsBase {
   /**
    * Set each bit of mask register "k" based on the most significant bit of the
    * corresponding packed 64-bit integer in "a".

@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512011 extends IntrinsicsBase {
+trait AVX512011 extends IntrinsicsBase {
   /**
    * Add packed 8-bit integers in "a" and "b" using saturation, and store the
    * results in "dst" using writemask "k" (elements are copied from "src" when the

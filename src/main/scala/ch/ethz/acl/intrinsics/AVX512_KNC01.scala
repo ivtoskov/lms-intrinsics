@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512_KNC01 extends IntrinsicsBase {
+trait AVX512_KNC01 extends IntrinsicsBase {
   /**
    * Compare packed unsigned 32-bit integers in "a" and "b" for
    * greater-than-or-equal, and store the results in mask vector "k".

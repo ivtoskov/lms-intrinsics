@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51209 extends IntrinsicsBase {
+trait AVX51209 extends IntrinsicsBase {
   /**
    * Multiply packed double-precision (64-bit) floating-point elements in "a" and
    * "b", add the intermediate result to packed elements in "c", and store the

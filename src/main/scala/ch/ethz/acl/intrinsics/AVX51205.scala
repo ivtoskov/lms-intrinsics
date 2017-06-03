@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51205 extends IntrinsicsBase {
+trait AVX51205 extends IntrinsicsBase {
   /**
    * Bitwise ternary logic that provides the capability to implement any
    * three-operand binary function; the specific binary function is specified by

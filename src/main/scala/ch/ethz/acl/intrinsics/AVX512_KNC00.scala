@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512_KNC00 extends IntrinsicsBase {
+trait AVX512_KNC00 extends IntrinsicsBase {
   /**
    * Add packed double-precision (64-bit) floating-point elements in "a" and "b",
    * and store the results in "dst".

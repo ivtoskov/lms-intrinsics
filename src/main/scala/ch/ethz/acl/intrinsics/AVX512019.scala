@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512019 extends IntrinsicsBase {
+trait AVX512019 extends IntrinsicsBase {
   /**
    * Extract the reduced argument of packed double-precision (64-bit)
    * floating-point elements in "a" by the number of bits specified by "imm8", and

@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX512013 extends IntrinsicsBase {
+trait AVX512013 extends IntrinsicsBase {
   /**
    * Compare packed unsigned 16-bit integers in "a" and "b" for less-than, and
    * store the results in mask vector "k1" using zeromask "k" (elements are zeroed

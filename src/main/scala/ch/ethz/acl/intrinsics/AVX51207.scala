@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX51207 extends IntrinsicsBase {
+trait AVX51207 extends IntrinsicsBase {
   /**
    * Broadcast the lower 2 packed single-precision (32-bit) floating-point elements
    * from "a" to all elements of "dst".
