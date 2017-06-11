@@ -106,6 +106,7 @@ trait IntrinsicsBase extends EffectExp {
     def read[A:Typ, T:Typ](c: Exp[C[T]]*)(readObject: Def[A]): Exp[A]
     def apply[T:Typ](c: Exp[C[T]], i: Exp[Int]): Exp[T]
     def update[T:Typ](c: Exp[C[T]], i: Exp[Int], elem: Exp[T]): Exp[Unit]
+    def newInstance[T:Typ](size: Exp[Int]): Exp[C[T]]
     def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A]
   }
 
@@ -150,6 +151,10 @@ trait IntrinsicsArrays extends IntrinsicsBase with ArrayOps {
 
     def applyTransformer[A](x: Exp[A], f: Transformer): Exp[A] = {
       f(x)
+    }
+
+    def newInstance[T:Typ](size: Exp[Int]): Exp[Array[T]] = {
+      array_obj_new[T](size)
     }
   }
 
