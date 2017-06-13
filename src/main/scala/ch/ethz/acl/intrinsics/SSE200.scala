@@ -3745,6 +3745,7 @@ trait SSE200 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_UCOMIEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_UCOMILT_SD (a, b), u, es) =>
       reflectMirrored(Reflect(MM_UCOMILT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 

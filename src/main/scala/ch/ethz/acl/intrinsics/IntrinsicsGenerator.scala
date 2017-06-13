@@ -475,6 +475,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
             |      reflectMirrored(Reflect(${in.getDefName} (${in.allParams.map(p => in.genMirror(p.varName)).mkString(", ")})${in.optionallyAddImplContMirror}, mapOver(f,u), f(es)))(mtype(typ[A]), pos)""".stripMargin)
     }
 
+    out.println("    case _ => super.mirror(e, f)")
     out.println("  }).asInstanceOf[Exp[A]] // why??")
     out.println("}")
     out.println()

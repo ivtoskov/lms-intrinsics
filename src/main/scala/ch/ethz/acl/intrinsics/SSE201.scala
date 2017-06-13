@@ -1342,6 +1342,7 @@ trait SSE201 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_CVTSD_F64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_CVTSI512_SI32 (a), u, es) =>
       reflectMirrored(Reflect(MM512_CVTSI512_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
