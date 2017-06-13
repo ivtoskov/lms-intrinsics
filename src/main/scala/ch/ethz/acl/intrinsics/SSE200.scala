@@ -3759,7 +3759,7 @@ trait CGenSSE200 extends CGenIntrinsics {
     case MM_PAUSE() =>
       stream.println(s"_mm_pause();")
     case MM_CLFLUSH(p, pOffset) =>
-      stream.println(s"_mm_clflush(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
+      stream.println(s"_mm_clflush((void const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
     case MM_LFENCE() =>
       stream.println(s"_mm_lfence();")
     case MM_MFENCE() =>
@@ -3947,25 +3947,25 @@ trait CGenSSE200 extends CGenIntrinsics {
     case MM_SETZERO_SI128() =>
       emitValDef(sym, s"_mm_setzero_si128()")
     case MM_LOADL_EPI64(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadl_epi64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadl_epi64((__m128i const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOAD_SI128(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_load_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_load_si128((__m128i const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOADU_SI128(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadu_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadu_si128((__m128i const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_MASKMOVEU_SI128(a, mask, mem_addr, mem_addrOffset) =>
-      stream.println(s"_mm_maskmoveu_si128(${quote(a)}, ${quote(mask)}, ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+      stream.println(s"_mm_maskmoveu_si128(${quote(a)}, ${quote(mask)}, (char*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
     case MM_STORE_SI128(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_store_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_store_si128((__m128i*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STOREU_SI128(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeu_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storeu_si128((__m128i*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STOREL_EPI64(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storel_epi64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storel_epi64((__m128i*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STREAM_SI128(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_stream_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_stream_si128((__m128i*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STREAM_SI32(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_stream_si32(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_stream_si32((int*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STREAM_SI64(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_stream_si64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_stream_si64((__int64*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_MOVEPI64_PI64(a) =>
       emitValDef(sym, s"_mm_movepi64_pi64(${quote(a)})")
     case MM_MOVPI64_EPI64(a) =>

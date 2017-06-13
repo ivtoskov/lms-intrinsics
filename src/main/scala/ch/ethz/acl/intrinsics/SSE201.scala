@@ -1408,39 +1408,39 @@ trait CGenSSE201 extends CGenIntrinsics {
     case MM_SETZERO_PD() =>
       emitValDef(sym, s"_mm_setzero_pd()")
     case MM_LOAD_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_load_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_load_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOAD1_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_load1_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_load1_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOAD_PD1(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_load_pd1(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_load_pd1((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOADR_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadr_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadr_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOADU_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadu_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadu_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOAD_SD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_load_sd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_load_sd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOADH_PD(a, mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadh_pd(${quote(a)}, ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadh_pd(${quote(a)}, (double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_LOADL_PD(a, mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadl_pd(${quote(a)}, ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_loadl_pd(${quote(a)}, (double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
     case MM_STREAM_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_stream_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_stream_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STORE_SD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_store_sd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_store_sd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STORE1_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_store1_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_store1_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STORE_PD1(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_store_pd1(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_store_pd1((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STORE_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_store_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_store_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STOREU_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeu_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storeu_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STORER_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storer_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storer_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STOREH_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeh_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storeh_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_STOREL_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storel_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      stream.println(s"_mm_storel_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
     case MM_UNPACKHI_PD(a, b) =>
       emitValDef(sym, s"_mm_unpackhi_pd(${quote(a)}, ${quote(b)})")
     case MM_UNPACKLO_PD(a, b) =>

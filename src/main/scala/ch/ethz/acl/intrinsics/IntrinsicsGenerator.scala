@@ -491,7 +491,8 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
        """.stripMargin)
 
     def paramPlusOffset(parameter: Parameter) = {
-      val basis = "${quote(" + parameter.varName + ")"
+      val optionalCast = if (isArrayParam(parameter)) s"(${parameter.pType}) " else ""
+      val basis = optionalCast + "${quote(" + parameter.varName + ")"
       if (isArrayParam(parameter))
         basis + " + (if(" + parameter.varName + "Offset == Const(0)) \"\" else \" + \" + quote(" + parameter.varName + "Offset))}"
       else
