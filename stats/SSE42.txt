@@ -1,0 +1,5 @@
+SSE42 statistics:
+
+
+Number of SSE42 intrinsics: 19
+Number of intrinsics with pointer arguments: 0

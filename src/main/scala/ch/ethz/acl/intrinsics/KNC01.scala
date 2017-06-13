@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -7,7 +33,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait KNC01 extends IntrinsicsBase {
+trait KNC01 extends IntrinsicsBase {
   /**
    * Determines the maximum of the absolute elements of each pair of corresponding
    * elements of packed single-precision (32-bit) floating-point elements in "a"
@@ -1987,191 +2013,280 @@ protected trait KNC01 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_KMERGE2L1H (f(k1), f(k2)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_KMERGE2L1L (k1, k2), u, es) =>
       reflectMirrored(Reflect(MM512_KMERGE2L1L (f(k1), f(k2)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenKNC01 extends CGenIntrinsics {
+trait CGenKNC01 extends CGenIntrinsics {
 
   val IR: KNC
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM512_MAXABS_PS(a, b) =>
+    case iDef@MM512_MAXABS_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maxabs_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_MAXABS_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_MAXABS_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_maxabs_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_GMAX_PS(a, b) =>
+    case iDef@MM512_GMAX_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_gmax_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_GMAX_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_GMAX_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_gmax_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_GMAXABS_PS(a, b) =>
+    case iDef@MM512_GMAXABS_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_gmaxabs_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_GMAXABS_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_GMAXABS_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_gmaxabs_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_GMAX_PD(a, b) =>
+    case iDef@MM512_GMAX_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_gmax_pd(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_GMAX_PD(src, k, a, b) =>
+    case iDef@MM512_MASK_GMAX_PD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_gmax_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_GMIN_PS(a, b) =>
+    case iDef@MM512_GMIN_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_gmin_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_GMIN_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_GMIN_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_gmin_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_GMIN_PD(a, b) =>
+    case iDef@MM512_GMIN_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_gmin_pd(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_GMIN_PD(src, k, a, b) =>
+    case iDef@MM512_MASK_GMIN_PD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_gmin_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MULHI_EPI32(a, b) =>
+    case iDef@MM512_MULHI_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mulhi_epi32(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_MULHI_EPI32(src, k, a, b) =>
+    case iDef@MM512_MASK_MULHI_EPI32(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_mulhi_epi32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MULHI_EPU32(a, b) =>
+    case iDef@MM512_MULHI_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mulhi_epu32(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_MULHI_EPU32(src, k, a, b) =>
+    case iDef@MM512_MASK_MULHI_EPU32(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_mulhi_epu32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_PERMUTE4F128_EPI32(a, imm8) =>
+    case iDef@MM512_PERMUTE4F128_EPI32(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_permute4f128_epi32(${quote(a)}, ${quote(imm8)})")
-    case MM512_MASK_PERMUTE4F128_EPI32(src, k, a, imm8) =>
+    case iDef@MM512_MASK_PERMUTE4F128_EPI32(src, k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_permute4f128_epi32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_RCP23_PS(a) =>
+    case iDef@MM512_RCP23_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rcp23_ps(${quote(a)})")
-    case MM512_MASK_RCP23_PS(src, k, a) =>
+    case iDef@MM512_MASK_RCP23_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rcp23_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_ROUND_PS(a, rounding, expadj) =>
+    case iDef@MM512_ROUND_PS(a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_round_ps(${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_MASK_ROUND_PS(src, k, a, rounding, expadj) =>
+    case iDef@MM512_MASK_ROUND_PS(src, k, a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_ROUNDFXPNT_ADJUST_PS(a, rounding, expadj) =>
+    case iDef@MM512_ROUNDFXPNT_ADJUST_PS(a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundfxpnt_adjust_ps(${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_MASK_ROUNDFXPNT_ADJUST_PS(src, k, a, rounding, expadj) =>
+    case iDef@MM512_MASK_ROUNDFXPNT_ADJUST_PS(src, k, a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundfxpnt_adjust_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_ROUNDFXPNT_ADJUST_PD(a, rounding, expadj) =>
+    case iDef@MM512_ROUNDFXPNT_ADJUST_PD(a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundfxpnt_adjust_pd(${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_MASK_ROUNDFXPNT_ADJUST_PD(src, k, a, rounding, expadj) =>
+    case iDef@MM512_MASK_ROUNDFXPNT_ADJUST_PD(src, k, a, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundfxpnt_adjust_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_RSQRT23_PS(a) =>
+    case iDef@MM512_RSQRT23_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rsqrt23_ps(${quote(a)})")
-    case MM512_MASK_RSQRT23_PS(src, k, a) =>
+    case iDef@MM512_MASK_RSQRT23_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rsqrt23_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_SCALE_PS(a, b) =>
+    case iDef@MM512_SCALE_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scale_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_SCALE_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_SCALE_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scale_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_SCALE_ROUND_PS(a, b, rounding) =>
+    case iDef@MM512_SCALE_ROUND_PS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scale_round_ps(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASK_SCALE_ROUND_PS(src, k, a, b, rounding) =>
+    case iDef@MM512_MASK_SCALE_ROUND_PS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scale_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_LOG2_PS(a) =>
+    case iDef@MM512_LOG2_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_log2_ps(${quote(a)})")
-    case MM512_MASK_LOG2_PS(src, k, a) =>
+    case iDef@MM512_MASK_LOG2_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_log2_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_REDUCE_GMIN_PS(a) =>
+    case iDef@MM512_REDUCE_GMIN_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_reduce_gmin_ps(${quote(a)})")
-    case MM512_MASK_REDUCE_GMIN_PS(k, a) =>
+    case iDef@MM512_MASK_REDUCE_GMIN_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_reduce_gmin_ps(${quote(k)}, ${quote(a)})")
-    case MM512_REDUCE_GMIN_PD(a) =>
+    case iDef@MM512_REDUCE_GMIN_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_reduce_gmin_pd(${quote(a)})")
-    case MM512_MASK_REDUCE_GMIN_PD(k, a) =>
+    case iDef@MM512_MASK_REDUCE_GMIN_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_reduce_gmin_pd(${quote(k)}, ${quote(a)})")
-    case MM512_REDUCE_GMAX_PS(a) =>
+    case iDef@MM512_REDUCE_GMAX_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_reduce_gmax_ps(${quote(a)})")
-    case MM512_MASK_REDUCE_GMAX_PS(k, a) =>
+    case iDef@MM512_MASK_REDUCE_GMAX_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_reduce_gmax_ps(${quote(k)}, ${quote(a)})")
-    case MM512_REDUCE_GMAX_PD(a) =>
+    case iDef@MM512_REDUCE_GMAX_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_reduce_gmax_pd(${quote(a)})")
-    case MM512_MASK_REDUCE_GMAX_PD(k, a) =>
+    case iDef@MM512_MASK_REDUCE_GMAX_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_reduce_gmax_pd(${quote(k)}, ${quote(a)})")
-    case MM_TZCNTI_32(a, x) =>
+    case iDef@MM_TZCNTI_32(a, x) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_tzcnti_32(${quote(a)}, ${quote(x)})")
-    case MM_TZCNTI_64(a, x) =>
+    case iDef@MM_TZCNTI_64(a, x) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_tzcnti_64(${quote(a)}, ${quote(x)})")
-    case MM_DELAY_32(r1) =>
+    case iDef@MM_DELAY_32(r1) =>
+      headers += iDef.header
       stream.println(s"_mm_delay_32(${quote(r1)});")
-    case MM_DELAY_64(r1) =>
+    case iDef@MM_DELAY_64(r1) =>
+      headers += iDef.header
       stream.println(s"_mm_delay_64(${quote(r1)});")
-    case MM_SPFLT_32(r1) =>
+    case iDef@MM_SPFLT_32(r1) =>
+      headers += iDef.header
       stream.println(s"_mm_spflt_32(${quote(r1)});")
-    case MM_SPFLT_64(r1) =>
+    case iDef@MM_SPFLT_64(r1) =>
+      headers += iDef.header
       stream.println(s"_mm_spflt_64(${quote(r1)});")
-    case MM_CLEVICT(ptr, level, ptrOffset) =>
-      stream.println(s"_mm_clevict(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(level)});")
-    case MM512_KANDNR(k1, k2) =>
+    case iDef@MM_CLEVICT(ptr, level, ptrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_clevict((const void *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(level)});")
+    case iDef@MM512_KANDNR(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kandnr(${quote(k1)}, ${quote(k2)})")
-    case MM512_KSWAPB(k1, k2) =>
+    case iDef@MM512_KSWAPB(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kswapb(${quote(k1)}, ${quote(k2)})")
-    case MM512_KORTESTZ(k1, k2) =>
+    case iDef@MM512_KORTESTZ(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kortestz(${quote(k1)}, ${quote(k2)})")
-    case MM512_KORTESTC(k1, k2) =>
+    case iDef@MM512_KORTESTC(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kortestc(${quote(k1)}, ${quote(k2)})")
-    case MM512_MASK2INT(k1) =>
+    case iDef@MM512_MASK2INT(k1) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask2int(${quote(k1)})")
-    case MM512_INT2MASK(mask) =>
+    case iDef@MM512_INT2MASK(mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_int2mask(${quote(mask)})")
-    case MM512_KCONCATHI_64(k1, k2) =>
+    case iDef@MM512_KCONCATHI_64(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kconcathi_64(${quote(k1)}, ${quote(k2)})")
-    case MM512_KCONCATLO_64(k1, k2) =>
+    case iDef@MM512_KCONCATLO_64(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kconcatlo_64(${quote(k1)}, ${quote(k2)})")
-    case MM512_KEXTRACT_64(a, b) =>
+    case iDef@MM512_KEXTRACT_64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kextract_64(${quote(a)}, ${quote(b)})")
-    case MM512_FMADD233_PS(a, b) =>
+    case iDef@MM512_FMADD233_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fmadd233_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_FMADD233_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_FMADD233_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fmadd233_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_I64EXTGATHER_EPI32LO(index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64extgather_epi32lo(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_MASK_I64EXTGATHER_EPI32LO(src, k, index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64extgather_epi32lo(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_I64EXTGATHER_EPI64(index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64extgather_epi64(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_MASK_I64EXTGATHER_EPI64(src, k, index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64extgather_epi64(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_I64EXTGATHER_PSLO(index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64extgather_pslo(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_MASK_I64EXTGATHER_PSLO(src, k, index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64extgather_pslo(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_I64EXTGATHER_PD(index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64extgather_pd(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_MASK_I64EXTGATHER_PD(src, k, index, mv, conv, scale, hint, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64extgather_pd(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
-    case MM512_I64EXTSCATTER_PSLO(mv, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_i64extscatter_pslo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_MASK_I64EXTSCATTER_PSLO(mv, k, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_mask_i64extscatter_pslo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_I64EXTSCATTER_PD(mv, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_i64extscatter_pd(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_MASK_I64EXTSCATTER_PD(mv, k, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_mask_i64extscatter_pd(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_I64EXTSCATTER_EPI32LO(mv, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_i64extscatter_epi32lo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_MASK_I64EXTSCATTER_EPI32LO(mv, k, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_mask_i64extscatter_epi32lo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_I64EXTSCATTER_EPI64(mv, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_i64extscatter_epi64(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_MASK_I64EXTSCATTER_EPI64(mv, k, index, v1, conv, scale, hint, mvOffset) =>
-      stream.println(s"_mm512_mask_i64extscatter_epi64(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
-    case MM512_PERMUTE4F128_PS(a, imm8) =>
+    case iDef@MM512_I64EXTGATHER_EPI32LO(index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64extgather_epi32lo(${quote(index)}, (void const*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_MASK_I64EXTGATHER_EPI32LO(src, k, index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64extgather_epi32lo(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_I64EXTGATHER_EPI64(index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64extgather_epi64(${quote(index)}, (void const*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_MASK_I64EXTGATHER_EPI64(src, k, index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64extgather_epi64(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_I64EXTGATHER_PSLO(index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64extgather_pslo(${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_MASK_I64EXTGATHER_PSLO(src, k, index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64extgather_pslo(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_I64EXTGATHER_PD(index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64extgather_pd(${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_MASK_I64EXTGATHER_PD(src, k, index, mv, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64extgather_pd(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)})")
+    case iDef@MM512_I64EXTSCATTER_PSLO(mv, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64extscatter_pslo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_MASK_I64EXTSCATTER_PSLO(mv, k, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64extscatter_pslo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_I64EXTSCATTER_PD(mv, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64extscatter_pd((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_MASK_I64EXTSCATTER_PD(mv, k, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64extscatter_pd((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_I64EXTSCATTER_EPI32LO(mv, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64extscatter_epi32lo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_MASK_I64EXTSCATTER_EPI32LO(mv, k, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64extscatter_epi32lo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_I64EXTSCATTER_EPI64(mv, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64extscatter_epi64((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_MASK_I64EXTSCATTER_EPI64(mv, k, index, v1, conv, scale, hint, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64extscatter_epi64((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(conv)}, ${quote(scale)}, ${quote(hint)});")
+    case iDef@MM512_PERMUTE4F128_PS(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_permute4f128_ps(${quote(a)}, ${quote(imm8)})")
-    case MM512_MASK_PERMUTE4F128_PS(src, k, a, imm8) =>
+    case iDef@MM512_MASK_PERMUTE4F128_PS(src, k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_permute4f128_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_I64GATHER_EPI32LO(index, mv, scale, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64gather_epi32lo(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
-    case MM512_MASK_I64GATHER_EPI32LO(src, k, index, mv, scale, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64gather_epi32lo(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
-    case MM512_I64GATHER_PSLO(index, mv, scale, mvOffset) =>
-      emitValDef(sym, s"_mm512_i64gather_pslo(${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
-    case MM512_MASK_I64GATHER_PSLO(src, k, index, mv, scale, mvOffset) =>
-      emitValDef(sym, s"_mm512_mask_i64gather_pslo(${quote(src)}, ${quote(k)}, ${quote(index)}, ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
-    case MM512_I64SCATTER_PSLO(mv, index, v, scale, mvOffset) =>
-      stream.println(s"_mm512_i64scatter_pslo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v)}, ${quote(scale)});")
-    case MM512_MASK_I64SCATTER_PSLO(mv, k, index, v1, scale, mvOffset) =>
-      stream.println(s"_mm512_mask_i64scatter_pslo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
-    case MM512_I64SCATTER_EPI32LO(mv, index, v1, scale, mvOffset) =>
-      stream.println(s"_mm512_i64scatter_epi32lo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
-    case MM512_MASK_I64SCATTER_EPI32LO(mv, k, index, v1, scale, mvOffset) =>
-      stream.println(s"_mm512_mask_i64scatter_epi32lo(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
-    case MM512_KMERGE2L1H(k1, k2) =>
+    case iDef@MM512_I64GATHER_EPI32LO(index, mv, scale, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64gather_epi32lo(${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
+    case iDef@MM512_MASK_I64GATHER_EPI32LO(src, k, index, mv, scale, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64gather_epi32lo(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
+    case iDef@MM512_I64GATHER_PSLO(index, mv, scale, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_i64gather_pslo(${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
+    case iDef@MM512_MASK_I64GATHER_PSLO(src, k, index, mv, scale, mvOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_i64gather_pslo(${quote(src)}, ${quote(k)}, ${quote(index)}, (void const *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(scale)})")
+    case iDef@MM512_I64SCATTER_PSLO(mv, index, v, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64scatter_pslo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I64SCATTER_PSLO(mv, k, index, v1, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64scatter_pslo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
+    case iDef@MM512_I64SCATTER_EPI32LO(mv, index, v1, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64scatter_epi32lo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I64SCATTER_EPI32LO(mv, k, index, v1, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64scatter_epi32lo((void *) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
+    case iDef@MM512_KMERGE2L1H(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kmerge2l1h(${quote(k1)}, ${quote(k2)})")
-    case MM512_KMERGE2L1L(k1, k2) =>
+    case iDef@MM512_KMERGE2L1L(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kmerge2l1l(${quote(k1)}, ${quote(k2)})")
     case _ => super.emitNode(sym, rhs)
   }

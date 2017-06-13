@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -4036,365 +4062,541 @@ trait AVX51205 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_CASTPS128_PS512 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_CASTPS256_PS512 (a), u, es) =>
       reflectMirrored(Reflect(MM512_CASTPS256_PS512 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX51205 extends CGenIntrinsics {
+trait CGenAVX51205 extends CGenIntrinsics {
 
   val IR: AVX512
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM512_TERNARYLOGIC_EPI32(a, b, c, imm8) =>
+    case iDef@MM512_TERNARYLOGIC_EPI32(a, b, c, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_ternarylogic_epi32(${quote(a)}, ${quote(b)}, ${quote(c)}, ${quote(imm8)})")
-    case MM512_MASK_TERNARYLOGIC_EPI64(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_TERNARYLOGIC_EPI64(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_ternarylogic_epi64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_TERNARYLOGIC_EPI64(k, a, b, c, imm8) =>
+    case iDef@MM512_MASKZ_TERNARYLOGIC_EPI64(k, a, b, c, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_ternarylogic_epi64(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(c)}, ${quote(imm8)})")
-    case MM512_TERNARYLOGIC_EPI64(a, b, c, imm8) =>
+    case iDef@MM512_TERNARYLOGIC_EPI64(a, b, c, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_ternarylogic_epi64(${quote(a)}, ${quote(b)}, ${quote(c)}, ${quote(imm8)})")
-    case MM512_MASK_TEST_EPI64_MASK(k1, a, b) =>
+    case iDef@MM512_MASK_TEST_EPI64_MASK(k1, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_test_epi64_mask(${quote(k1)}, ${quote(a)}, ${quote(b)})")
-    case MM512_TEST_EPI64_MASK(a, b) =>
+    case iDef@MM512_TEST_EPI64_MASK(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_test_epi64_mask(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_TESTN_EPI32_MASK(k1, a, b) =>
+    case iDef@MM512_MASK_TESTN_EPI32_MASK(k1, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_testn_epi32_mask(${quote(k1)}, ${quote(a)}, ${quote(b)})")
-    case MM512_TESTN_EPI32_MASK(a, b) =>
+    case iDef@MM512_TESTN_EPI32_MASK(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_testn_epi32_mask(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_TESTN_EPI64_MASK(k1, a, b) =>
+    case iDef@MM512_MASK_TESTN_EPI64_MASK(k1, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_testn_epi64_mask(${quote(k1)}, ${quote(a)}, ${quote(b)})")
-    case MM512_TESTN_EPI64_MASK(a, b) =>
+    case iDef@MM512_TESTN_EPI64_MASK(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_testn_epi64_mask(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKHI_EPI32(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKHI_EPI32(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpackhi_epi32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKHI_EPI32(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKHI_EPI32(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpackhi_epi32(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKHI_EPI32(a, b) =>
+    case iDef@MM512_UNPACKHI_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpackhi_epi32(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKHI_EPI64(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKHI_EPI64(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpackhi_epi64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKHI_EPI64(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKHI_EPI64(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpackhi_epi64(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKHI_EPI64(a, b) =>
+    case iDef@MM512_UNPACKHI_EPI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpackhi_epi64(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKLO_EPI32(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKLO_EPI32(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpacklo_epi32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKLO_EPI32(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKLO_EPI32(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpacklo_epi32(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKLO_EPI32(a, b) =>
+    case iDef@MM512_UNPACKLO_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpacklo_epi32(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKLO_EPI64(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKLO_EPI64(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpacklo_epi64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKLO_EPI64(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKLO_EPI64(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpacklo_epi64(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKLO_EPI64(a, b) =>
+    case iDef@MM512_UNPACKLO_EPI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpacklo_epi64(${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_XOR_EPI32(k, a, b) =>
+    case iDef@MM512_MASKZ_XOR_EPI32(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_xor_epi32(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_XOR_EPI64(k, a, b) =>
+    case iDef@MM512_MASKZ_XOR_EPI64(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_xor_epi64(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASK_RCP14_PD(src, k, a) =>
+    case iDef@MM512_MASK_RCP14_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rcp14_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_RCP14_PD(k, a) =>
+    case iDef@MM512_MASKZ_RCP14_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_rcp14_pd(${quote(k)}, ${quote(a)})")
-    case MM512_RCP14_PD(a) =>
+    case iDef@MM512_RCP14_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rcp14_pd(${quote(a)})")
-    case MM512_MASK_RCP14_PS(src, k, a) =>
+    case iDef@MM512_MASK_RCP14_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rcp14_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_RCP14_PS(k, a) =>
+    case iDef@MM512_MASKZ_RCP14_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_rcp14_ps(${quote(k)}, ${quote(a)})")
-    case MM512_RCP14_PS(a) =>
+    case iDef@MM512_RCP14_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rcp14_ps(${quote(a)})")
-    case MM_MASK_RCP14_SD(src, k, a, b) =>
+    case iDef@MM_MASK_RCP14_SD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_rcp14_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_RCP14_SD(k, a, b) =>
+    case iDef@MM_MASKZ_RCP14_SD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_rcp14_sd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_RCP14_SD(a, b) =>
+    case iDef@MM_RCP14_SD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_rcp14_sd(${quote(a)}, ${quote(b)})")
-    case MM_MASK_RCP14_SS(src, k, a, b) =>
+    case iDef@MM_MASK_RCP14_SS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_rcp14_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_RCP14_SS(k, a, b) =>
+    case iDef@MM_MASKZ_RCP14_SS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_rcp14_ss(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_RCP14_SS(a, b) =>
+    case iDef@MM_RCP14_SS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_rcp14_ss(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_ROUNDSCALE_PD(src, k, a, imm8) =>
+    case iDef@MM512_MASK_ROUNDSCALE_PD(src, k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundscale_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_MASK_ROUNDSCALE_ROUND_PD(src, k, a, imm8, rounding) =>
+    case iDef@MM512_MASK_ROUNDSCALE_ROUND_PD(src, k, a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundscale_round_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM512_MASKZ_ROUNDSCALE_PD(k, a, imm8) =>
+    case iDef@MM512_MASKZ_ROUNDSCALE_PD(k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_roundscale_pd(${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_MASKZ_ROUNDSCALE_ROUND_PD(k, a, imm8, rounding) =>
+    case iDef@MM512_MASKZ_ROUNDSCALE_ROUND_PD(k, a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_roundscale_round_pd(${quote(k)}, ${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM512_ROUNDSCALE_PD(a, imm8) =>
+    case iDef@MM512_ROUNDSCALE_PD(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundscale_pd(${quote(a)}, ${quote(imm8)})")
-    case MM512_ROUNDSCALE_ROUND_PD(a, imm8, rounding) =>
+    case iDef@MM512_ROUNDSCALE_ROUND_PD(a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundscale_round_pd(${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM512_MASK_ROUNDSCALE_PS(src, k, a, imm8) =>
+    case iDef@MM512_MASK_ROUNDSCALE_PS(src, k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundscale_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_MASK_ROUNDSCALE_ROUND_PS(src, k, a, imm8, rounding) =>
+    case iDef@MM512_MASK_ROUNDSCALE_ROUND_PS(src, k, a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_roundscale_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM512_MASKZ_ROUNDSCALE_PS(k, a, imm8) =>
+    case iDef@MM512_MASKZ_ROUNDSCALE_PS(k, a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_roundscale_ps(${quote(k)}, ${quote(a)}, ${quote(imm8)})")
-    case MM512_MASKZ_ROUNDSCALE_ROUND_PS(k, a, imm8, rounding) =>
+    case iDef@MM512_MASKZ_ROUNDSCALE_ROUND_PS(k, a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_roundscale_round_ps(${quote(k)}, ${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM512_ROUNDSCALE_PS(a, imm8) =>
+    case iDef@MM512_ROUNDSCALE_PS(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundscale_ps(${quote(a)}, ${quote(imm8)})")
-    case MM512_ROUNDSCALE_ROUND_PS(a, imm8, rounding) =>
+    case iDef@MM512_ROUNDSCALE_ROUND_PS(a, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_roundscale_round_ps(${quote(a)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_MASK_ROUNDSCALE_ROUND_SD(src, k, a, b, imm8, rounding) =>
+    case iDef@MM_MASK_ROUNDSCALE_ROUND_SD(src, k, a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_roundscale_round_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_MASK_ROUNDSCALE_SD(src, k, a, b, imm8) =>
+    case iDef@MM_MASK_ROUNDSCALE_SD(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_roundscale_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_MASKZ_ROUNDSCALE_ROUND_SD(k, a, b, imm8, rounding) =>
+    case iDef@MM_MASKZ_ROUNDSCALE_ROUND_SD(k, a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_roundscale_round_sd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_MASKZ_ROUNDSCALE_SD(k, a, b, imm8) =>
+    case iDef@MM_MASKZ_ROUNDSCALE_SD(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_roundscale_sd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_ROUNDSCALE_ROUND_SD(a, b, imm8, rounding) =>
+    case iDef@MM_ROUNDSCALE_ROUND_SD(a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_roundscale_round_sd(${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_ROUNDSCALE_SD(a, b, imm8) =>
+    case iDef@MM_ROUNDSCALE_SD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_roundscale_sd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_MASK_ROUNDSCALE_ROUND_SS(src, k, a, b, imm8, rounding) =>
+    case iDef@MM_MASK_ROUNDSCALE_ROUND_SS(src, k, a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_roundscale_round_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_MASK_ROUNDSCALE_SS(src, k, a, b, imm8) =>
+    case iDef@MM_MASK_ROUNDSCALE_SS(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_roundscale_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_MASKZ_ROUNDSCALE_ROUND_SS(k, a, b, imm8, rounding) =>
+    case iDef@MM_MASKZ_ROUNDSCALE_ROUND_SS(k, a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_roundscale_round_ss(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_MASKZ_ROUNDSCALE_SS(k, a, b, imm8) =>
+    case iDef@MM_MASKZ_ROUNDSCALE_SS(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_roundscale_ss(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_ROUNDSCALE_ROUND_SS(a, b, imm8, rounding) =>
+    case iDef@MM_ROUNDSCALE_ROUND_SS(a, b, imm8, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_roundscale_round_ss(${quote(a)}, ${quote(b)}, ${quote(imm8)}, ${quote(rounding)})")
-    case MM_ROUNDSCALE_SS(a, b, imm8) =>
+    case iDef@MM_ROUNDSCALE_SS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_roundscale_ss(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_RSQRT14_PD(src, k, a) =>
+    case iDef@MM512_MASK_RSQRT14_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rsqrt14_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_RSQRT14_PD(k, a) =>
+    case iDef@MM512_MASKZ_RSQRT14_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_rsqrt14_pd(${quote(k)}, ${quote(a)})")
-    case MM512_RSQRT14_PD(a) =>
+    case iDef@MM512_RSQRT14_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rsqrt14_pd(${quote(a)})")
-    case MM512_MASK_RSQRT14_PS(src, k, a) =>
+    case iDef@MM512_MASK_RSQRT14_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_rsqrt14_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_RSQRT14_PS(k, a) =>
+    case iDef@MM512_MASKZ_RSQRT14_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_rsqrt14_ps(${quote(k)}, ${quote(a)})")
-    case MM512_RSQRT14_PS(a) =>
+    case iDef@MM512_RSQRT14_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_rsqrt14_ps(${quote(a)})")
-    case MM_MASK_RSQRT14_SD(src, k, a, b) =>
+    case iDef@MM_MASK_RSQRT14_SD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_rsqrt14_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_RSQRT14_SD(k, a, b) =>
+    case iDef@MM_MASKZ_RSQRT14_SD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_rsqrt14_sd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_RSQRT14_SD(a, b) =>
+    case iDef@MM_RSQRT14_SD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_rsqrt14_sd(${quote(a)}, ${quote(b)})")
-    case MM_MASK_RSQRT14_SS(src, k, a, b) =>
+    case iDef@MM_MASK_RSQRT14_SS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_rsqrt14_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_RSQRT14_SS(k, a, b) =>
+    case iDef@MM_MASKZ_RSQRT14_SS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_rsqrt14_ss(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_RSQRT14_SS(a, b) =>
+    case iDef@MM_RSQRT14_SS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_rsqrt14_ss(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_SCALEF_PD(src, k, a, b) =>
+    case iDef@MM512_MASK_SCALEF_PD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scalef_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASK_SCALEF_ROUND_PD(src, k, a, b, rounding) =>
+    case iDef@MM512_MASK_SCALEF_ROUND_PD(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scalef_round_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASKZ_SCALEF_PD(k, a, b) =>
+    case iDef@MM512_MASKZ_SCALEF_PD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_scalef_pd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_SCALEF_ROUND_PD(k, a, b, rounding) =>
+    case iDef@MM512_MASKZ_SCALEF_ROUND_PD(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_scalef_round_pd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_SCALEF_PD(a, b) =>
+    case iDef@MM512_SCALEF_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scalef_pd(${quote(a)}, ${quote(b)})")
-    case MM512_SCALEF_ROUND_PD(a, b, rounding) =>
+    case iDef@MM512_SCALEF_ROUND_PD(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scalef_round_pd(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASK_SCALEF_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_SCALEF_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scalef_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASK_SCALEF_ROUND_PS(src, k, a, b, rounding) =>
+    case iDef@MM512_MASK_SCALEF_ROUND_PS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_scalef_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASKZ_SCALEF_PS(k, a, b) =>
+    case iDef@MM512_MASKZ_SCALEF_PS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_scalef_ps(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_SCALEF_ROUND_PS(k, a, b, rounding) =>
+    case iDef@MM512_MASKZ_SCALEF_ROUND_PS(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_scalef_round_ps(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_SCALEF_PS(a, b) =>
+    case iDef@MM512_SCALEF_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scalef_ps(${quote(a)}, ${quote(b)})")
-    case MM512_SCALEF_ROUND_PS(a, b, rounding) =>
+    case iDef@MM512_SCALEF_ROUND_PS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_scalef_round_ps(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SCALEF_ROUND_SD(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SCALEF_ROUND_SD(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_scalef_round_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SCALEF_SD(src, k, a, b) =>
+    case iDef@MM_MASK_SCALEF_SD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_scalef_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SCALEF_ROUND_SD(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SCALEF_ROUND_SD(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_scalef_round_sd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SCALEF_SD(k, a, b) =>
+    case iDef@MM_MASKZ_SCALEF_SD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_scalef_sd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SCALEF_ROUND_SD(a, b, rounding) =>
+    case iDef@MM_SCALEF_ROUND_SD(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_scalef_round_sd(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_SCALEF_SD(a, b) =>
+    case iDef@MM_SCALEF_SD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_scalef_sd(${quote(a)}, ${quote(b)})")
-    case MM_MASK_SCALEF_ROUND_SS(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SCALEF_ROUND_SS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_scalef_round_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SCALEF_SS(src, k, a, b) =>
+    case iDef@MM_MASK_SCALEF_SS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_scalef_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SCALEF_ROUND_SS(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SCALEF_ROUND_SS(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_scalef_round_ss(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SCALEF_SS(k, a, b) =>
+    case iDef@MM_MASKZ_SCALEF_SS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_scalef_ss(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SCALEF_ROUND_SS(a, b, rounding) =>
+    case iDef@MM_SCALEF_ROUND_SS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_scalef_round_ss(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_SCALEF_SS(a, b) =>
+    case iDef@MM_SCALEF_SS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_scalef_ss(${quote(a)}, ${quote(b)})")
-    case MM512_I32SCATTER_PD(base_addr, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_i32scatter_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_MASK_I32SCATTER_PD(base_addr, k, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_mask_i32scatter_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_I64SCATTER_PD(base_addr, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_i64scatter_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_MASK_I64SCATTER_PD(base_addr, k, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_mask_i64scatter_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_I64SCATTER_PS(base_addr, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_i64scatter_ps(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_MASK_I64SCATTER_PS(base_addr, k, vindex, a, scale, base_addrOffset) =>
-      stream.println(s"_mm512_mask_i64scatter_ps(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
-    case MM512_MASK_SHUFFLE_F32X4(src, k, a, b, imm8) =>
+    case iDef@MM512_I32SCATTER_PD(base_addr, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i32scatter_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I32SCATTER_PD(base_addr, k, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i32scatter_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_I64SCATTER_PD(base_addr, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64scatter_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I64SCATTER_PD(base_addr, k, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64scatter_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_I64SCATTER_PS(base_addr, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i64scatter_ps((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I64SCATTER_PS(base_addr, k, vindex, a, scale, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i64scatter_ps((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(vindex)}, ${quote(a)}, ${quote(scale)});")
+    case iDef@MM512_MASK_SHUFFLE_F32X4(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_f32x4(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_F32X4(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_F32X4(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_f32x4(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_F32X4(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_F32X4(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_f32x4(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SHUFFLE_F64X2(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_SHUFFLE_F64X2(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_f64x2(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_F64X2(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_F64X2(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_f64x2(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_F64X2(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_F64X2(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_f64x2(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SHUFFLE_I32X4(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_SHUFFLE_I32X4(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_i32x4(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_I32X4(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_I32X4(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_i32x4(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_I32X4(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_I32X4(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_i32x4(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SHUFFLE_I64X2(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_SHUFFLE_I64X2(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_i64x2(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_I64X2(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_I64X2(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_i64x2(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_I64X2(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_I64X2(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_i64x2(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SHUFFLE_PD(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_SHUFFLE_PD(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_PD(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_PD(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_pd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_PD(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SHUFFLE_PS(src, k, a, b, imm8) =>
+    case iDef@MM512_MASK_SHUFFLE_PS(src, k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_shuffle_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASKZ_SHUFFLE_PS(k, a, b, imm8) =>
+    case iDef@MM512_MASKZ_SHUFFLE_PS(k, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_shuffle_ps(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_SHUFFLE_PS(a, b, imm8) =>
+    case iDef@MM512_SHUFFLE_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_shuffle_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM512_MASK_SQRT_PD(src, k, a) =>
+    case iDef@MM512_MASK_SQRT_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_sqrt_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASK_SQRT_ROUND_PD(src, k, a, rounding) =>
+    case iDef@MM512_MASK_SQRT_ROUND_PD(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_sqrt_round_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_SQRT_PD(k, a) =>
+    case iDef@MM512_MASKZ_SQRT_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sqrt_pd(${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_SQRT_ROUND_PD(k, a, rounding) =>
+    case iDef@MM512_MASKZ_SQRT_ROUND_PD(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sqrt_round_pd(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_SQRT_PD(a) =>
+    case iDef@MM512_SQRT_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_sqrt_pd(${quote(a)})")
-    case MM512_SQRT_ROUND_PD(a, rounding) =>
+    case iDef@MM512_SQRT_ROUND_PD(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_sqrt_round_pd(${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_SQRT_PS(src, k, a) =>
+    case iDef@MM512_MASK_SQRT_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_sqrt_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASK_SQRT_ROUND_PS(src, k, a, rounding) =>
+    case iDef@MM512_MASK_SQRT_ROUND_PS(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_sqrt_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_SQRT_PS(k, a) =>
+    case iDef@MM512_MASKZ_SQRT_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sqrt_ps(${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_SQRT_ROUND_PS(k, a, rounding) =>
+    case iDef@MM512_MASKZ_SQRT_ROUND_PS(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sqrt_round_ps(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_SQRT_PS(a) =>
+    case iDef@MM512_SQRT_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_sqrt_ps(${quote(a)})")
-    case MM512_SQRT_ROUND_PS(a, rounding) =>
+    case iDef@MM512_SQRT_ROUND_PS(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_sqrt_round_ps(${quote(a)}, ${quote(rounding)})")
-    case MM_MASK_SQRT_ROUND_SD(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SQRT_ROUND_SD(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sqrt_round_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SQRT_SD(src, k, a, b) =>
+    case iDef@MM_MASK_SQRT_SD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sqrt_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SQRT_ROUND_SD(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SQRT_ROUND_SD(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sqrt_round_sd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SQRT_SD(k, a, b) =>
+    case iDef@MM_MASKZ_SQRT_SD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sqrt_sd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SQRT_ROUND_SD(a, b, rounding) =>
+    case iDef@MM_SQRT_ROUND_SD(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sqrt_round_sd(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SQRT_ROUND_SS(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SQRT_ROUND_SS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sqrt_round_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SQRT_SS(src, k, a, b) =>
+    case iDef@MM_MASK_SQRT_SS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sqrt_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SQRT_ROUND_SS(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SQRT_ROUND_SS(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sqrt_round_ss(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SQRT_SS(k, a, b) =>
+    case iDef@MM_MASKZ_SQRT_SS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sqrt_ss(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SQRT_ROUND_SS(a, b, rounding) =>
+    case iDef@MM_SQRT_ROUND_SS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sqrt_round_ss(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASKZ_SUB_PD(k, a, b) =>
+    case iDef@MM512_MASKZ_SUB_PD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sub_pd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_SUB_ROUND_PD(k, a, b, rounding) =>
+    case iDef@MM512_MASKZ_SUB_ROUND_PD(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sub_round_pd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASKZ_SUB_PS(k, a, b) =>
+    case iDef@MM512_MASKZ_SUB_PS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sub_ps(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_SUB_ROUND_PS(k, a, b, rounding) =>
+    case iDef@MM512_MASKZ_SUB_ROUND_PS(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_sub_round_ps(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SUB_ROUND_SD(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SUB_ROUND_SD(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sub_round_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SUB_SD(src, k, a, b) =>
+    case iDef@MM_MASK_SUB_SD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sub_sd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SUB_ROUND_SD(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SUB_ROUND_SD(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sub_round_sd(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SUB_SD(k, a, b) =>
+    case iDef@MM_MASKZ_SUB_SD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sub_sd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SUB_ROUND_SD(a, b, rounding) =>
+    case iDef@MM_SUB_ROUND_SD(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sub_round_sd(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SUB_ROUND_SS(src, k, a, b, rounding) =>
+    case iDef@MM_MASK_SUB_ROUND_SS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sub_round_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASK_SUB_SS(src, k, a, b) =>
+    case iDef@MM_MASK_SUB_SS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_sub_ss(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_MASKZ_SUB_ROUND_SS(k, a, b, rounding) =>
+    case iDef@MM_MASKZ_SUB_ROUND_SS(k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sub_round_ss(${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM_MASKZ_SUB_SS(k, a, b) =>
+    case iDef@MM_MASKZ_SUB_SS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_sub_ss(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM_SUB_ROUND_SS(a, b, rounding) =>
+    case iDef@MM_SUB_ROUND_SS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sub_round_ss(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASK_UNPACKHI_PD(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKHI_PD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpackhi_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKHI_PD(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKHI_PD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpackhi_pd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKHI_PD(a, b) =>
+    case iDef@MM512_UNPACKHI_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpackhi_pd(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKHI_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKHI_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpackhi_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKHI_PS(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKHI_PS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpackhi_ps(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKHI_PS(a, b) =>
+    case iDef@MM512_UNPACKHI_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpackhi_ps(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKLO_PD(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKLO_PD(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpacklo_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKLO_PD(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKLO_PD(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpacklo_pd(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKLO_PD(a, b) =>
+    case iDef@MM512_UNPACKLO_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpacklo_pd(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_UNPACKLO_PS(src, k, a, b) =>
+    case iDef@MM512_MASK_UNPACKLO_PS(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_unpacklo_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_MASKZ_UNPACKLO_PS(k, a, b) =>
+    case iDef@MM512_MASKZ_UNPACKLO_PS(k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_unpacklo_ps(${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_UNPACKLO_PS(a, b) =>
+    case iDef@MM512_UNPACKLO_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_unpacklo_ps(${quote(a)}, ${quote(b)})")
-    case MM512_CASTPD128_PD512(a) =>
+    case iDef@MM512_CASTPD128_PD512(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castpd128_pd512(${quote(a)})")
-    case MM512_CASTPD256_PD512(a) =>
+    case iDef@MM512_CASTPD256_PD512(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castpd256_pd512(${quote(a)})")
-    case MM512_CASTPD512_PD128(a) =>
+    case iDef@MM512_CASTPD512_PD128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castpd512_pd128(${quote(a)})")
-    case MM512_CASTPS512_PS128(a) =>
+    case iDef@MM512_CASTPS512_PS128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castps512_ps128(${quote(a)})")
-    case MM512_CASTPD512_PD256(a) =>
+    case iDef@MM512_CASTPD512_PD256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castpd512_pd256(${quote(a)})")
-    case MM512_CASTPS128_PS512(a) =>
+    case iDef@MM512_CASTPS128_PS512(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castps128_ps512(${quote(a)})")
-    case MM512_CASTPS256_PS512(a) =>
+    case iDef@MM512_CASTPS256_PS512(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_castps256_ps512(${quote(a)})")
     case _ => super.emitNode(sym, rhs)
   }

@@ -1,0 +1,5 @@
+FMA statistics:
+
+
+Number of FMA intrinsics: 32
+Number of intrinsics with pointer arguments: 0

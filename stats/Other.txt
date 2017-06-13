@@ -1,0 +1,63 @@
+Other statistics:
+
+
+Intrinsic _bnd_narrow_ptr_bounds has 2 pointer arguments
+Intrinsic _bnd_copy_ptr_bounds has 2 pointer arguments
+Number of Other intrinsics: 150
+Number of intrinsics with pointer arguments: 56
+_mm_prefetch
+_mm_free
+_mm_monitor
+_mm_clflushopt
+_mm_clwb
+_invpcid
+_mulx_u32
+_mulx_u64
+__rdtscp
+_BitScanForward
+_BitScanReverse
+_BitScanForward64
+_BitScanReverse64
+_bittest
+_bittestandcomplement
+_bittestandreset
+_bittestandset
+_bittest64
+_bittestandcomplement64
+_bittestandreset64
+_bittestandset64
+_fxrstor
+_fxrstor64
+_fxsave
+_fxsave64
+_xrstor
+_xrstor64
+_xsave
+_xsave64
+_xsaveopt
+_xsaveopt64
+_mm_storeu_si32
+_mm_storeu_si16
+_mm_storeu_si64
+_rdrand16_step
+_rdrand32_step
+_rdrand64_step
+_rdseed16_step
+_rdseed32_step
+_rdseed64_step
+_addcarry_u32
+_addcarry_u64
+_subborrow_u32
+_subborrow_u64
+_addcarryx_u32
+_addcarryx_u64
+_bnd_store_ptr_bounds
+_bnd_chk_ptr_lbounds
+_bnd_chk_ptr_ubounds
+_bnd_chk_ptr_bounds
+_xsavec
+_xsaves
+_xsavec64
+_xsaves64
+_xrstors
+_xrstors64

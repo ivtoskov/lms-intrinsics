@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -3277,6 +3303,7 @@ trait Other extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_TZCNT_32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_TZCNT_64 (a), u, es) =>
       reflectMirrored(Reflect(MM_TZCNT_64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -3287,305 +3314,455 @@ trait CGenOther extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_PREFETCH(p, i, pOffset) =>
-      stream.println(s"_mm_prefetch(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
-    case MM_MALLOC(size, align) =>
+    case iDef@MM_PREFETCH(p, i, pOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_prefetch((char const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
+    case iDef@MM_MALLOC(size, align) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_malloc(${quote(size)}, ${quote(align)})")
-    case MM_FREE(mem_addr, mem_addrOffset) =>
-      stream.println(s"_mm_free(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
-    case CVTSH_SS(a) =>
+    case iDef@MM_FREE(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_free((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+    case iDef@CVTSH_SS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_cvtsh_ss(${quote(a)})")
-    case CVTSS_SH(a, imm8) =>
+    case iDef@CVTSS_SH(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_cvtss_sh(${quote(a)}, ${quote(imm8)})")
-    case MM_CVTPH_PS(a) =>
+    case iDef@MM_CVTPH_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtph_ps(${quote(a)})")
-    case MM_CVTPS_PH(a, rounding) =>
+    case iDef@MM_CVTPS_PH(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtps_ph(${quote(a)}, ${quote(rounding)})")
-    case MM_MONITOR(p, extensions, hints, pOffset) =>
-      stream.println(s"_mm_monitor(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(extensions)}, ${quote(hints)});")
-    case MM_MWAIT(extensions, hints) =>
+    case iDef@MM_MONITOR(p, extensions, hints, pOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_monitor((void const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(extensions)}, ${quote(hints)});")
+    case iDef@MM_MWAIT(extensions, hints) =>
+      headers += iDef.header
       stream.println(s"_mm_mwait(${quote(extensions)}, ${quote(hints)});")
-    case MM_POPCNT_U32(a) =>
+    case iDef@MM_POPCNT_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_popcnt_u32(${quote(a)})")
-    case MM_POPCNT_U64(a) =>
+    case iDef@MM_POPCNT_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_popcnt_u64(${quote(a)})")
-    case MM_AESENC_SI128(a, roundKey) =>
+    case iDef@MM_AESENC_SI128(a, roundKey) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aesenc_si128(${quote(a)}, ${quote(roundKey)})")
-    case MM_AESENCLAST_SI128(a, roundKey) =>
+    case iDef@MM_AESENCLAST_SI128(a, roundKey) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aesenclast_si128(${quote(a)}, ${quote(roundKey)})")
-    case MM_AESDEC_SI128(a, roundKey) =>
+    case iDef@MM_AESDEC_SI128(a, roundKey) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aesdec_si128(${quote(a)}, ${quote(roundKey)})")
-    case MM_AESDECLAST_SI128(a, roundKey) =>
+    case iDef@MM_AESDECLAST_SI128(a, roundKey) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aesdeclast_si128(${quote(a)}, ${quote(roundKey)})")
-    case MM_AESIMC_SI128(a) =>
+    case iDef@MM_AESIMC_SI128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aesimc_si128(${quote(a)})")
-    case MM_AESKEYGENASSIST_SI128(a, imm8) =>
+    case iDef@MM_AESKEYGENASSIST_SI128(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_aeskeygenassist_si128(${quote(a)}, ${quote(imm8)})")
-    case MM_CLMULEPI64_SI128(a, b, imm8) =>
+    case iDef@MM_CLMULEPI64_SI128(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_clmulepi64_si128(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CLFLUSHOPT(p, pOffset) =>
-      stream.println(s"_mm_clflushopt(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
-    case MM_CLWB(p, pOffset) =>
-      stream.println(s"_mm_clwb(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
-    case BEXTR_U32(a, start, len) =>
+    case iDef@MM_CLFLUSHOPT(p, pOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_clflushopt((void const *) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
+    case iDef@MM_CLWB(p, pOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_clwb((void const *) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
+    case iDef@BEXTR_U32(a, start, len) =>
+      headers += iDef.header
       emitValDef(sym, s"_bextr_u32(${quote(a)}, ${quote(start)}, ${quote(len)})")
-    case BEXTR2_U32(a, control) =>
+    case iDef@BEXTR2_U32(a, control) =>
+      headers += iDef.header
       emitValDef(sym, s"_bextr2_u32(${quote(a)}, ${quote(control)})")
-    case BEXTR_U64(a, start, len) =>
+    case iDef@BEXTR_U64(a, start, len) =>
+      headers += iDef.header
       emitValDef(sym, s"_bextr_u64(${quote(a)}, ${quote(start)}, ${quote(len)})")
-    case BEXTR2_U64(a, control) =>
+    case iDef@BEXTR2_U64(a, control) =>
+      headers += iDef.header
       emitValDef(sym, s"_bextr2_u64(${quote(a)}, ${quote(control)})")
-    case BLSI_U32(a) =>
+    case iDef@BLSI_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsi_u32(${quote(a)})")
-    case BLSI_U64(a) =>
+    case iDef@BLSI_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsi_u64(${quote(a)})")
-    case BLSMSK_U32(a) =>
+    case iDef@BLSMSK_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsmsk_u32(${quote(a)})")
-    case BLSMSK_U64(a) =>
+    case iDef@BLSMSK_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsmsk_u64(${quote(a)})")
-    case BLSR_U32(a) =>
+    case iDef@BLSR_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsr_u32(${quote(a)})")
-    case BLSR_U64(a) =>
+    case iDef@BLSR_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_blsr_u64(${quote(a)})")
-    case BZHI_U32(a, index) =>
+    case iDef@BZHI_U32(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_bzhi_u32(${quote(a)}, ${quote(index)})")
-    case BZHI_U64(a, index) =>
+    case iDef@BZHI_U64(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_bzhi_u64(${quote(a)}, ${quote(index)})")
-    case INVPCID(tpe, descriptor, descriptorOffset) =>
-      stream.println(s"_invpcid(${quote(tpe)}, ${quote(descriptor) + (if(descriptorOffset == Const(0)) "" else " + " + quote(descriptorOffset))});")
-    case LZCNT_U32(a) =>
+    case iDef@INVPCID(tpe, descriptor, descriptorOffset) =>
+      headers += iDef.header
+      stream.println(s"_invpcid(${quote(tpe)}, (void*) ${quote(descriptor) + (if(descriptorOffset == Const(0)) "" else " + " + quote(descriptorOffset))});")
+    case iDef@LZCNT_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_lzcnt_u32(${quote(a)})")
-    case LZCNT_U64(a) =>
+    case iDef@LZCNT_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_lzcnt_u64(${quote(a)})")
-    case PDEP_U32(a, mask) =>
+    case iDef@PDEP_U32(a, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_pdep_u32(${quote(a)}, ${quote(mask)})")
-    case PDEP_U64(a, mask) =>
+    case iDef@PDEP_U64(a, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_pdep_u64(${quote(a)}, ${quote(mask)})")
-    case PEXT_U32(a, mask) =>
+    case iDef@PEXT_U32(a, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_pext_u32(${quote(a)}, ${quote(mask)})")
-    case PEXT_U64(a, mask) =>
+    case iDef@PEXT_U64(a, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_pext_u64(${quote(a)}, ${quote(mask)})")
-    case ANDN_U32(a, b) =>
+    case iDef@ANDN_U32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_andn_u32(${quote(a)}, ${quote(b)})")
-    case ANDN_U64(a, b) =>
+    case iDef@ANDN_U64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_andn_u64(${quote(a)}, ${quote(b)})")
-    case MULX_U32(a, b, hi, hiOffset) =>
-      emitValDef(sym, s"_mulx_u32(${quote(a)}, ${quote(b)}, ${quote(hi) + (if(hiOffset == Const(0)) "" else " + " + quote(hiOffset))})")
-    case MULX_U64(a, b, hi, hiOffset) =>
-      emitValDef(sym, s"_mulx_u64(${quote(a)}, ${quote(b)}, ${quote(hi) + (if(hiOffset == Const(0)) "" else " + " + quote(hiOffset))})")
-    case TZCNT_U32(a) =>
+    case iDef@MULX_U32(a, b, hi, hiOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mulx_u32(${quote(a)}, ${quote(b)}, (unsigned int*) ${quote(hi) + (if(hiOffset == Const(0)) "" else " + " + quote(hiOffset))})")
+    case iDef@MULX_U64(a, b, hi, hiOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mulx_u64(${quote(a)}, ${quote(b)}, (unsigned __int64*) ${quote(hi) + (if(hiOffset == Const(0)) "" else " + " + quote(hiOffset))})")
+    case iDef@TZCNT_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_tzcnt_u32(${quote(a)})")
-    case TZCNT_U64(a) =>
+    case iDef@TZCNT_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_tzcnt_u64(${quote(a)})")
-    case XABORT(imm8) =>
+    case iDef@XABORT(imm8) =>
+      headers += iDef.header
       stream.println(s"_xabort(${quote(imm8)});")
-    case XBEGIN() =>
+    case iDef@XBEGIN() =>
+      headers += iDef.header
       emitValDef(sym, s"_xbegin()")
-    case XEND() =>
+    case iDef@XEND() =>
+      headers += iDef.header
       stream.println(s"_xend();")
-    case XTEST() =>
+    case iDef@XTEST() =>
+      headers += iDef.header
       emitValDef(sym, s"_xtest()")
-    case RDTSCP(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"__rdtscp(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case RDPID_U32() =>
+    case iDef@RDTSCP(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"__rdtscp((unsigned int *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@RDPID_U32() =>
+      headers += iDef.header
       emitValDef(sym, s"_rdpid_u32()")
-    case BIT_SCAN_FORWARD(a) =>
+    case iDef@BIT_SCAN_FORWARD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_bit_scan_forward(${quote(a)})")
-    case BIT_SCAN_REVERSE(a) =>
+    case iDef@BIT_SCAN_REVERSE(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_bit_scan_reverse(${quote(a)})")
-    case BITSCANFORWARD(index, mask, indexOffset) =>
-      emitValDef(sym, s"_BitScanForward(${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
-    case BITSCANREVERSE(index, mask, indexOffset) =>
-      emitValDef(sym, s"_BitScanReverse(${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
-    case BITSCANFORWARD64(index, mask, indexOffset) =>
-      emitValDef(sym, s"_BitScanForward64(${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
-    case BITSCANREVERSE64(index, mask, indexOffset) =>
-      emitValDef(sym, s"_BitScanReverse64(${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
-    case BITTEST(a, b, aOffset) =>
-      emitValDef(sym, s"_bittest(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDCOMPLEMENT(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandcomplement(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDRESET(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandreset(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDSET(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandset(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTEST64(a, b, aOffset) =>
-      emitValDef(sym, s"_bittest64(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDCOMPLEMENT64(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandcomplement64(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDRESET64(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandreset64(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BITTESTANDSET64(a, b, aOffset) =>
-      emitValDef(sym, s"_bittestandset64(${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
-    case BSWAP(a) =>
+    case iDef@BITSCANFORWARD(index, mask, indexOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_BitScanForward((unsigned __int32*) ${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
+    case iDef@BITSCANREVERSE(index, mask, indexOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_BitScanReverse((unsigned __int32*) ${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
+    case iDef@BITSCANFORWARD64(index, mask, indexOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_BitScanForward64((unsigned __int32*) ${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
+    case iDef@BITSCANREVERSE64(index, mask, indexOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_BitScanReverse64((unsigned __int32*) ${quote(index) + (if(indexOffset == Const(0)) "" else " + " + quote(indexOffset))}, ${quote(mask)})")
+    case iDef@BITTEST(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittest((__int32*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDCOMPLEMENT(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandcomplement((__int32*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDRESET(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandreset((__int32*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDSET(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandset((__int32*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTEST64(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittest64((__int64*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDCOMPLEMENT64(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandcomplement64((__int64*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDRESET64(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandreset64((__int64*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BITTESTANDSET64(a, b, aOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bittestandset64((__int64*) ${quote(a) + (if(aOffset == Const(0)) "" else " + " + quote(aOffset))}, ${quote(b)})")
+    case iDef@BSWAP(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_bswap(${quote(a)})")
-    case BSWAP64(a) =>
+    case iDef@BSWAP64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_bswap64(${quote(a)})")
-    case CASTF32_U32(a) =>
+    case iDef@CASTF32_U32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_castf32_u32(${quote(a)})")
-    case CASTF64_U64(a) =>
+    case iDef@CASTF64_U64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_castf64_u64(${quote(a)})")
-    case CASTU32_F32(a) =>
+    case iDef@CASTU32_F32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_castu32_f32(${quote(a)})")
-    case CASTU64_F64(a) =>
+    case iDef@CASTU64_F64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_castu64_f64(${quote(a)})")
-    case FXRSTOR(mem_addr, mem_addrOffset) =>
-      stream.println(s"_fxrstor(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
-    case FXRSTOR64(mem_addr, mem_addrOffset) =>
-      stream.println(s"_fxrstor64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
-    case FXSAVE(mem_addr, mem_addrOffset) =>
-      stream.println(s"_fxsave(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
-    case FXSAVE64(mem_addr, mem_addrOffset) =>
-      stream.println(s"_fxsave64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
-    case LROTL(a, shift) =>
+    case iDef@FXRSTOR(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_fxrstor((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+    case iDef@FXRSTOR64(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_fxrstor64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+    case iDef@FXSAVE(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_fxsave((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+    case iDef@FXSAVE64(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_fxsave64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))});")
+    case iDef@LROTL(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_lrotl(${quote(a)}, ${quote(shift)})")
-    case LROTR(a, shift) =>
+    case iDef@LROTR(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_lrotr(${quote(a)}, ${quote(shift)})")
-    case ALLOW_CPU_FEATURES(a) =>
+    case iDef@ALLOW_CPU_FEATURES(a) =>
+      headers += iDef.header
       stream.println(s"_allow_cpu_features(${quote(a)});")
-    case MAY_I_USE_CPU_FEATURE(a) =>
+    case iDef@MAY_I_USE_CPU_FEATURE(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_may_i_use_cpu_feature(${quote(a)})")
-    case POPCNT32(a) =>
+    case iDef@POPCNT32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_popcnt32(${quote(a)})")
-    case POPCNT64(a) =>
+    case iDef@POPCNT64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_popcnt64(${quote(a)})")
-    case RDPMC(a) =>
+    case iDef@RDPMC(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_rdpmc(${quote(a)})")
-    case RDTSC() =>
+    case iDef@RDTSC() =>
+      headers += iDef.header
       emitValDef(sym, s"_rdtsc()")
-    case ROTL(a, shift) =>
+    case iDef@ROTL(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotl(${quote(a)}, ${quote(shift)})")
-    case ROTR(a, shift) =>
+    case iDef@ROTR(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotr(${quote(a)}, ${quote(shift)})")
-    case ROTWL(a, shift) =>
+    case iDef@ROTWL(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotwl(${quote(a)}, ${quote(shift)})")
-    case ROTWR(a, shift) =>
+    case iDef@ROTWR(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotwr(${quote(a)}, ${quote(shift)})")
-    case ROTL64(a, shift) =>
+    case iDef@ROTL64(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotl64(${quote(a)}, ${quote(shift)})")
-    case ROTR64(a, shift) =>
+    case iDef@ROTR64(a, shift) =>
+      headers += iDef.header
       emitValDef(sym, s"_rotr64(${quote(a)}, ${quote(shift)})")
-    case XGETBV(a) =>
+    case iDef@XGETBV(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_xgetbv(${quote(a)})")
-    case XRSTOR(mem_addr, rs_mask, mem_addrOffset) =>
-      stream.println(s"_xrstor(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
-    case XRSTOR64(mem_addr, rs_mask, mem_addrOffset) =>
-      stream.println(s"_xrstor64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
-    case XSAVE(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsave(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVE64(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsave64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVEOPT(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsaveopt(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVEOPT64(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsaveopt64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSETBV(a, value) =>
+    case iDef@XRSTOR(mem_addr, rs_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xrstor((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
+    case iDef@XRSTOR64(mem_addr, rs_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xrstor64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
+    case iDef@XSAVE(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsave((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVE64(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsave64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVEOPT(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsaveopt((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVEOPT64(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsaveopt64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSETBV(a, value) =>
+      headers += iDef.header
       stream.println(s"_xsetbv(${quote(a)}, ${quote(value)});")
-    case MM_LOADU_SI32(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadu_si32(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM_STOREU_SI32(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeu_si32(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM_STOREU_SI16(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeu_si16(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM_LOADU_SI64(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadu_si64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM_STOREU_SI64(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm_storeu_si64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM_LOADU_SI16(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loadu_si16(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case READFSBASE_U32() =>
+    case iDef@MM_LOADU_SI32(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_loadu_si32((void const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM_STOREU_SI32(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_storeu_si32((void*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM_STOREU_SI16(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_storeu_si16((void*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM_LOADU_SI64(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_loadu_si64((void const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM_STOREU_SI64(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_storeu_si64((void*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM_LOADU_SI16(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_loadu_si16((void const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@READFSBASE_U32() =>
+      headers += iDef.header
       emitValDef(sym, s"_readfsbase_u32()")
-    case READFSBASE_U64() =>
+    case iDef@READFSBASE_U64() =>
+      headers += iDef.header
       emitValDef(sym, s"_readfsbase_u64()")
-    case READGSBASE_U32() =>
+    case iDef@READGSBASE_U32() =>
+      headers += iDef.header
       emitValDef(sym, s"_readgsbase_u32()")
-    case READGSBASE_U64() =>
+    case iDef@READGSBASE_U64() =>
+      headers += iDef.header
       emitValDef(sym, s"_readgsbase_u64()")
-    case RDRAND16_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdrand16_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case RDRAND32_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdrand32_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case RDRAND64_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdrand64_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case WRITEFSBASE_U32(a) =>
+    case iDef@RDRAND16_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdrand16_step((unsigned short*) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@RDRAND32_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdrand32_step((unsigned int*) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@RDRAND64_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdrand64_step((unsigned __int64*) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@WRITEFSBASE_U32(a) =>
+      headers += iDef.header
       stream.println(s"_writefsbase_u32(${quote(a)});")
-    case WRITEFSBASE_U64(a) =>
+    case iDef@WRITEFSBASE_U64(a) =>
+      headers += iDef.header
       stream.println(s"_writefsbase_u64(${quote(a)});")
-    case WRITEGSBASE_U32(a) =>
+    case iDef@WRITEGSBASE_U32(a) =>
+      headers += iDef.header
       stream.println(s"_writegsbase_u32(${quote(a)});")
-    case WRITEGSBASE_U64(a) =>
+    case iDef@WRITEGSBASE_U64(a) =>
+      headers += iDef.header
       stream.println(s"_writegsbase_u64(${quote(a)});")
-    case MM256_CVTPH_PS(a) =>
+    case iDef@MM256_CVTPH_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtph_ps(${quote(a)})")
-    case MM256_CVTPS_PH(a, rounding) =>
+    case iDef@MM256_CVTPS_PH(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_ph(${quote(a)}, ${quote(rounding)})")
-    case RDSEED16_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdseed16_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case RDSEED32_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdseed32_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case RDSEED64_STEP(value, valueOffset) =>
-      emitValDef(sym, s"_rdseed64_step(${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
-    case ADDCARRY_U32(c_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_addcarry_u32(${quote(c_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case ADDCARRY_U64(c_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_addcarry_u64(${quote(c_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case SUBBORROW_U32(b_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_subborrow_u32(${quote(b_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case SUBBORROW_U64(b_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_subborrow_u64(${quote(b_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case ADDCARRYX_U32(c_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_addcarryx_u32(${quote(c_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case ADDCARRYX_U64(c_in, a, b, out, outOffset) =>
-      emitValDef(sym, s"_addcarryx_u64(${quote(c_in)}, ${quote(a)}, ${quote(b)}, ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
-    case MM_SHA1MSG1_EPU32(a, b) =>
+    case iDef@RDSEED16_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdseed16_step((unsigned short *) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@RDSEED32_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdseed32_step((unsigned int *) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@RDSEED64_STEP(value, valueOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_rdseed64_step((unsigned __int64 *) ${quote(value) + (if(valueOffset == Const(0)) "" else " + " + quote(valueOffset))})")
+    case iDef@ADDCARRY_U32(c_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_addcarry_u32(${quote(c_in)}, ${quote(a)}, ${quote(b)}, (unsigned int *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@ADDCARRY_U64(c_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_addcarry_u64(${quote(c_in)}, ${quote(a)}, ${quote(b)}, (unsigned __int64 *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@SUBBORROW_U32(b_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_subborrow_u32(${quote(b_in)}, ${quote(a)}, ${quote(b)}, (unsigned int *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@SUBBORROW_U64(b_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_subborrow_u64(${quote(b_in)}, ${quote(a)}, ${quote(b)}, (unsigned __int64 *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@ADDCARRYX_U32(c_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_addcarryx_u32(${quote(c_in)}, ${quote(a)}, ${quote(b)}, (unsigned int *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@ADDCARRYX_U64(c_in, a, b, out, outOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_addcarryx_u64(${quote(c_in)}, ${quote(a)}, ${quote(b)}, (unsigned __int64 *) ${quote(out) + (if(outOffset == Const(0)) "" else " + " + quote(outOffset))})")
+    case iDef@MM_SHA1MSG1_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha1msg1_epu32(${quote(a)}, ${quote(b)})")
-    case MM_SHA1MSG2_EPU32(a, b) =>
+    case iDef@MM_SHA1MSG2_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha1msg2_epu32(${quote(a)}, ${quote(b)})")
-    case MM_SHA1NEXTE_EPU32(a, b) =>
+    case iDef@MM_SHA1NEXTE_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha1nexte_epu32(${quote(a)}, ${quote(b)})")
-    case MM_SHA1RNDS4_EPU32(a, b, func) =>
+    case iDef@MM_SHA1RNDS4_EPU32(a, b, func) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha1rnds4_epu32(${quote(a)}, ${quote(b)}, ${quote(func)})")
-    case MM_SHA256MSG1_EPU32(a, b) =>
+    case iDef@MM_SHA256MSG1_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha256msg1_epu32(${quote(a)}, ${quote(b)})")
-    case MM_SHA256MSG2_EPU32(a, b) =>
+    case iDef@MM_SHA256MSG2_EPU32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha256msg2_epu32(${quote(a)}, ${quote(b)})")
-    case MM_SHA256RNDS2_EPU32(a, b, k) =>
+    case iDef@MM_SHA256RNDS2_EPU32(a, b, k) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sha256rnds2_epu32(${quote(a)}, ${quote(b)}, ${quote(k)})")
-    case BND_SET_PTR_BOUNDS(srcmem, size, srcmemOffset) =>
-      emitValDef(sym, s"_bnd_set_ptr_bounds(${quote(srcmem) + (if(srcmemOffset == Const(0)) "" else " + " + quote(srcmemOffset))}, ${quote(size)})")
-    case BND_NARROW_PTR_BOUNDS(q, r, size, qOffset, rOffset) =>
-      emitValDef(sym, s"_bnd_narrow_ptr_bounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, ${quote(r) + (if(rOffset == Const(0)) "" else " + " + quote(rOffset))}, ${quote(size)})")
-    case BND_COPY_PTR_BOUNDS(q, r, qOffset, rOffset) =>
-      emitValDef(sym, s"_bnd_copy_ptr_bounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, ${quote(r) + (if(rOffset == Const(0)) "" else " + " + quote(rOffset))})")
-    case BND_INIT_PTR_BOUNDS(q, qOffset) =>
-      emitValDef(sym, s"_bnd_init_ptr_bounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
-    case BND_STORE_PTR_BOUNDS(ptr_addr, ptr_val, ptr_valOffset) =>
-      stream.println(s"_bnd_store_ptr_bounds(${quote(ptr_addr)}, ${quote(ptr_val) + (if(ptr_valOffset == Const(0)) "" else " + " + quote(ptr_valOffset))});")
-    case BND_CHK_PTR_LBOUNDS(q, qOffset) =>
-      stream.println(s"_bnd_chk_ptr_lbounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))});")
-    case BND_CHK_PTR_UBOUNDS(q, qOffset) =>
-      stream.println(s"_bnd_chk_ptr_ubounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))});")
-    case BND_CHK_PTR_BOUNDS(q, size, qOffset) =>
-      stream.println(s"_bnd_chk_ptr_bounds(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, ${quote(size)});")
-    case BND_GET_PTR_LBOUND(q, qOffset) =>
-      emitValDef(sym, s"_bnd_get_ptr_lbound(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
-    case BND_GET_PTR_UBOUND(q, qOffset) =>
-      emitValDef(sym, s"_bnd_get_ptr_ubound(${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
-    case XSAVEC(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsavec(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVES(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsaves(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVEC64(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsavec64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XSAVES64(mem_addr, save_mask, mem_addrOffset) =>
-      stream.println(s"_xsaves64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
-    case XRSTORS(mem_addr, rs_mask, mem_addrOffset) =>
-      stream.println(s"_xrstors(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
-    case XRSTORS64(mem_addr, rs_mask, mem_addrOffset) =>
-      stream.println(s"_xrstors64(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
-    case MM_TZCNT_32(a) =>
+    case iDef@BND_SET_PTR_BOUNDS(srcmem, size, srcmemOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_set_ptr_bounds((const void *) ${quote(srcmem) + (if(srcmemOffset == Const(0)) "" else " + " + quote(srcmemOffset))}, ${quote(size)})")
+    case iDef@BND_NARROW_PTR_BOUNDS(q, r, size, qOffset, rOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_narrow_ptr_bounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, (const void *) ${quote(r) + (if(rOffset == Const(0)) "" else " + " + quote(rOffset))}, ${quote(size)})")
+    case iDef@BND_COPY_PTR_BOUNDS(q, r, qOffset, rOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_copy_ptr_bounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, (const void *) ${quote(r) + (if(rOffset == Const(0)) "" else " + " + quote(rOffset))})")
+    case iDef@BND_INIT_PTR_BOUNDS(q, qOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_init_ptr_bounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
+    case iDef@BND_STORE_PTR_BOUNDS(ptr_addr, ptr_val, ptr_valOffset) =>
+      headers += iDef.header
+      stream.println(s"_bnd_store_ptr_bounds(${quote(ptr_addr)}, (const void *) ${quote(ptr_val) + (if(ptr_valOffset == Const(0)) "" else " + " + quote(ptr_valOffset))});")
+    case iDef@BND_CHK_PTR_LBOUNDS(q, qOffset) =>
+      headers += iDef.header
+      stream.println(s"_bnd_chk_ptr_lbounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))});")
+    case iDef@BND_CHK_PTR_UBOUNDS(q, qOffset) =>
+      headers += iDef.header
+      stream.println(s"_bnd_chk_ptr_ubounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))});")
+    case iDef@BND_CHK_PTR_BOUNDS(q, size, qOffset) =>
+      headers += iDef.header
+      stream.println(s"_bnd_chk_ptr_bounds((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))}, ${quote(size)});")
+    case iDef@BND_GET_PTR_LBOUND(q, qOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_get_ptr_lbound((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
+    case iDef@BND_GET_PTR_UBOUND(q, qOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_bnd_get_ptr_ubound((const void *) ${quote(q) + (if(qOffset == Const(0)) "" else " + " + quote(qOffset))})")
+    case iDef@XSAVEC(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsavec((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVES(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsaves((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVEC64(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsavec64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XSAVES64(mem_addr, save_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xsaves64((void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(save_mask)});")
+    case iDef@XRSTORS(mem_addr, rs_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xrstors((const void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
+    case iDef@XRSTORS64(mem_addr, rs_mask, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_xrstors64((const void *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(rs_mask)});")
+    case iDef@MM_TZCNT_32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_tzcnt_32(${quote(a)})")
-    case MM_TZCNT_64(a) =>
+    case iDef@MM_TZCNT_64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_tzcnt_64(${quote(a)})")
     case _ => super.emitNode(sym, rhs)
   }

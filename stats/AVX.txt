@@ -1,0 +1,28 @@
+AVX statistics:
+
+
+Number of AVX intrinsics: 188
+Number of intrinsics with pointer arguments: 13
+_mm256_store_pd
+_mm256_store_ps
+_mm256_storeu_pd
+_mm256_storeu_ps
+_mm256_store_si256
+_mm256_storeu_si256
+_mm256_maskstore_pd
+_mm_maskstore_pd
+_mm256_maskstore_ps
+_mm_maskstore_ps
+_mm256_stream_si256
+_mm256_stream_pd
+_mm256_stream_ps
+Intrinsic _mm256_loadu2_m128 has 2 pointer arguments
+Intrinsic _mm256_loadu2_m128d has 2 pointer arguments
+Intrinsic _mm256_loadu2_m128i has 2 pointer arguments
+Intrinsic _mm256_storeu2_m128 has 2 pointer arguments
+Intrinsic _mm256_storeu2_m128d has 2 pointer arguments
+Intrinsic _mm256_storeu2_m128i has 2 pointer arguments
+Number of intrinsics with pointer arguments: 3
+_mm256_storeu2_m128
+_mm256_storeu2_m128d
+_mm256_storeu2_m128i

@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -423,53 +449,73 @@ trait AVX512020 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_MASK2_PERMUTEX2VAR_EPI8 (f(a), f(idx), f(k), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MASKZ_PERMUTEX2VAR_EPI8 (k, a, idx, b), u, es) =>
       reflectMirrored(Reflect(MM_MASKZ_PERMUTEX2VAR_EPI8 (f(k), f(a), f(idx), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX512020 extends CGenIntrinsics {
+trait CGenAVX512020 extends CGenIntrinsics {
 
   val IR: AVX512
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM512_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+    case iDef@MM512_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_permutexvar_epi8(${quote(k)}, ${quote(idx)}, ${quote(a)})")
-    case MM256_PERMUTEXVAR_EPI8(idx, a) =>
+    case iDef@MM256_PERMUTEXVAR_EPI8(idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permutexvar_epi8(${quote(idx)}, ${quote(a)})")
-    case MM256_MASK_PERMUTEXVAR_EPI8(src, k, idx, a) =>
+    case iDef@MM256_MASK_PERMUTEXVAR_EPI8(src, k, idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_permutexvar_epi8(${quote(src)}, ${quote(k)}, ${quote(idx)}, ${quote(a)})")
-    case MM256_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+    case iDef@MM256_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_permutexvar_epi8(${quote(k)}, ${quote(idx)}, ${quote(a)})")
-    case MM_PERMUTEXVAR_EPI8(idx, a) =>
+    case iDef@MM_PERMUTEXVAR_EPI8(idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permutexvar_epi8(${quote(idx)}, ${quote(a)})")
-    case MM_MASK_PERMUTEXVAR_EPI8(src, k, idx, a) =>
+    case iDef@MM_MASK_PERMUTEXVAR_EPI8(src, k, idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_permutexvar_epi8(${quote(src)}, ${quote(k)}, ${quote(idx)}, ${quote(a)})")
-    case MM_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+    case iDef@MM_MASKZ_PERMUTEXVAR_EPI8(k, idx, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_permutexvar_epi8(${quote(k)}, ${quote(idx)}, ${quote(a)})")
-    case MM512_PERMUTEX2VAR_EPI8(a, idx, b) =>
+    case iDef@MM512_PERMUTEX2VAR_EPI8(a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(b)})")
-    case MM512_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+    case iDef@MM512_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_permutex2var_epi8(${quote(a)}, ${quote(k)}, ${quote(idx)}, ${quote(b)})")
-    case MM512_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+    case iDef@MM512_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask2_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(k)}, ${quote(b)})")
-    case MM512_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+    case iDef@MM512_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_permutex2var_epi8(${quote(k)}, ${quote(a)}, ${quote(idx)}, ${quote(b)})")
-    case MM256_PERMUTEX2VAR_EPI8(a, idx, b) =>
+    case iDef@MM256_PERMUTEX2VAR_EPI8(a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(b)})")
-    case MM256_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+    case iDef@MM256_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_permutex2var_epi8(${quote(a)}, ${quote(k)}, ${quote(idx)}, ${quote(b)})")
-    case MM256_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+    case iDef@MM256_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask2_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(k)}, ${quote(b)})")
-    case MM256_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+    case iDef@MM256_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_permutex2var_epi8(${quote(k)}, ${quote(a)}, ${quote(idx)}, ${quote(b)})")
-    case MM_PERMUTEX2VAR_EPI8(a, idx, b) =>
+    case iDef@MM_PERMUTEX2VAR_EPI8(a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(b)})")
-    case MM_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+    case iDef@MM_MASK_PERMUTEX2VAR_EPI8(a, k, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_permutex2var_epi8(${quote(a)}, ${quote(k)}, ${quote(idx)}, ${quote(b)})")
-    case MM_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+    case iDef@MM_MASK2_PERMUTEX2VAR_EPI8(a, idx, k, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask2_permutex2var_epi8(${quote(a)}, ${quote(idx)}, ${quote(k)}, ${quote(b)})")
-    case MM_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+    case iDef@MM_MASKZ_PERMUTEX2VAR_EPI8(k, a, idx, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_permutex2var_epi8(${quote(k)}, ${quote(a)}, ${quote(idx)}, ${quote(b)})")
     case _ => super.emitNode(sym, rhs)
   }

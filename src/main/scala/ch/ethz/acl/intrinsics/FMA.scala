@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -724,6 +750,7 @@ trait FMA extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_FNMSUB_SD (f(a), f(b), f(c)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_FNMSUB_SS (a, b, c), u, es) =>
       reflectMirrored(Reflect(MM_FNMSUB_SS (f(a), f(b), f(c)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -734,69 +761,101 @@ trait CGenFMA extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_FMADD_PD(a, b, c) =>
+    case iDef@MM_FMADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMADD_PD(a, b, c) =>
+    case iDef@MM256_FMADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMADD_PS(a, b, c) =>
+    case iDef@MM_FMADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMADD_PS(a, b, c) =>
+    case iDef@MM256_FMADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMADD_SD(a, b, c) =>
+    case iDef@MM_FMADD_SD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmadd_sd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMADD_SS(a, b, c) =>
+    case iDef@MM_FMADD_SS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmadd_ss(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMADDSUB_PD(a, b, c) =>
+    case iDef@MM_FMADDSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmaddsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMADDSUB_PD(a, b, c) =>
+    case iDef@MM256_FMADDSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmaddsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMADDSUB_PS(a, b, c) =>
+    case iDef@MM_FMADDSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmaddsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMADDSUB_PS(a, b, c) =>
+    case iDef@MM256_FMADDSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmaddsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUB_PD(a, b, c) =>
+    case iDef@MM_FMSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMSUB_PD(a, b, c) =>
+    case iDef@MM256_FMSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUB_PS(a, b, c) =>
+    case iDef@MM_FMSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMSUB_PS(a, b, c) =>
+    case iDef@MM256_FMSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUB_SD(a, b, c) =>
+    case iDef@MM_FMSUB_SD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsub_sd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUB_SS(a, b, c) =>
+    case iDef@MM_FMSUB_SS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsub_ss(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUBADD_PD(a, b, c) =>
+    case iDef@MM_FMSUBADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsubadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMSUBADD_PD(a, b, c) =>
+    case iDef@MM256_FMSUBADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmsubadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FMSUBADD_PS(a, b, c) =>
+    case iDef@MM_FMSUBADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fmsubadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FMSUBADD_PS(a, b, c) =>
+    case iDef@MM256_FMSUBADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fmsubadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMADD_PD(a, b, c) =>
+    case iDef@MM_FNMADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FNMADD_PD(a, b, c) =>
+    case iDef@MM256_FNMADD_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fnmadd_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMADD_PS(a, b, c) =>
+    case iDef@MM_FNMADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FNMADD_PS(a, b, c) =>
+    case iDef@MM256_FNMADD_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fnmadd_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMADD_SD(a, b, c) =>
+    case iDef@MM_FNMADD_SD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmadd_sd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMADD_SS(a, b, c) =>
+    case iDef@MM_FNMADD_SS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmadd_ss(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMSUB_PD(a, b, c) =>
+    case iDef@MM_FNMSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FNMSUB_PD(a, b, c) =>
+    case iDef@MM256_FNMSUB_PD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fnmsub_pd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMSUB_PS(a, b, c) =>
+    case iDef@MM_FNMSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM256_FNMSUB_PS(a, b, c) =>
+    case iDef@MM256_FNMSUB_PS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_fnmsub_ps(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMSUB_SD(a, b, c) =>
+    case iDef@MM_FNMSUB_SD(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmsub_sd(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM_FNMSUB_SS(a, b, c) =>
+    case iDef@MM_FNMSUB_SS(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_fnmsub_ss(${quote(a)}, ${quote(b)}, ${quote(c)})")
     case _ => super.emitNode(sym, rhs)
   }

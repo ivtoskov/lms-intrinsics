@@ -1,0 +1,5 @@
+SSE41 statistics:
+
+
+Number of SSE41 intrinsics: 61
+Number of intrinsics with pointer arguments: 0

@@ -1,0 +1,10 @@
+AVX2 statistics:
+
+
+Number of AVX2 intrinsics: 191
+Number of intrinsics with pointer arguments: 4
+_mm_maskstore_epi32
+_mm256_maskstore_epi32
+_mm_maskstore_epi64
+_mm256_maskstore_epi64
+Number of intrinsics with pointer arguments: 0

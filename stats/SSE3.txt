@@ -1,0 +1,5 @@
+SSE3 statistics:
+
+
+Number of SSE3 intrinsics: 11
+Number of intrinsics with pointer arguments: 0

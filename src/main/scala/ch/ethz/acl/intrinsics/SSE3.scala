@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -244,6 +270,7 @@ trait SSE3 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_MOVEHDUP_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MOVELDUP_PS (a), u, es) =>
       reflectMirrored(Reflect(MM_MOVELDUP_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -254,27 +281,38 @@ trait CGenSSE3 extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_ADDSUB_PS(a, b) =>
+    case iDef@MM_ADDSUB_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_addsub_ps(${quote(a)}, ${quote(b)})")
-    case MM_ADDSUB_PD(a, b) =>
+    case iDef@MM_ADDSUB_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_addsub_pd(${quote(a)}, ${quote(b)})")
-    case MM_HADD_PD(a, b) =>
+    case iDef@MM_HADD_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_pd(${quote(a)}, ${quote(b)})")
-    case MM_HADD_PS(a, b) =>
+    case iDef@MM_HADD_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_ps(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_PD(a, b) =>
+    case iDef@MM_HSUB_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_pd(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_PS(a, b) =>
+    case iDef@MM_HSUB_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_ps(${quote(a)}, ${quote(b)})")
-    case MM_LDDQU_SI128(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_lddqu_si128(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM_MOVEDUP_PD(a) =>
+    case iDef@MM_LDDQU_SI128(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_lddqu_si128((__m128i const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM_MOVEDUP_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_movedup_pd(${quote(a)})")
-    case MM_LOADDUP_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_loaddup_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM_MOVEHDUP_PS(a) =>
+    case iDef@MM_LOADDUP_PD(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_loaddup_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM_MOVEHDUP_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_movehdup_ps(${quote(a)})")
-    case MM_MOVELDUP_PS(a) =>
+    case iDef@MM_MOVELDUP_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_moveldup_ps(${quote(a)})")
     case _ => super.emitNode(sym, rhs)
   }

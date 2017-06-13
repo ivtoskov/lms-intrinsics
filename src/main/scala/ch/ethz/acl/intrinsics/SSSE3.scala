@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -694,6 +720,7 @@ trait SSSE3 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_SIGN_PI16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_SIGN_PI32 (a, b), u, es) =>
       reflectMirrored(Reflect(MM_SIGN_PI32 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -704,69 +731,101 @@ trait CGenSSSE3 extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_ABS_PI8(a) =>
+    case iDef@MM_ABS_PI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_pi8(${quote(a)})")
-    case MM_ABS_EPI8(a) =>
+    case iDef@MM_ABS_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_epi8(${quote(a)})")
-    case MM_ABS_PI16(a) =>
+    case iDef@MM_ABS_PI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_pi16(${quote(a)})")
-    case MM_ABS_EPI16(a) =>
+    case iDef@MM_ABS_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_epi16(${quote(a)})")
-    case MM_ABS_PI32(a) =>
+    case iDef@MM_ABS_PI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_pi32(${quote(a)})")
-    case MM_ABS_EPI32(a) =>
+    case iDef@MM_ABS_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_abs_epi32(${quote(a)})")
-    case MM_SHUFFLE_EPI8(a, b) =>
+    case iDef@MM_SHUFFLE_EPI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_shuffle_epi8(${quote(a)}, ${quote(b)})")
-    case MM_SHUFFLE_PI8(a, b) =>
+    case iDef@MM_SHUFFLE_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_shuffle_pi8(${quote(a)}, ${quote(b)})")
-    case MM_ALIGNR_EPI8(a, b, count) =>
+    case iDef@MM_ALIGNR_EPI8(a, b, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_alignr_epi8(${quote(a)}, ${quote(b)}, ${quote(count)})")
-    case MM_ALIGNR_PI8(a, b, count) =>
+    case iDef@MM_ALIGNR_PI8(a, b, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_alignr_pi8(${quote(a)}, ${quote(b)}, ${quote(count)})")
-    case MM_HADD_EPI16(a, b) =>
+    case iDef@MM_HADD_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_epi16(${quote(a)}, ${quote(b)})")
-    case MM_HADDS_EPI16(a, b) =>
+    case iDef@MM_HADDS_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadds_epi16(${quote(a)}, ${quote(b)})")
-    case MM_HADD_EPI32(a, b) =>
+    case iDef@MM_HADD_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_epi32(${quote(a)}, ${quote(b)})")
-    case MM_HADD_PI16(a, b) =>
+    case iDef@MM_HADD_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_pi16(${quote(a)}, ${quote(b)})")
-    case MM_HADD_PI32(a, b) =>
+    case iDef@MM_HADD_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadd_pi32(${quote(a)}, ${quote(b)})")
-    case MM_HADDS_PI16(a, b) =>
+    case iDef@MM_HADDS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hadds_pi16(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_EPI16(a, b) =>
+    case iDef@MM_HSUB_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_epi16(${quote(a)}, ${quote(b)})")
-    case MM_HSUBS_EPI16(a, b) =>
+    case iDef@MM_HSUBS_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsubs_epi16(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_EPI32(a, b) =>
+    case iDef@MM_HSUB_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_epi32(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_PI16(a, b) =>
+    case iDef@MM_HSUB_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_pi16(${quote(a)}, ${quote(b)})")
-    case MM_HSUB_PI32(a, b) =>
+    case iDef@MM_HSUB_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsub_pi32(${quote(a)}, ${quote(b)})")
-    case MM_HSUBS_PI16(a, b) =>
+    case iDef@MM_HSUBS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_hsubs_pi16(${quote(a)}, ${quote(b)})")
-    case MM_MADDUBS_EPI16(a, b) =>
+    case iDef@MM_MADDUBS_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maddubs_epi16(${quote(a)}, ${quote(b)})")
-    case MM_MADDUBS_PI16(a, b) =>
+    case iDef@MM_MADDUBS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maddubs_pi16(${quote(a)}, ${quote(b)})")
-    case MM_MULHRS_EPI16(a, b) =>
+    case iDef@MM_MULHRS_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mulhrs_epi16(${quote(a)}, ${quote(b)})")
-    case MM_MULHRS_PI16(a, b) =>
+    case iDef@MM_MULHRS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mulhrs_pi16(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_EPI8(a, b) =>
+    case iDef@MM_SIGN_EPI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_epi8(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_EPI16(a, b) =>
+    case iDef@MM_SIGN_EPI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_epi16(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_EPI32(a, b) =>
+    case iDef@MM_SIGN_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_epi32(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_PI8(a, b) =>
+    case iDef@MM_SIGN_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_pi8(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_PI16(a, b) =>
+    case iDef@MM_SIGN_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_pi16(${quote(a)}, ${quote(b)})")
-    case MM_SIGN_PI32(a, b) =>
+    case iDef@MM_SIGN_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sign_pi32(${quote(a)}, ${quote(b)})")
     case _ => super.emitNode(sym, rhs)
   }

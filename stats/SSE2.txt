@@ -1,0 +1,23 @@
+SSE2 statistics:
+
+
+Number of SSE2 intrinsics: 236
+Number of intrinsics with pointer arguments: 8
+_mm_clflush
+_mm_maskmoveu_si128
+_mm_store_si128
+_mm_storeu_si128
+_mm_storel_epi64
+_mm_stream_si128
+_mm_stream_si32
+_mm_stream_si64
+Number of intrinsics with pointer arguments: 9
+_mm_stream_pd
+_mm_store_sd
+_mm_store1_pd
+_mm_store_pd1
+_mm_store_pd
+_mm_storeu_pd
+_mm_storer_pd
+_mm_storeh_pd
+_mm_storel_pd

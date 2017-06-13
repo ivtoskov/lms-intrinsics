@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -3845,365 +3871,541 @@ trait AVX512015 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM256_MASKZ_CVTEPU8_EPI32 (f(k), f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MASK_CVTEPU8_EPI32 (src, k, a), u, es) =>
       reflectMirrored(Reflect(MM_MASK_CVTEPU8_EPI32 (f(src), f(k), f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX512015 extends CGenIntrinsics {
+trait CGenAVX512015 extends CGenIntrinsics {
 
   val IR: AVX512
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM512_MOVEPI64_MASK(a) =>
+    case iDef@MM512_MOVEPI64_MASK(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_movepi64_mask(${quote(a)})")
-    case MM_MOVEPI64_MASK(a) =>
+    case iDef@MM_MOVEPI64_MASK(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_movepi64_mask(${quote(a)})")
-    case MM256_CVTEPI64_EPI8(a) =>
+    case iDef@MM256_CVTEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi64_epi8(${quote(a)})")
-    case MM256_MASK_CVTEPI64_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTEPI64_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTEPI64_EPI8(a) =>
+    case iDef@MM_CVTEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtepi64_epi8(${quote(a)})")
-    case MM_MASK_CVTEPI64_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTEPI64_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_CVTEPI64_EPI32(a) =>
+    case iDef@MM256_CVTEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi64_epi32(${quote(a)})")
-    case MM256_MASK_CVTEPI64_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTEPI64_EPI32(k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM_CVTEPI64_EPI32(a) =>
+    case iDef@MM_CVTEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtepi64_epi32(${quote(a)})")
-    case MM_MASK_CVTEPI64_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTEPI64_EPI32(k, a) =>
+    case iDef@MM_MASK_CVTEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_CVTEPI64_EPI16(a) =>
+    case iDef@MM256_CVTEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi64_epi16(${quote(a)})")
-    case MM256_MASK_CVTEPI64_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTEPI64_EPI16(k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM_CVTEPI64_EPI16(a) =>
+    case iDef@MM_CVTEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtepi64_epi16(${quote(a)})")
-    case MM_MASK_CVTEPI64_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTEPI64_EPI16(k, a) =>
+    case iDef@MM_MASK_CVTEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI32_EPI8(a) =>
+    case iDef@MM256_CVTSEPI32_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi32_epi8(${quote(a)})")
-    case MM256_MASK_CVTSEPI32_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI32_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi32_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi32_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI32_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi32_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI32_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi32_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI32_EPI8(a) =>
+    case iDef@MM_CVTSEPI32_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi32_epi8(${quote(a)})")
-    case MM_MASK_CVTSEPI32_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI32_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi32_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi32_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI32_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi32_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI32_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi32_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI32_EPI16(a) =>
+    case iDef@MM256_CVTSEPI32_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi32_epi16(${quote(a)})")
-    case MM256_MASK_CVTSEPI32_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI32_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi32_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi32_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI32_EPI16(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi32_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI32_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi32_epi16(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI32_EPI16(a) =>
+    case iDef@MM_CVTSEPI32_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi32_epi16(${quote(a)})")
-    case MM_MASK_CVTSEPI32_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI32_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi32_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi32_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI32_EPI16(k, a) =>
+    case iDef@MM_MASK_CVTSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi32_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI32_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi32_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI64_EPI8(a) =>
+    case iDef@MM256_CVTSEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi64_epi8(${quote(a)})")
-    case MM256_MASK_CVTSEPI64_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI64_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI64_EPI8(a) =>
+    case iDef@MM_CVTSEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi64_epi8(${quote(a)})")
-    case MM_MASK_CVTSEPI64_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI64_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI64_EPI32(a) =>
+    case iDef@MM256_CVTSEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi64_epi32(${quote(a)})")
-    case MM256_MASK_CVTSEPI64_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI64_EPI32(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI64_EPI32(a) =>
+    case iDef@MM_CVTSEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi64_epi32(${quote(a)})")
-    case MM_MASK_CVTSEPI64_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI64_EPI32(k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI64_EPI16(a) =>
+    case iDef@MM256_CVTSEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi64_epi16(${quote(a)})")
-    case MM256_MASK_CVTSEPI64_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI64_EPI16(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI64_EPI16(a) =>
+    case iDef@MM_CVTSEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi64_epi16(${quote(a)})")
-    case MM_MASK_CVTSEPI64_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI64_EPI16(k, a) =>
+    case iDef@MM_MASK_CVTSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_CVTSEPI16_EPI8(a) =>
+    case iDef@MM256_CVTSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtsepi16_epi8(${quote(a)})")
-    case MM256_MASK_CVTSEPI16_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtsepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtsepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTSEPI16_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtsepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtsepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM512_CVTSEPI16_EPI8(a) =>
+    case iDef@MM512_CVTSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtsepi16_epi8(${quote(a)})")
-    case MM512_MASK_CVTSEPI16_EPI8(src, k, a) =>
+    case iDef@MM512_MASK_CVTSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtsepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm512_mask_cvtsepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM512_MASKZ_CVTSEPI16_EPI8(k, a) =>
+    case iDef@MM512_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_cvtsepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM512_MASKZ_CVTSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtsepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTSEPI16_EPI8(a) =>
+    case iDef@MM_CVTSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsepi16_epi8(${quote(a)})")
-    case MM_MASK_CVTSEPI16_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtsepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtsepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTSEPI16_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtsepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtsepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI8_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI8_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi8_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI8_EPI32(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI8_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi8_epi32(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI8_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI8_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi8_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI8_EPI32(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI8_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi8_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI8_EPI64(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI8_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi8_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI8_EPI64(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI8_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi8_epi64(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI8_EPI64(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI8_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi8_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI8_EPI64(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI8_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi8_epi64(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI8_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI8_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi8_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI8_EPI16(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI8_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi8_epi16(${quote(k)}, ${quote(a)})")
-    case MM512_CVTEPI8_EPI16(a) =>
+    case iDef@MM512_CVTEPI8_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtepi8_epi16(${quote(a)})")
-    case MM512_MASK_CVTEPI8_EPI16(src, k, a) =>
+    case iDef@MM512_MASK_CVTEPI8_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtepi8_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVTEPI8_EPI16(k, a) =>
+    case iDef@MM512_MASKZ_CVTEPI8_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtepi8_epi16(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI8_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI8_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi8_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI8_EPI16(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI8_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi8_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI32_EPI64(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI32_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi32_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI32_EPI64(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI32_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi32_epi64(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI32_EPI64(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI32_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi32_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI32_EPI64(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI32_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi32_epi64(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI16_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI16_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi16_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI16_EPI32(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI16_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi16_epi32(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI16_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI16_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi16_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI16_EPI32(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI16_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi16_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI16_EPI64(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI16_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi16_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI16_EPI64(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI16_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi16_epi64(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI16_EPI64(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI16_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi16_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI16_EPI64(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI16_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi16_epi64(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI32_EPI8(a) =>
+    case iDef@MM256_CVTUSEPI32_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi32_epi8(${quote(a)})")
-    case MM256_MASK_CVTUSEPI32_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI32_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi32_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi32_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI32_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi32_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI32_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi32_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI32_EPI8(a) =>
+    case iDef@MM_CVTUSEPI32_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi32_epi8(${quote(a)})")
-    case MM_MASK_CVTUSEPI32_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI32_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi32_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi32_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI32_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI32_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi32_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI32_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi32_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI32_EPI16(a) =>
+    case iDef@MM256_CVTUSEPI32_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi32_epi16(${quote(a)})")
-    case MM256_MASK_CVTUSEPI32_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI32_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi32_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi32_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI32_EPI16(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi32_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI32_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi32_epi16(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI32_EPI16(a) =>
+    case iDef@MM_CVTUSEPI32_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi32_epi16(${quote(a)})")
-    case MM_MASK_CVTUSEPI32_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI32_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi32_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi32_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI32_EPI16(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI32_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi32_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI32_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi32_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI64_EPI8(a) =>
+    case iDef@MM256_CVTUSEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi64_epi8(${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI64_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI64_EPI8(a) =>
+    case iDef@MM_CVTUSEPI64_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi64_epi8(${quote(a)})")
-    case MM_MASK_CVTUSEPI64_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi64_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi64_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI64_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi64_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI64_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi64_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI64_EPI32(a) =>
+    case iDef@MM256_CVTUSEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi64_epi32(${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI64_EPI32(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI64_EPI32(a) =>
+    case iDef@MM_CVTUSEPI64_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi64_epi32(${quote(a)})")
-    case MM_MASK_CVTUSEPI64_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi64_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi64_storeu_epi32(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI64_EPI32(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_STOREU_EPI32(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi64_storeu_epi32((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI64_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi64_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI64_EPI16(a) =>
+    case iDef@MM256_CVTUSEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi64_epi16(${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_EPI16(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI64_EPI16(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI64_EPI16(a) =>
+    case iDef@MM_CVTUSEPI64_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi64_epi16(${quote(a)})")
-    case MM_MASK_CVTUSEPI64_EPI16(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_EPI16(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi64_epi16(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi64_storeu_epi16(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI64_EPI16(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI64_STOREU_EPI16(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi64_storeu_epi16((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI64_EPI16(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi64_epi16(${quote(k)}, ${quote(a)})")
-    case MM256_CVTUSEPI16_EPI8(a) =>
+    case iDef@MM256_CVTUSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtusepi16_epi8(${quote(a)})")
-    case MM256_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtusepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtusepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtusepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtusepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM512_CVTUSEPI16_EPI8(a) =>
+    case iDef@MM512_CVTUSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtusepi16_epi8(${quote(a)})")
-    case MM512_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+    case iDef@MM512_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtusepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm512_mask_cvtusepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM512_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+    case iDef@MM512_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_cvtusepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM512_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtusepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTUSEPI16_EPI8(a) =>
+    case iDef@MM_CVTUSEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtusepi16_epi8(${quote(a)})")
-    case MM_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTUSEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtusepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtusepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTUSEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtusepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTUSEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtusepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_MOVEPI16_MASK(a) =>
+    case iDef@MM256_MOVEPI16_MASK(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_movepi16_mask(${quote(a)})")
-    case MM512_MOVEPI16_MASK(a) =>
+    case iDef@MM512_MOVEPI16_MASK(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_movepi16_mask(${quote(a)})")
-    case MM_MOVEPI16_MASK(a) =>
+    case iDef@MM_MOVEPI16_MASK(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_movepi16_mask(${quote(a)})")
-    case MM256_CVTEPI16_EPI8(a) =>
+    case iDef@MM256_CVTEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi16_epi8(${quote(a)})")
-    case MM256_MASK_CVTEPI16_EPI8(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_cvtepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_CVTEPI16_EPI8(k, a) =>
+    case iDef@MM256_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_cvtepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_CVTEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM512_CVTEPI16_EPI8(a) =>
+    case iDef@MM512_CVTEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtepi16_epi8(${quote(a)})")
-    case MM512_MASK_CVTEPI16_EPI8(src, k, a) =>
+    case iDef@MM512_MASK_CVTEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm512_mask_cvtepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM512_MASKZ_CVTEPI16_EPI8(k, a) =>
+    case iDef@MM512_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_cvtepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM512_MASKZ_CVTEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM_CVTEPI16_EPI8(a) =>
+    case iDef@MM_CVTEPI16_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtepi16_epi8(${quote(a)})")
-    case MM_MASK_CVTEPI16_EPI8(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI16_EPI8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi16_epi8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_cvtepi16_storeu_epi8(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_CVTEPI16_EPI8(k, a) =>
+    case iDef@MM_MASK_CVTEPI16_STOREU_EPI8(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_cvtepi16_storeu_epi8((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_CVTEPI16_EPI8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi16_epi8(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPU8_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPU8_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepu8_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPU8_EPI32(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPU8_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepu8_epi32(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPU8_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTEPU8_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepu8_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
     case _ => super.emitNode(sym, rhs)
   }

@@ -1,0 +1,5 @@
+MMX statistics:
+
+
+Number of MMX intrinsics: 124
+Number of intrinsics with pointer arguments: 0

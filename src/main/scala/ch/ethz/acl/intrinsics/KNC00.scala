@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -7,7 +33,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait KNC00 extends IntrinsicsBase {
+trait KNC00 extends IntrinsicsBase {
   /**
    * Fetch the line of data from memory that contains address "p" to a location in
    * the cache heirarchy specified by the locality hint "i".
@@ -4186,365 +4212,541 @@ protected trait KNC00 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_FMADD233_ROUND_PS (f(a), f(b), f(rounding)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_MASK_FMADD233_ROUND_PS (src, k, a, b, rounding), u, es) =>
       reflectMirrored(Reflect(MM512_MASK_FMADD233_ROUND_PS (f(src), f(k), f(a), f(b), f(rounding)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenKNC00 extends CGenIntrinsics {
+trait CGenKNC00 extends CGenIntrinsics {
 
   val IR: KNC
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_PREFETCH(p, i, pOffset) =>
-      stream.println(s"_mm_prefetch(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
-    case LOADBE_I16(ptr, ptrOffset) =>
-      emitValDef(sym, s"_loadbe_i16(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
-    case LOADBE_I32(ptr, ptrOffset) =>
-      emitValDef(sym, s"_loadbe_i32(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
-    case LOADBE_I64(ptr, ptrOffset) =>
-      emitValDef(sym, s"_loadbe_i64(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
-    case STOREBE_I16(ptr, data, ptrOffset) =>
-      stream.println(s"_storebe_i16(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
-    case STOREBE_I32(ptr, data, ptrOffset) =>
-      stream.println(s"_storebe_i32(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
-    case STOREBE_I64(ptr, data, ptrOffset) =>
-      stream.println(s"_storebe_i64(${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
-    case MM512_KANDN(a, b) =>
+    case iDef@MM_PREFETCH(p, i, pOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_prefetch((char const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
+    case iDef@LOADBE_I16(ptr, ptrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_loadbe_i16((void const *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
+    case iDef@LOADBE_I32(ptr, ptrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_loadbe_i32((void const *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
+    case iDef@LOADBE_I64(ptr, ptrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_loadbe_i64((void const *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))})")
+    case iDef@STOREBE_I16(ptr, data, ptrOffset) =>
+      headers += iDef.header
+      stream.println(s"_storebe_i16((void *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
+    case iDef@STOREBE_I32(ptr, data, ptrOffset) =>
+      headers += iDef.header
+      stream.println(s"_storebe_i32((void *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
+    case iDef@STOREBE_I64(ptr, data, ptrOffset) =>
+      headers += iDef.header
+      stream.println(s"_storebe_i64((void *) ${quote(ptr) + (if(ptrOffset == Const(0)) "" else " + " + quote(ptrOffset))}, ${quote(data)});")
+    case iDef@MM512_KANDN(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kandn(${quote(a)}, ${quote(b)})")
-    case MM512_KAND(a, b) =>
+    case iDef@MM512_KAND(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kand(${quote(a)}, ${quote(b)})")
-    case MM512_KMOV(a) =>
+    case iDef@MM512_KMOV(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kmov(${quote(a)})")
-    case MM512_KNOT(a) =>
+    case iDef@MM512_KNOT(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_knot(${quote(a)})")
-    case MM512_KOR(a, b) =>
+    case iDef@MM512_KOR(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kor(${quote(a)}, ${quote(b)})")
-    case MM512_KXNOR(a, b) =>
+    case iDef@MM512_KXNOR(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kxnor(${quote(a)}, ${quote(b)})")
-    case MM512_KXOR(a, b) =>
+    case iDef@MM512_KXOR(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kxor(${quote(a)}, ${quote(b)})")
-    case MM512_CMPLT_EPI32_MASK(a, b) =>
+    case iDef@MM512_CMPLT_EPI32_MASK(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cmplt_epi32_mask(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_CMPLT_EPI32_MASK(k1, a, b) =>
+    case iDef@MM512_MASK_CMPLT_EPI32_MASK(k1, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cmplt_epi32_mask(${quote(k1)}, ${quote(a)}, ${quote(b)})")
-    case MM512_EXTLOAD_PS(mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extload_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOAD_PS(src, k, mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extload_ps(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_EXTLOAD_EPI32(mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extload_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOAD_EPI32(src, k, mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extload_epi32(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_EXTLOAD_PD(mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extload_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOAD_PD(src, k, mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extload_pd(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_EXTLOAD_EPI64(mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extload_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOAD_EPI64(src, k, mt, conv, bc, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extload_epi64(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
-    case MM512_SWIZZLE_PS(v, s) =>
+    case iDef@MM512_EXTLOAD_PS(mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extload_ps((void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOAD_PS(src, k, mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extload_ps(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOAD_EPI32(mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extload_epi32((void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOAD_EPI32(src, k, mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extload_epi32(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOAD_PD(mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extload_pd((void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOAD_PD(src, k, mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extload_pd(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOAD_EPI64(mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extload_epi64((void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOAD_EPI64(src, k, mt, conv, bc, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extload_epi64(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(bc)}, ${quote(hint)})")
+    case iDef@MM512_SWIZZLE_PS(v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_swizzle_ps(${quote(v)}, ${quote(s)})")
-    case MM512_SWIZZLE_PD(v, s) =>
+    case iDef@MM512_SWIZZLE_PD(v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_swizzle_pd(${quote(v)}, ${quote(s)})")
-    case MM512_SWIZZLE_EPI32(v, s) =>
+    case iDef@MM512_SWIZZLE_EPI32(v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_swizzle_epi32(${quote(v)}, ${quote(s)})")
-    case MM512_SWIZZLE_EPI64(v, s) =>
+    case iDef@MM512_SWIZZLE_EPI64(v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_swizzle_epi64(${quote(v)}, ${quote(s)})")
-    case MM512_MASK_SWIZZLE_PS(src, k, v, s) =>
+    case iDef@MM512_MASK_SWIZZLE_PS(src, k, v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_swizzle_ps(${quote(src)}, ${quote(k)}, ${quote(v)}, ${quote(s)})")
-    case MM512_MASK_SWIZZLE_PD(src, k, v, s) =>
+    case iDef@MM512_MASK_SWIZZLE_PD(src, k, v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_swizzle_pd(${quote(src)}, ${quote(k)}, ${quote(v)}, ${quote(s)})")
-    case MM512_MASK_SWIZZLE_EPI32(src, k, v, s) =>
+    case iDef@MM512_MASK_SWIZZLE_EPI32(src, k, v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_swizzle_epi32(${quote(src)}, ${quote(k)}, ${quote(v)}, ${quote(s)})")
-    case MM512_MASK_SWIZZLE_EPI64(src, k, v, s) =>
+    case iDef@MM512_MASK_SWIZZLE_EPI64(src, k, v, s) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_swizzle_epi64(${quote(src)}, ${quote(k)}, ${quote(v)}, ${quote(s)})")
-    case MM512_EXTSTORE_PS(mt, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extstore_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTSTORE_EPI32(mt, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extstore_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTSTORE_PD(mt, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extstore_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTSTORE_EPI64(mt, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extstore_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTSTORE_PS(mt, k, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extstore_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTSTORE_PD(mt, k, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extstore_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTSTORE_EPI32(mt, k, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extstore_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTSTORE_EPI64(mt, k, v, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extstore_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_STORENR_PS(mt, v, mtOffset) =>
-      stream.println(s"_mm512_storenr_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
-    case MM512_STORENR_PD(mt, v, mtOffset) =>
-      stream.println(s"_mm512_storenr_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
-    case MM512_STORENRNGO_PS(mt, v, mtOffset) =>
-      stream.println(s"_mm512_storenrngo_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
-    case MM512_STORENRNGO_PD(mt, v, mtOffset) =>
-      stream.println(s"_mm512_storenrngo_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
-    case MM512_ADC_EPI32(v2, k2, v3, k2_res, k2_resOffset) =>
-      emitValDef(sym, s"_mm512_adc_epi32(${quote(v2)}, ${quote(k2)}, ${quote(v3)}, ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
-    case MM512_MASK_ADC_EPI32(v2, k1, k2, v3, k2_res, k2_resOffset) =>
-      emitValDef(sym, s"_mm512_mask_adc_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
-    case MM512_ADDN_PD(v2, v3) =>
+    case iDef@MM512_EXTSTORE_PS(mt, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extstore_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTSTORE_EPI32(mt, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extstore_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTSTORE_PD(mt, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extstore_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTSTORE_EPI64(mt, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extstore_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTSTORE_PS(mt, k, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extstore_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTSTORE_PD(mt, k, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extstore_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTSTORE_EPI32(mt, k, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extstore_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTSTORE_EPI64(mt, k, v, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extstore_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_STORENR_PS(mt, v, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_storenr_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
+    case iDef@MM512_STORENR_PD(mt, v, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_storenr_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
+    case iDef@MM512_STORENRNGO_PS(mt, v, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_storenrngo_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
+    case iDef@MM512_STORENRNGO_PD(mt, v, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_storenrngo_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v)});")
+    case iDef@MM512_ADC_EPI32(v2, k2, v3, k2_res, k2_resOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_adc_epi32(${quote(v2)}, ${quote(k2)}, ${quote(v3)}, (__mmask16 *) ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
+    case iDef@MM512_MASK_ADC_EPI32(v2, k1, k2, v3, k2_res, k2_resOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_adc_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, (__mmask16 *) ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
+    case iDef@MM512_ADDN_PD(v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_addn_pd(${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_ADDN_PD(src, k, v2, v3) =>
+    case iDef@MM512_MASK_ADDN_PD(src, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_addn_pd(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_ADDN_PS(v2, v3) =>
+    case iDef@MM512_ADDN_PS(v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_addn_ps(${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_ADDN_PS(src, k, v2, v3) =>
+    case iDef@MM512_MASK_ADDN_PS(src, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_addn_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_ADDN_ROUND_PD(v2, v3, rounding) =>
+    case iDef@MM512_ADDN_ROUND_PD(v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_addn_round_pd(${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_MASK_ADDN_ROUND_PD(src, k, v2, v3, rounding) =>
+    case iDef@MM512_MASK_ADDN_ROUND_PD(src, k, v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_addn_round_pd(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_ADDN_ROUND_PS(v2, v3, rounding) =>
+    case iDef@MM512_ADDN_ROUND_PS(v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_addn_round_ps(${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_MASK_ADDN_ROUND_PS(src, k, v2, v3, rounding) =>
+    case iDef@MM512_MASK_ADDN_ROUND_PS(src, k, v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_addn_round_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_SUBR_PD(v2, v3) =>
+    case iDef@MM512_SUBR_PD(v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_subr_pd(${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_SUBR_PD(src, k, v2, v3) =>
+    case iDef@MM512_MASK_SUBR_PD(src, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_subr_pd(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_SUBR_PS(v2, v3) =>
+    case iDef@MM512_SUBR_PS(v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_subr_ps(${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_SUBR_PS(src, k, v2, v3) =>
+    case iDef@MM512_MASK_SUBR_PS(src, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_subr_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_SUBR_ROUND_PD(v2, v3, rounding) =>
+    case iDef@MM512_SUBR_ROUND_PD(v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_subr_round_pd(${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_MASK_SUBR_ROUND_PD(src, k, v2, v3, rounding) =>
+    case iDef@MM512_MASK_SUBR_ROUND_PD(src, k, v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_subr_round_pd(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_SUBR_ROUND_PS(v2, v3, rounding) =>
+    case iDef@MM512_SUBR_ROUND_PS(v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_subr_round_ps(${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_MASK_SUBR_ROUND_PS(src, k, v2, v3, rounding) =>
+    case iDef@MM512_MASK_SUBR_ROUND_PS(src, k, v2, v3, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_subr_round_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(rounding)})")
-    case MM512_SUBR_EPI32(v2, v3) =>
+    case iDef@MM512_SUBR_EPI32(v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_subr_epi32(${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_SUBR_EPI32(src, k, v2, v3) =>
+    case iDef@MM512_MASK_SUBR_EPI32(src, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_subr_epi32(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_ADDSETC_EPI32(v2, v3, k2_res, k2_resOffset) =>
-      emitValDef(sym, s"_mm512_addsetc_epi32(${quote(v2)}, ${quote(v3)}, ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
-    case MM512_MASK_ADDSETC_EPI32(v2, k, k_old, v3, k2_res, k2_resOffset) =>
-      emitValDef(sym, s"_mm512_mask_addsetc_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
-    case MM512_ADDSETS_EPI32(v2, v3, sign, signOffset) =>
-      emitValDef(sym, s"_mm512_addsets_epi32(${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
-    case MM512_MASK_ADDSETS_EPI32(src, k, v2, v3, sign, signOffset) =>
-      emitValDef(sym, s"_mm512_mask_addsets_epi32(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
-    case MM512_ADDSETS_PS(v2, v3, sign, signOffset) =>
-      emitValDef(sym, s"_mm512_addsets_ps(${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
-    case MM512_MASK_ADDSETS_PS(src, k, v2, v3, sign, signOffset) =>
-      emitValDef(sym, s"_mm512_mask_addsets_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
-    case MM512_ADDSETS_ROUND_PS(v2, v3, sign, rounding, signOffset) =>
-      emitValDef(sym, s"_mm512_addsets_round_ps(${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))}, ${quote(rounding)})")
-    case MM512_MASK_ADDSETS_ROUND_PS(src, k, v2, v3, sign, rounding, signOffset) =>
-      emitValDef(sym, s"_mm512_mask_addsets_round_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))}, ${quote(rounding)})")
-    case MM512_SUBSETB_EPI32(v2, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_subsetb_epi32(${quote(v2)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_MASK_SUBSETB_EPI32(v2, k, k_old, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_mask_subsetb_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_SUBRSETB_EPI32(v2, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_subrsetb_epi32(${quote(v2)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_MASK_SUBRSETB_EPI32(v2, k, k_old, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_mask_subrsetb_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_SBB_EPI32(v2, k, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_sbb_epi32(${quote(v2)}, ${quote(k)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_MASK_SBB_EPI32(v2, k1, k2, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_mask_sbb_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_SBBR_EPI32(v2, k, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_sbbr_epi32(${quote(v2)}, ${quote(k)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_MASK_SBBR_EPI32(v2, k1, k2, v3, borrow, borrowOffset) =>
-      emitValDef(sym, s"_mm512_mask_sbbr_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
-    case MM512_CVT_ROUNDPD_PSLO(v2, rounding) =>
+    case iDef@MM512_ADDSETC_EPI32(v2, v3, k2_res, k2_resOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_addsetc_epi32(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
+    case iDef@MM512_MASK_ADDSETC_EPI32(v2, k, k_old, v3, k2_res, k2_resOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_addsetc_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, (__mmask16 *) ${quote(k2_res) + (if(k2_resOffset == Const(0)) "" else " + " + quote(k2_resOffset))})")
+    case iDef@MM512_ADDSETS_EPI32(v2, v3, sign, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_addsets_epi32(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
+    case iDef@MM512_MASK_ADDSETS_EPI32(src, k, v2, v3, sign, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_addsets_epi32(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
+    case iDef@MM512_ADDSETS_PS(v2, v3, sign, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_addsets_ps(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
+    case iDef@MM512_MASK_ADDSETS_PS(src, k, v2, v3, sign, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_addsets_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))})")
+    case iDef@MM512_ADDSETS_ROUND_PS(v2, v3, sign, rounding, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_addsets_round_ps(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))}, ${quote(rounding)})")
+    case iDef@MM512_MASK_ADDSETS_ROUND_PS(src, k, v2, v3, sign, rounding, signOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_addsets_round_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(sign) + (if(signOffset == Const(0)) "" else " + " + quote(signOffset))}, ${quote(rounding)})")
+    case iDef@MM512_SUBSETB_EPI32(v2, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_subsetb_epi32(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_MASK_SUBSETB_EPI32(v2, k, k_old, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_subsetb_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_SUBRSETB_EPI32(v2, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_subrsetb_epi32(${quote(v2)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_MASK_SUBRSETB_EPI32(v2, k, k_old, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_subrsetb_epi32(${quote(v2)}, ${quote(k)}, ${quote(k_old)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_SBB_EPI32(v2, k, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_sbb_epi32(${quote(v2)}, ${quote(k)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_MASK_SBB_EPI32(v2, k1, k2, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_sbb_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_SBBR_EPI32(v2, k, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_sbbr_epi32(${quote(v2)}, ${quote(k)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_MASK_SBBR_EPI32(v2, k1, k2, v3, borrow, borrowOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_sbbr_epi32(${quote(v2)}, ${quote(k1)}, ${quote(k2)}, ${quote(v3)}, (__mmask16 *) ${quote(borrow) + (if(borrowOffset == Const(0)) "" else " + " + quote(borrowOffset))})")
+    case iDef@MM512_CVT_ROUNDPD_PSLO(v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundpd_pslo(${quote(v2)}, ${quote(rounding)})")
-    case MM512_MASK_CVT_ROUNDPD_PSLO(src, k, v2, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDPD_PSLO(src, k, v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundpd_pslo(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(rounding)})")
-    case MM512_CVTFXPNT_ROUNDPD_EPU32LO(v2, rounding) =>
+    case iDef@MM512_CVTFXPNT_ROUNDPD_EPU32LO(v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_roundpd_epu32lo(${quote(v2)}, ${quote(rounding)})")
-    case MM512_MASK_CVTFXPNT_ROUNDPD_EPU32LO(src, k, v2, rounding) =>
+    case iDef@MM512_MASK_CVTFXPNT_ROUNDPD_EPU32LO(src, k, v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtfxpnt_roundpd_epu32lo(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(rounding)})")
-    case MM512_CVTFXPNT_ROUND_ADJUSTPS_EPI32(v2, rounding, expadj) =>
+    case iDef@MM512_CVTFXPNT_ROUND_ADJUSTPS_EPI32(v2, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_round_adjustps_epi32(${quote(v2)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_CVTFXPNT_ROUND_ADJUSTPS_EPU32(v2, rounding, expadj) =>
+    case iDef@MM512_CVTFXPNT_ROUND_ADJUSTPS_EPU32(v2, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_round_adjustps_epu32(${quote(v2)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_CVTFXPNT_ROUND_ADJUSTEPU32_PS(v2, rounding, expadj) =>
+    case iDef@MM512_CVTFXPNT_ROUND_ADJUSTEPU32_PS(v2, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_round_adjustepu32_ps(${quote(v2)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_MASK_CVTFXPNT_ROUND_ADJUSTEPU32_PS(src, k, v2, rounding, expadj) =>
+    case iDef@MM512_MASK_CVTFXPNT_ROUND_ADJUSTEPU32_PS(src, k, v2, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtfxpnt_round_adjustepu32_ps(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_EXP223_PS(v2) =>
+    case iDef@MM512_EXP223_PS(v2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_exp223_ps(${quote(v2)})")
-    case MM512_MASK_EXP223_PS(src, k, v2) =>
+    case iDef@MM512_MASK_EXP223_PS(src, k, v2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_exp223_ps(${quote(src)}, ${quote(k)}, ${quote(v2)})")
-    case MM512_FIXUPNAN_PD(v1, v2, v3) =>
+    case iDef@MM512_FIXUPNAN_PD(v1, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fixupnan_pd(${quote(v1)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_FIXUPNAN_PD(v1, k, v2, v3) =>
+    case iDef@MM512_MASK_FIXUPNAN_PD(v1, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fixupnan_pd(${quote(v1)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_FIXUPNAN_PS(v1, v2, v3) =>
+    case iDef@MM512_FIXUPNAN_PS(v1, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fixupnan_ps(${quote(v1)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_MASK_FIXUPNAN_PS(v1, k, v2, v3) =>
+    case iDef@MM512_MASK_FIXUPNAN_PS(v1, k, v2, v3) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fixupnan_ps(${quote(v1)}, ${quote(k)}, ${quote(v2)}, ${quote(v3)})")
-    case MM512_EXTLOADUNPACKHI_EPI32(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpackhi_epi32(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKHI_EPI32(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpackhi_epi32(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKLO_EPI32(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpacklo_epi32(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKLO_EPI32(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpacklo_epi32(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKHI_EPI64(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpackhi_epi64(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKHI_EPI64(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpackhi_epi64(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKLO_EPI64(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpacklo_epi64(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKLO_EPI64(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpacklo_epi64(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKHI_PS(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpackhi_ps(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKHI_PS(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpackhi_ps(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKLO_PS(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpacklo_ps(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKLO_PS(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpacklo_ps(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKHI_PD(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpackhi_pd(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKHI_PD(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpackhi_pd(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTLOADUNPACKLO_PD(src, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_extloadunpacklo_pd(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_MASK_EXTLOADUNPACKLO_PD(src, k, mt, conv, hint, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_extloadunpacklo_pd(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
-    case MM512_EXTPACKSTOREHI_EPI32(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorehi_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTOREHI_EPI32(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorehi_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTORELO_EPI32(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorelo_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTORELO_EPI32(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorelo_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTOREHI_EPI64(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorehi_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTOREHI_EPI64(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorehi_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTORELO_EPI64(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorelo_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTORELO_EPI64(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorelo_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTOREHI_PS(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorehi_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTOREHI_PS(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorehi_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTORELO_PS(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorelo_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTORELO_PS(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorelo_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTOREHI_PD(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorehi_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTOREHI_PD(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorehi_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_EXTPACKSTORELO_PD(mt, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_extpackstorelo_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_MASK_EXTPACKSTORELO_PD(mt, k, v1, conv, hint, mtOffset) =>
-      stream.println(s"_mm512_mask_extpackstorelo_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
-    case MM512_I32LOSCATTER_EPI64(mv, index, v1, scale, mvOffset) =>
-      stream.println(s"_mm512_i32loscatter_epi64(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
-    case MM512_MASK_I32LOSCATTER_EPI64(mv, k, index, v1, scale, mvOffset) =>
-      stream.println(s"_mm512_mask_i32loscatter_epi64(${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
-    case MM512_LOADUNPACKHI_EPI32(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpackhi_epi32(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKHI_EPI32(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpackhi_epi32(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKLO_EPI32(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpacklo_epi32(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKLO_EPI32(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpacklo_epi32(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKHI_EPI64(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpackhi_epi64(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKHI_EPI64(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpackhi_epi64(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKLO_EPI64(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpacklo_epi64(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKLO_EPI64(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpacklo_epi64(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKHI_PS(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpackhi_ps(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKHI_PS(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpackhi_ps(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKLO_PS(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpacklo_ps(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKLO_PS(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpacklo_ps(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKHI_PD(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpackhi_pd(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKHI_PD(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpackhi_pd(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_LOADUNPACKLO_PD(src, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_loadunpacklo_pd(${quote(src)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_MASK_LOADUNPACKLO_PD(src, k, mt, mtOffset) =>
-      emitValDef(sym, s"_mm512_mask_loadunpacklo_pd(${quote(src)}, ${quote(k)}, ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
-    case MM512_PACKSTOREHI_EPI32(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorehi_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTOREHI_EPI32(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorehi_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTORELO_EPI32(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorelo_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTORELO_EPI32(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorelo_epi32(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTOREHI_EPI64(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorehi_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTOREHI_EPI64(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorehi_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTORELO_EPI64(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorelo_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTORELO_EPI64(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorelo_epi64(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTOREHI_PS(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorehi_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTOREHI_PS(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorehi_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTORELO_PS(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorelo_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTORELO_PS(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorelo_ps(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTOREHI_PD(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorehi_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTOREHI_PD(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorehi_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM512_PACKSTORELO_PD(mt, v1, mtOffset) =>
-      stream.println(s"_mm512_packstorelo_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
-    case MM512_MASK_PACKSTORELO_PD(mt, k, v1, mtOffset) =>
-      stream.println(s"_mm512_mask_packstorelo_pd(${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
-    case MM_COUNTBITS_32(r1) =>
+    case iDef@MM512_EXTLOADUNPACKHI_EPI32(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpackhi_epi32(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKHI_EPI32(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpackhi_epi32(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKLO_EPI32(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpacklo_epi32(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKLO_EPI32(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpacklo_epi32(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKHI_EPI64(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpackhi_epi64(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKHI_EPI64(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpackhi_epi64(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKLO_EPI64(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpacklo_epi64(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKLO_EPI64(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpacklo_epi64(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKHI_PS(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpackhi_ps(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKHI_PS(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpackhi_ps(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKLO_PS(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpacklo_ps(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKLO_PS(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpacklo_ps(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKHI_PD(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpackhi_pd(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKHI_PD(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpackhi_pd(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTLOADUNPACKLO_PD(src, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_extloadunpacklo_pd(${quote(src)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_MASK_EXTLOADUNPACKLO_PD(src, k, mt, conv, hint, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_extloadunpacklo_pd(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(conv)}, ${quote(hint)})")
+    case iDef@MM512_EXTPACKSTOREHI_EPI32(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorehi_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTOREHI_EPI32(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorehi_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTORELO_EPI32(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorelo_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTORELO_EPI32(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorelo_epi32((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTOREHI_EPI64(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorehi_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTOREHI_EPI64(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorehi_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTORELO_EPI64(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorelo_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTORELO_EPI64(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorelo_epi64((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTOREHI_PS(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorehi_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTOREHI_PS(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorehi_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTORELO_PS(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorelo_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTORELO_PS(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorelo_ps((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTOREHI_PD(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorehi_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTOREHI_PD(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorehi_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_EXTPACKSTORELO_PD(mt, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_extpackstorelo_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_MASK_EXTPACKSTORELO_PD(mt, k, v1, conv, hint, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_extpackstorelo_pd((void *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)}, ${quote(conv)}, ${quote(hint)});")
+    case iDef@MM512_I32LOSCATTER_EPI64(mv, index, v1, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_i32loscatter_epi64((void*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
+    case iDef@MM512_MASK_I32LOSCATTER_EPI64(mv, k, index, v1, scale, mvOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_i32loscatter_epi64((void*) ${quote(mv) + (if(mvOffset == Const(0)) "" else " + " + quote(mvOffset))}, ${quote(k)}, ${quote(index)}, ${quote(v1)}, ${quote(scale)});")
+    case iDef@MM512_LOADUNPACKHI_EPI32(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpackhi_epi32(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKHI_EPI32(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpackhi_epi32(${quote(src)}, ${quote(k)}, (void const *) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKLO_EPI32(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpacklo_epi32(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKLO_EPI32(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpacklo_epi32(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKHI_EPI64(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpackhi_epi64(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKHI_EPI64(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpackhi_epi64(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKLO_EPI64(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpacklo_epi64(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKLO_EPI64(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpacklo_epi64(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKHI_PS(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpackhi_ps(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKHI_PS(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpackhi_ps(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKLO_PS(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpacklo_ps(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKLO_PS(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpacklo_ps(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKHI_PD(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpackhi_pd(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKHI_PD(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpackhi_pd(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_LOADUNPACKLO_PD(src, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_loadunpacklo_pd(${quote(src)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_MASK_LOADUNPACKLO_PD(src, k, mt, mtOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm512_mask_loadunpacklo_pd(${quote(src)}, ${quote(k)}, (void const*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))})")
+    case iDef@MM512_PACKSTOREHI_EPI32(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorehi_epi32((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTOREHI_EPI32(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorehi_epi32((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTORELO_EPI32(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorelo_epi32((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTORELO_EPI32(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorelo_epi32((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTOREHI_EPI64(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorehi_epi64((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTOREHI_EPI64(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorehi_epi64((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTORELO_EPI64(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorelo_epi64((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTORELO_EPI64(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorelo_epi64((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTOREHI_PS(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorehi_ps((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTOREHI_PS(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorehi_ps((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTORELO_PS(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorelo_ps((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTORELO_PS(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorelo_ps((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTOREHI_PD(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorehi_pd((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTOREHI_PD(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorehi_pd((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM512_PACKSTORELO_PD(mt, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_packstorelo_pd((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(v1)});")
+    case iDef@MM512_MASK_PACKSTORELO_PD(mt, k, v1, mtOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm512_mask_packstorelo_pd((void*) ${quote(mt) + (if(mtOffset == Const(0)) "" else " + " + quote(mtOffset))}, ${quote(k)}, ${quote(v1)});")
+    case iDef@MM_COUNTBITS_32(r1) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_countbits_32(${quote(r1)})")
-    case MM_COUNTBITS_64(r1) =>
+    case iDef@MM_COUNTBITS_64(r1) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_countbits_64(${quote(r1)})")
-    case MM512_KMOVLHB(k1, k2) =>
+    case iDef@MM512_KMOVLHB(k1, k2) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_kmovlhb(${quote(k1)}, ${quote(k2)})")
-    case MM512_CVTFXPNT_ROUNDPD_EPI32LO(v2, rounding) =>
+    case iDef@MM512_CVTFXPNT_ROUNDPD_EPI32LO(v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_roundpd_epi32lo(${quote(v2)}, ${quote(rounding)})")
-    case MM512_MASK_CVTFXPNT_ROUNDPD_EPI32LO(src, k, v2, rounding) =>
+    case iDef@MM512_MASK_CVTFXPNT_ROUNDPD_EPI32LO(src, k, v2, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtfxpnt_roundpd_epi32lo(${quote(src)}, ${quote(k)}, ${quote(v2)}, ${quote(rounding)})")
-    case MM512_CVTFXPNT_ROUND_ADJUSTEPI32_PS(v2, rounding, expadj) =>
+    case iDef@MM512_CVTFXPNT_ROUND_ADJUSTEPI32_PS(v2, rounding, expadj) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtfxpnt_round_adjustepi32_ps(${quote(v2)}, ${quote(rounding)}, ${quote(expadj)})")
-    case MM512_LOG2AE23_PS(a) =>
+    case iDef@MM512_LOG2AE23_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_log2ae23_ps(${quote(a)})")
-    case MM512_MASK_LOG2AE23_PS(src, k, a) =>
+    case iDef@MM512_MASK_LOG2AE23_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_log2ae23_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_FMADD_EPI32(a, b, c) =>
+    case iDef@MM512_FMADD_EPI32(a, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fmadd_epi32(${quote(a)}, ${quote(b)}, ${quote(c)})")
-    case MM512_MASK_FMADD_EPI32(a, k, b, c) =>
+    case iDef@MM512_MASK_FMADD_EPI32(a, k, b, c) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fmadd_epi32(${quote(a)}, ${quote(k)}, ${quote(b)}, ${quote(c)})")
-    case MM512_MASK3_FMADD_EPI32(a, b, c, k) =>
+    case iDef@MM512_MASK3_FMADD_EPI32(a, b, c, k) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask3_fmadd_epi32(${quote(a)}, ${quote(b)}, ${quote(c)}, ${quote(k)})")
-    case MM512_FMADD233_EPI32(a, b) =>
+    case iDef@MM512_FMADD233_EPI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fmadd233_epi32(${quote(a)}, ${quote(b)})")
-    case MM512_MASK_FMADD233_EPI32(src, k, a, b) =>
+    case iDef@MM512_MASK_FMADD233_EPI32(src, k, a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fmadd233_epi32(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)})")
-    case MM512_FMADD233_ROUND_PS(a, b, rounding) =>
+    case iDef@MM512_FMADD233_ROUND_PS(a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_fmadd233_round_ps(${quote(a)}, ${quote(b)}, ${quote(rounding)})")
-    case MM512_MASK_FMADD233_ROUND_PS(src, k, a, b, rounding) =>
+    case iDef@MM512_MASK_FMADD233_ROUND_PS(src, k, a, b, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_fmadd233_round_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(b)}, ${quote(rounding)})")
     case _ => super.emitNode(sym, rhs)
   }

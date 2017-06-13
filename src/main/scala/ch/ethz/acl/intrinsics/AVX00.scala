@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -7,7 +33,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX00 extends IntrinsicsBase {
+trait AVX00 extends IntrinsicsBase {
   /**
    * Add packed double-precision (64-bit) floating-point elements in "a" and "b",
    * and store the results in "dst".
@@ -3828,365 +3854,541 @@ protected trait AVX00 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM256_UNDEFINED_PS (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM256_UNDEFINED_PD (), u, es) =>
       reflectMirrored(Reflect(MM256_UNDEFINED_PD (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX00 extends CGenIntrinsics {
+trait CGenAVX00 extends CGenIntrinsics {
 
   val IR: AVX
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM256_ADD_PD(a, b) =>
+    case iDef@MM256_ADD_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_add_pd(${quote(a)}, ${quote(b)})")
-    case MM256_ADD_PS(a, b) =>
+    case iDef@MM256_ADD_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_add_ps(${quote(a)}, ${quote(b)})")
-    case MM256_ADDSUB_PD(a, b) =>
+    case iDef@MM256_ADDSUB_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_addsub_pd(${quote(a)}, ${quote(b)})")
-    case MM256_ADDSUB_PS(a, b) =>
+    case iDef@MM256_ADDSUB_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_addsub_ps(${quote(a)}, ${quote(b)})")
-    case MM256_AND_PD(a, b) =>
+    case iDef@MM256_AND_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_and_pd(${quote(a)}, ${quote(b)})")
-    case MM256_AND_PS(a, b) =>
+    case iDef@MM256_AND_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_and_ps(${quote(a)}, ${quote(b)})")
-    case MM256_ANDNOT_PD(a, b) =>
+    case iDef@MM256_ANDNOT_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_andnot_pd(${quote(a)}, ${quote(b)})")
-    case MM256_ANDNOT_PS(a, b) =>
+    case iDef@MM256_ANDNOT_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_andnot_ps(${quote(a)}, ${quote(b)})")
-    case MM256_BLEND_PD(a, b, imm8) =>
+    case iDef@MM256_BLEND_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_blend_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_BLEND_PS(a, b, imm8) =>
+    case iDef@MM256_BLEND_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_blend_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_BLENDV_PD(a, b, mask) =>
+    case iDef@MM256_BLENDV_PD(a, b, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_blendv_pd(${quote(a)}, ${quote(b)}, ${quote(mask)})")
-    case MM256_BLENDV_PS(a, b, mask) =>
+    case iDef@MM256_BLENDV_PS(a, b, mask) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_blendv_ps(${quote(a)}, ${quote(b)}, ${quote(mask)})")
-    case MM256_DIV_PD(a, b) =>
+    case iDef@MM256_DIV_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_div_pd(${quote(a)}, ${quote(b)})")
-    case MM256_DIV_PS(a, b) =>
+    case iDef@MM256_DIV_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_div_ps(${quote(a)}, ${quote(b)})")
-    case MM256_DP_PS(a, b, imm8) =>
+    case iDef@MM256_DP_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_dp_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_HADD_PD(a, b) =>
+    case iDef@MM256_HADD_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_hadd_pd(${quote(a)}, ${quote(b)})")
-    case MM256_HADD_PS(a, b) =>
+    case iDef@MM256_HADD_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_hadd_ps(${quote(a)}, ${quote(b)})")
-    case MM256_HSUB_PD(a, b) =>
+    case iDef@MM256_HSUB_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_hsub_pd(${quote(a)}, ${quote(b)})")
-    case MM256_HSUB_PS(a, b) =>
+    case iDef@MM256_HSUB_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_hsub_ps(${quote(a)}, ${quote(b)})")
-    case MM256_MAX_PD(a, b) =>
+    case iDef@MM256_MAX_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_max_pd(${quote(a)}, ${quote(b)})")
-    case MM256_MAX_PS(a, b) =>
+    case iDef@MM256_MAX_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_max_ps(${quote(a)}, ${quote(b)})")
-    case MM256_MIN_PD(a, b) =>
+    case iDef@MM256_MIN_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_min_pd(${quote(a)}, ${quote(b)})")
-    case MM256_MIN_PS(a, b) =>
+    case iDef@MM256_MIN_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_min_ps(${quote(a)}, ${quote(b)})")
-    case MM256_MUL_PD(a, b) =>
+    case iDef@MM256_MUL_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mul_pd(${quote(a)}, ${quote(b)})")
-    case MM256_MUL_PS(a, b) =>
+    case iDef@MM256_MUL_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mul_ps(${quote(a)}, ${quote(b)})")
-    case MM256_OR_PD(a, b) =>
+    case iDef@MM256_OR_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_or_pd(${quote(a)}, ${quote(b)})")
-    case MM256_OR_PS(a, b) =>
+    case iDef@MM256_OR_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_or_ps(${quote(a)}, ${quote(b)})")
-    case MM256_SHUFFLE_PD(a, b, imm8) =>
+    case iDef@MM256_SHUFFLE_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_shuffle_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_SHUFFLE_PS(a, b, imm8) =>
+    case iDef@MM256_SHUFFLE_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_shuffle_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_SUB_PD(a, b) =>
+    case iDef@MM256_SUB_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_sub_pd(${quote(a)}, ${quote(b)})")
-    case MM256_SUB_PS(a, b) =>
+    case iDef@MM256_SUB_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_sub_ps(${quote(a)}, ${quote(b)})")
-    case MM256_XOR_PD(a, b) =>
+    case iDef@MM256_XOR_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_xor_pd(${quote(a)}, ${quote(b)})")
-    case MM256_XOR_PS(a, b) =>
+    case iDef@MM256_XOR_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_xor_ps(${quote(a)}, ${quote(b)})")
-    case MM_CMP_PD(a, b, imm8) =>
+    case iDef@MM_CMP_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_CMP_PD(a, b, imm8) =>
+    case iDef@MM256_CMP_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cmp_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMP_PS(a, b, imm8) =>
+    case iDef@MM_CMP_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_CMP_PS(a, b, imm8) =>
+    case iDef@MM256_CMP_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cmp_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMP_SD(a, b, imm8) =>
+    case iDef@MM_CMP_SD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_sd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMP_SS(a, b, imm8) =>
+    case iDef@MM_CMP_SS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_ss(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_CVTEPI32_PD(a) =>
+    case iDef@MM256_CVTEPI32_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi32_pd(${quote(a)})")
-    case MM256_CVTEPI32_PS(a) =>
+    case iDef@MM256_CVTEPI32_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi32_ps(${quote(a)})")
-    case MM256_CVTPD_PS(a) =>
+    case iDef@MM256_CVTPD_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtpd_ps(${quote(a)})")
-    case MM256_CVTPS_EPI32(a) =>
+    case iDef@MM256_CVTPS_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_epi32(${quote(a)})")
-    case MM256_CVTPS_PD(a) =>
+    case iDef@MM256_CVTPS_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_pd(${quote(a)})")
-    case MM256_CVTTPD_EPI32(a) =>
+    case iDef@MM256_CVTTPD_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvttpd_epi32(${quote(a)})")
-    case MM256_CVTPD_EPI32(a) =>
+    case iDef@MM256_CVTPD_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtpd_epi32(${quote(a)})")
-    case MM256_CVTTPS_EPI32(a) =>
+    case iDef@MM256_CVTTPS_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvttps_epi32(${quote(a)})")
-    case MM256_EXTRACTF128_PS(a, imm8) =>
+    case iDef@MM256_EXTRACTF128_PS(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extractf128_ps(${quote(a)}, ${quote(imm8)})")
-    case MM256_EXTRACTF128_PD(a, imm8) =>
+    case iDef@MM256_EXTRACTF128_PD(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extractf128_pd(${quote(a)}, ${quote(imm8)})")
-    case MM256_EXTRACTF128_SI256(a, imm8) =>
+    case iDef@MM256_EXTRACTF128_SI256(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extractf128_si256(${quote(a)}, ${quote(imm8)})")
-    case MM256_EXTRACT_EPI8(a, index) =>
+    case iDef@MM256_EXTRACT_EPI8(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extract_epi8(${quote(a)}, ${quote(index)})")
-    case MM256_EXTRACT_EPI16(a, index) =>
+    case iDef@MM256_EXTRACT_EPI16(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extract_epi16(${quote(a)}, ${quote(index)})")
-    case MM256_EXTRACT_EPI32(a, index) =>
+    case iDef@MM256_EXTRACT_EPI32(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extract_epi32(${quote(a)}, ${quote(index)})")
-    case MM256_EXTRACT_EPI64(a, index) =>
+    case iDef@MM256_EXTRACT_EPI64(a, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_extract_epi64(${quote(a)}, ${quote(index)})")
-    case MM256_ZEROALL() =>
+    case iDef@MM256_ZEROALL() =>
+      headers += iDef.header
       stream.println(s"_mm256_zeroall();")
-    case MM256_ZEROUPPER() =>
+    case iDef@MM256_ZEROUPPER() =>
+      headers += iDef.header
       stream.println(s"_mm256_zeroupper();")
-    case MM256_PERMUTEVAR_PS(a, b) =>
+    case iDef@MM256_PERMUTEVAR_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permutevar_ps(${quote(a)}, ${quote(b)})")
-    case MM_PERMUTEVAR_PS(a, b) =>
+    case iDef@MM_PERMUTEVAR_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permutevar_ps(${quote(a)}, ${quote(b)})")
-    case MM256_PERMUTE_PS(a, imm8) =>
+    case iDef@MM256_PERMUTE_PS(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permute_ps(${quote(a)}, ${quote(imm8)})")
-    case MM_PERMUTE_PS(a, imm8) =>
+    case iDef@MM_PERMUTE_PS(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permute_ps(${quote(a)}, ${quote(imm8)})")
-    case MM256_PERMUTEVAR_PD(a, b) =>
+    case iDef@MM256_PERMUTEVAR_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permutevar_pd(${quote(a)}, ${quote(b)})")
-    case MM_PERMUTEVAR_PD(a, b) =>
+    case iDef@MM_PERMUTEVAR_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permutevar_pd(${quote(a)}, ${quote(b)})")
-    case MM256_PERMUTE_PD(a, imm8) =>
+    case iDef@MM256_PERMUTE_PD(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permute_pd(${quote(a)}, ${quote(imm8)})")
-    case MM_PERMUTE_PD(a, imm8) =>
+    case iDef@MM_PERMUTE_PD(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_permute_pd(${quote(a)}, ${quote(imm8)})")
-    case MM256_PERMUTE2F128_PS(a, b, imm8) =>
+    case iDef@MM256_PERMUTE2F128_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permute2f128_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_PERMUTE2F128_PD(a, b, imm8) =>
+    case iDef@MM256_PERMUTE2F128_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permute2f128_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_PERMUTE2F128_SI256(a, b, imm8) =>
+    case iDef@MM256_PERMUTE2F128_SI256(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_permute2f128_si256(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_BROADCAST_SS(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_broadcast_ss(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM_BROADCAST_SS(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_broadcast_ss(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_BROADCAST_SD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_broadcast_sd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_BROADCAST_PS(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_broadcast_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_BROADCAST_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_broadcast_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_INSERTF128_PS(a, b, imm8) =>
+    case iDef@MM256_BROADCAST_SS(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_broadcast_ss((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM_BROADCAST_SS(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_broadcast_ss((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_BROADCAST_SD(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_broadcast_sd((double const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_BROADCAST_PS(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_broadcast_ps((__m128 const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_BROADCAST_PD(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_broadcast_pd((__m128d const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_INSERTF128_PS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insertf128_ps(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_INSERTF128_PD(a, b, imm8) =>
+    case iDef@MM256_INSERTF128_PD(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insertf128_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_INSERTF128_SI256(a, b, imm8) =>
+    case iDef@MM256_INSERTF128_SI256(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insertf128_si256(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_INSERT_EPI8(a, i, index) =>
+    case iDef@MM256_INSERT_EPI8(a, i, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insert_epi8(${quote(a)}, ${quote(i)}, ${quote(index)})")
-    case MM256_INSERT_EPI16(a, i, index) =>
+    case iDef@MM256_INSERT_EPI16(a, i, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insert_epi16(${quote(a)}, ${quote(i)}, ${quote(index)})")
-    case MM256_INSERT_EPI32(a, i, index) =>
+    case iDef@MM256_INSERT_EPI32(a, i, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insert_epi32(${quote(a)}, ${quote(i)}, ${quote(index)})")
-    case MM256_INSERT_EPI64(a, i, index) =>
+    case iDef@MM256_INSERT_EPI64(a, i, index) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_insert_epi64(${quote(a)}, ${quote(i)}, ${quote(index)})")
-    case MM256_LOAD_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_load_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STORE_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_store_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_LOAD_PS(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_load_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STORE_PS(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_store_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_LOADU_PD(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_loadu_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STOREU_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_storeu_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_LOADU_PS(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_loadu_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STOREU_PS(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_storeu_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_LOAD_SI256(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_load_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STORE_SI256(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_store_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_LOADU_SI256(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_loadu_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STOREU_SI256(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_storeu_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_MASKLOAD_PD(mem_addr, mask, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_maskload_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
-    case MM256_MASKSTORE_PD(mem_addr, mask, a, mem_addrOffset) =>
-      stream.println(s"_mm256_maskstore_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
-    case MM_MASKLOAD_PD(mem_addr, mask, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_maskload_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
-    case MM_MASKSTORE_PD(mem_addr, mask, a, mem_addrOffset) =>
-      stream.println(s"_mm_maskstore_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
-    case MM256_MASKLOAD_PS(mem_addr, mask, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_maskload_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
-    case MM256_MASKSTORE_PS(mem_addr, mask, a, mem_addrOffset) =>
-      stream.println(s"_mm256_maskstore_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
-    case MM_MASKLOAD_PS(mem_addr, mask, mem_addrOffset) =>
-      emitValDef(sym, s"_mm_maskload_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
-    case MM_MASKSTORE_PS(mem_addr, mask, a, mem_addrOffset) =>
-      stream.println(s"_mm_maskstore_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
-    case MM256_MOVEHDUP_PS(a) =>
+    case iDef@MM256_LOAD_PD(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_load_pd((double const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STORE_PD(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_store_pd((double *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOAD_PS(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_load_ps((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STORE_PS(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_store_ps((float *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOADU_PD(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu_pd((double const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STOREU_PD(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu_pd((double *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOADU_PS(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu_ps((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STOREU_PS(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu_ps((float *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOAD_SI256(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_load_si256((__m256i const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STORE_SI256(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_store_si256((__m256i *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOADU_SI256(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu_si256((__m256i const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STOREU_SI256(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu_si256((__m256i *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_MASKLOAD_PD(mem_addr, mask, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_maskload_pd((double const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
+    case iDef@MM256_MASKSTORE_PD(mem_addr, mask, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_maskstore_pd((double *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
+    case iDef@MM_MASKLOAD_PD(mem_addr, mask, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_maskload_pd((double const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
+    case iDef@MM_MASKSTORE_PD(mem_addr, mask, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_maskstore_pd((double *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
+    case iDef@MM256_MASKLOAD_PS(mem_addr, mask, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_maskload_ps((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
+    case iDef@MM256_MASKSTORE_PS(mem_addr, mask, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_maskstore_ps((float *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
+    case iDef@MM_MASKLOAD_PS(mem_addr, mask, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_maskload_ps((float const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)})")
+    case iDef@MM_MASKSTORE_PS(mem_addr, mask, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_maskstore_ps((float *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(mask)}, ${quote(a)});")
+    case iDef@MM256_MOVEHDUP_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_movehdup_ps(${quote(a)})")
-    case MM256_MOVELDUP_PS(a) =>
+    case iDef@MM256_MOVELDUP_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_moveldup_ps(${quote(a)})")
-    case MM256_MOVEDUP_PD(a) =>
+    case iDef@MM256_MOVEDUP_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_movedup_pd(${quote(a)})")
-    case MM256_LDDQU_SI256(mem_addr, mem_addrOffset) =>
-      emitValDef(sym, s"_mm256_lddqu_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case MM256_STREAM_SI256(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_stream_si256(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_STREAM_PD(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_stream_pd(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_STREAM_PS(mem_addr, a, mem_addrOffset) =>
-      stream.println(s"_mm256_stream_ps(${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case MM256_RCP_PS(a) =>
+    case iDef@MM256_LDDQU_SI256(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_lddqu_si256((__m256i const *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+    case iDef@MM256_STREAM_SI256(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_stream_si256((__m256i *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_STREAM_PD(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_stream_pd((double *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_STREAM_PS(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_stream_ps((float *) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+    case iDef@MM256_RCP_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_rcp_ps(${quote(a)})")
-    case MM256_RSQRT_PS(a) =>
+    case iDef@MM256_RSQRT_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_rsqrt_ps(${quote(a)})")
-    case MM256_SQRT_PD(a) =>
+    case iDef@MM256_SQRT_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_sqrt_pd(${quote(a)})")
-    case MM256_SQRT_PS(a) =>
+    case iDef@MM256_SQRT_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_sqrt_ps(${quote(a)})")
-    case MM256_ROUND_PD(a, rounding) =>
+    case iDef@MM256_ROUND_PD(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_round_pd(${quote(a)}, ${quote(rounding)})")
-    case MM256_ROUND_PS(a, rounding) =>
+    case iDef@MM256_ROUND_PS(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_round_ps(${quote(a)}, ${quote(rounding)})")
-    case MM256_UNPACKHI_PD(a, b) =>
+    case iDef@MM256_UNPACKHI_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_unpackhi_pd(${quote(a)}, ${quote(b)})")
-    case MM256_UNPACKHI_PS(a, b) =>
+    case iDef@MM256_UNPACKHI_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_unpackhi_ps(${quote(a)}, ${quote(b)})")
-    case MM256_UNPACKLO_PD(a, b) =>
+    case iDef@MM256_UNPACKLO_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_unpacklo_pd(${quote(a)}, ${quote(b)})")
-    case MM256_UNPACKLO_PS(a, b) =>
+    case iDef@MM256_UNPACKLO_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_unpacklo_ps(${quote(a)}, ${quote(b)})")
-    case MM256_TESTZ_SI256(a, b) =>
+    case iDef@MM256_TESTZ_SI256(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testz_si256(${quote(a)}, ${quote(b)})")
-    case MM256_TESTC_SI256(a, b) =>
+    case iDef@MM256_TESTC_SI256(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testc_si256(${quote(a)}, ${quote(b)})")
-    case MM256_TESTNZC_SI256(a, b) =>
+    case iDef@MM256_TESTNZC_SI256(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testnzc_si256(${quote(a)}, ${quote(b)})")
-    case MM256_TESTZ_PD(a, b) =>
+    case iDef@MM256_TESTZ_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testz_pd(${quote(a)}, ${quote(b)})")
-    case MM256_TESTC_PD(a, b) =>
+    case iDef@MM256_TESTC_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testc_pd(${quote(a)}, ${quote(b)})")
-    case MM256_TESTNZC_PD(a, b) =>
+    case iDef@MM256_TESTNZC_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testnzc_pd(${quote(a)}, ${quote(b)})")
-    case MM_TESTZ_PD(a, b) =>
+    case iDef@MM_TESTZ_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testz_pd(${quote(a)}, ${quote(b)})")
-    case MM_TESTC_PD(a, b) =>
+    case iDef@MM_TESTC_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testc_pd(${quote(a)}, ${quote(b)})")
-    case MM_TESTNZC_PD(a, b) =>
+    case iDef@MM_TESTNZC_PD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testnzc_pd(${quote(a)}, ${quote(b)})")
-    case MM256_TESTZ_PS(a, b) =>
+    case iDef@MM256_TESTZ_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testz_ps(${quote(a)}, ${quote(b)})")
-    case MM256_TESTC_PS(a, b) =>
+    case iDef@MM256_TESTC_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testc_ps(${quote(a)}, ${quote(b)})")
-    case MM256_TESTNZC_PS(a, b) =>
+    case iDef@MM256_TESTNZC_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_testnzc_ps(${quote(a)}, ${quote(b)})")
-    case MM_TESTZ_PS(a, b) =>
+    case iDef@MM_TESTZ_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testz_ps(${quote(a)}, ${quote(b)})")
-    case MM_TESTC_PS(a, b) =>
+    case iDef@MM_TESTC_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testc_ps(${quote(a)}, ${quote(b)})")
-    case MM_TESTNZC_PS(a, b) =>
+    case iDef@MM_TESTNZC_PS(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_testnzc_ps(${quote(a)}, ${quote(b)})")
-    case MM256_MOVEMASK_PD(a) =>
+    case iDef@MM256_MOVEMASK_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_movemask_pd(${quote(a)})")
-    case MM256_MOVEMASK_PS(a) =>
+    case iDef@MM256_MOVEMASK_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_movemask_ps(${quote(a)})")
-    case MM256_SETZERO_PD() =>
+    case iDef@MM256_SETZERO_PD() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setzero_pd()")
-    case MM256_SETZERO_PS() =>
+    case iDef@MM256_SETZERO_PS() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setzero_ps()")
-    case MM256_SETZERO_SI256() =>
+    case iDef@MM256_SETZERO_SI256() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setzero_si256()")
-    case MM256_SET_PD(e3, e2, e1, e0) =>
+    case iDef@MM256_SET_PD(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_pd(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET_PS(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SET_PS(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_ps(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET_EPI8(e31, e30, e29, e28, e27, e26, e25, e24, e23, e22, e21, e20, e19, e18, e17, e16, e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SET_EPI8(e31, e30, e29, e28, e27, e26, e25, e24, e23, e22, e21, e20, e19, e18, e17, e16, e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_epi8(${quote(e31)}, ${quote(e30)}, ${quote(e29)}, ${quote(e28)}, ${quote(e27)}, ${quote(e26)}, ${quote(e25)}, ${quote(e24)}, ${quote(e23)}, ${quote(e22)}, ${quote(e21)}, ${quote(e20)}, ${quote(e19)}, ${quote(e18)}, ${quote(e17)}, ${quote(e16)}, ${quote(e15)}, ${quote(e14)}, ${quote(e13)}, ${quote(e12)}, ${quote(e11)}, ${quote(e10)}, ${quote(e9)}, ${quote(e8)}, ${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET_EPI16(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SET_EPI16(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_epi16(${quote(e15)}, ${quote(e14)}, ${quote(e13)}, ${quote(e12)}, ${quote(e11)}, ${quote(e10)}, ${quote(e9)}, ${quote(e8)}, ${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET_EPI32(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SET_EPI32(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_epi32(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET_EPI64X(e3, e2, e1, e0) =>
+    case iDef@MM256_SET_EPI64X(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_epi64x(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_PD(e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_PD(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_pd(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_PS(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_PS(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_ps(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_EPI8(e31, e30, e29, e28, e27, e26, e25, e24, e23, e22, e21, e20, e19, e18, e17, e16, e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_EPI8(e31, e30, e29, e28, e27, e26, e25, e24, e23, e22, e21, e20, e19, e18, e17, e16, e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_epi8(${quote(e31)}, ${quote(e30)}, ${quote(e29)}, ${quote(e28)}, ${quote(e27)}, ${quote(e26)}, ${quote(e25)}, ${quote(e24)}, ${quote(e23)}, ${quote(e22)}, ${quote(e21)}, ${quote(e20)}, ${quote(e19)}, ${quote(e18)}, ${quote(e17)}, ${quote(e16)}, ${quote(e15)}, ${quote(e14)}, ${quote(e13)}, ${quote(e12)}, ${quote(e11)}, ${quote(e10)}, ${quote(e9)}, ${quote(e8)}, ${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_EPI16(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_EPI16(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_epi16(${quote(e15)}, ${quote(e14)}, ${quote(e13)}, ${quote(e12)}, ${quote(e11)}, ${quote(e10)}, ${quote(e9)}, ${quote(e8)}, ${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_EPI32(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_EPI32(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_epi32(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SETR_EPI64X(e3, e2, e1, e0) =>
+    case iDef@MM256_SETR_EPI64X(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_epi64x(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM256_SET1_PD(a) =>
+    case iDef@MM256_SET1_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_pd(${quote(a)})")
-    case MM256_SET1_PS(a) =>
+    case iDef@MM256_SET1_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_ps(${quote(a)})")
-    case MM256_SET1_EPI8(a) =>
+    case iDef@MM256_SET1_EPI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_epi8(${quote(a)})")
-    case MM256_SET1_EPI16(a) =>
+    case iDef@MM256_SET1_EPI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_epi16(${quote(a)})")
-    case MM256_SET1_EPI32(a) =>
+    case iDef@MM256_SET1_EPI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_epi32(${quote(a)})")
-    case MM256_SET1_EPI64X(a) =>
+    case iDef@MM256_SET1_EPI64X(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set1_epi64x(${quote(a)})")
-    case MM256_CASTPD_PS(a) =>
+    case iDef@MM256_CASTPD_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castpd_ps(${quote(a)})")
-    case MM256_CASTPS_PD(a) =>
+    case iDef@MM256_CASTPS_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castps_pd(${quote(a)})")
-    case MM256_CASTPS_SI256(a) =>
+    case iDef@MM256_CASTPS_SI256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castps_si256(${quote(a)})")
-    case MM256_CASTPD_SI256(a) =>
+    case iDef@MM256_CASTPD_SI256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castpd_si256(${quote(a)})")
-    case MM256_CASTSI256_PS(a) =>
+    case iDef@MM256_CASTSI256_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castsi256_ps(${quote(a)})")
-    case MM256_CASTSI256_PD(a) =>
+    case iDef@MM256_CASTSI256_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castsi256_pd(${quote(a)})")
-    case MM256_CASTPS256_PS128(a) =>
+    case iDef@MM256_CASTPS256_PS128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castps256_ps128(${quote(a)})")
-    case MM256_CASTPD256_PD128(a) =>
+    case iDef@MM256_CASTPD256_PD128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castpd256_pd128(${quote(a)})")
-    case MM256_CASTSI256_SI128(a) =>
+    case iDef@MM256_CASTSI256_SI128(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castsi256_si128(${quote(a)})")
-    case MM256_CASTPS128_PS256(a) =>
+    case iDef@MM256_CASTPS128_PS256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castps128_ps256(${quote(a)})")
-    case MM256_CASTPD128_PD256(a) =>
+    case iDef@MM256_CASTPD128_PD256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castpd128_pd256(${quote(a)})")
-    case MM256_CASTSI128_SI256(a) =>
+    case iDef@MM256_CASTSI128_SI256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_castsi128_si256(${quote(a)})")
-    case MM256_ZEXTPS128_PS256(a) =>
+    case iDef@MM256_ZEXTPS128_PS256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_zextps128_ps256(${quote(a)})")
-    case MM256_ZEXTPD128_PD256(a) =>
+    case iDef@MM256_ZEXTPD128_PD256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_zextpd128_pd256(${quote(a)})")
-    case MM256_ZEXTSI128_SI256(a) =>
+    case iDef@MM256_ZEXTSI128_SI256(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_zextsi128_si256(${quote(a)})")
-    case MM256_FLOOR_PS(a) =>
+    case iDef@MM256_FLOOR_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_floor_ps(${quote(a)})")
-    case MM256_CEIL_PS(a) =>
+    case iDef@MM256_CEIL_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_ceil_ps(${quote(a)})")
-    case MM256_FLOOR_PD(a) =>
+    case iDef@MM256_FLOOR_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_floor_pd(${quote(a)})")
-    case MM256_CEIL_PD(a) =>
+    case iDef@MM256_CEIL_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_ceil_pd(${quote(a)})")
-    case MM256_UNDEFINED_PS() =>
+    case iDef@MM256_UNDEFINED_PS() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_undefined_ps()")
-    case MM256_UNDEFINED_PD() =>
+    case iDef@MM256_UNDEFINED_PD() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_undefined_pd()")
     case _ => super.emitNode(sym, rhs)
   }

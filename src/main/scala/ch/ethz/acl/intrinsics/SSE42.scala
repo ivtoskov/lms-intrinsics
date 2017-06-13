@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -432,6 +458,7 @@ trait SSE42 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_CRC32_U32 (f(crc), f(v)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_CRC32_U64 (crc, v), u, es) =>
       reflectMirrored(Reflect(MM_CRC32_U64 (f(crc), f(v)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -442,43 +469,62 @@ trait CGenSSE42 extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_CMPISTRM(a, b, imm8) =>
+    case iDef@MM_CMPISTRM(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistrm(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRI(a, b, imm8) =>
+    case iDef@MM_CMPISTRI(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistri(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRZ(a, b, imm8) =>
+    case iDef@MM_CMPISTRZ(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistrz(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRC(a, b, imm8) =>
+    case iDef@MM_CMPISTRC(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistrc(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRS(a, b, imm8) =>
+    case iDef@MM_CMPISTRS(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistrs(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRO(a, b, imm8) =>
+    case iDef@MM_CMPISTRO(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistro(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPISTRA(a, b, imm8) =>
+    case iDef@MM_CMPISTRA(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpistra(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMPESTRM(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRM(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestrm(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRI(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRI(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestri(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRZ(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRZ(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestrz(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRC(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRC(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestrc(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRS(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRS(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestrs(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRO(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRO(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestro(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPESTRA(a, la, b, lb, imm8) =>
+    case iDef@MM_CMPESTRA(a, la, b, lb, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpestra(${quote(a)}, ${quote(la)}, ${quote(b)}, ${quote(lb)}, ${quote(imm8)})")
-    case MM_CMPGT_EPI64(a, b) =>
+    case iDef@MM_CMPGT_EPI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpgt_epi64(${quote(a)}, ${quote(b)})")
-    case MM_CRC32_U8(crc, v) =>
+    case iDef@MM_CRC32_U8(crc, v) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_crc32_u8(${quote(crc)}, ${quote(v)})")
-    case MM_CRC32_U16(crc, v) =>
+    case iDef@MM_CRC32_U16(crc, v) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_crc32_u16(${quote(crc)}, ${quote(v)})")
-    case MM_CRC32_U32(crc, v) =>
+    case iDef@MM_CRC32_U32(crc, v) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_crc32_u32(${quote(crc)}, ${quote(v)})")
-    case MM_CRC32_U64(crc, v) =>
+    case iDef@MM_CRC32_U64(crc, v) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_crc32_u64(${quote(crc)}, ${quote(v)})")
     case _ => super.emitNode(sym, rhs)
   }

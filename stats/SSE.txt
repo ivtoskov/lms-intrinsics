@@ -1,0 +1,18 @@
+SSE statistics:
+
+
+Number of SSE intrinsics: 154
+Number of intrinsics with pointer arguments: 13
+_mm_prefetch
+_mm_stream_pi
+_mm_maskmove_si64
+_m_maskmovq
+_mm_stream_ps
+_mm_storeh_pi
+_mm_storel_pi
+_mm_store_ss
+_mm_store1_ps
+_mm_store_ps1
+_mm_store_ps
+_mm_storeu_ps
+_mm_storer_ps

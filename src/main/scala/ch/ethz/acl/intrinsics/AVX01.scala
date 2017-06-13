@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -7,7 +33,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait AVX01 extends IntrinsicsBase {
+trait AVX01 extends IntrinsicsBase {
   /**
    * Return vector of type __m256i with undefined elements.
 
@@ -292,42 +318,56 @@ protected trait AVX01 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM256_STOREU2_M128D (iDef.cont.applyTransformer(hiaddr, f), iDef.cont.applyTransformer(loaddr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(hiaddrOffset, f), iDef.cont.applyTransformer(loaddrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(iDef@MM256_STOREU2_M128I (hiaddr, loaddr, a, hiaddrOffset, loaddrOffset), u, es) =>
       reflectMirrored(Reflect(MM256_STOREU2_M128I (iDef.cont.applyTransformer(hiaddr, f), iDef.cont.applyTransformer(loaddr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(hiaddrOffset, f), iDef.cont.applyTransformer(loaddrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX01 extends CGenIntrinsics {
+trait CGenAVX01 extends CGenIntrinsics {
 
   val IR: AVX
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM256_UNDEFINED_SI256() =>
+    case iDef@MM256_UNDEFINED_SI256() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_undefined_si256()")
-    case MM256_SET_M128(hi, lo) =>
+    case iDef@MM256_SET_M128(hi, lo) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_m128(${quote(hi)}, ${quote(lo)})")
-    case MM256_SET_M128D(hi, lo) =>
+    case iDef@MM256_SET_M128D(hi, lo) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_m128d(${quote(hi)}, ${quote(lo)})")
-    case MM256_SET_M128I(hi, lo) =>
+    case iDef@MM256_SET_M128I(hi, lo) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_set_m128i(${quote(hi)}, ${quote(lo)})")
-    case MM256_SETR_M128(lo, hi) =>
+    case iDef@MM256_SETR_M128(lo, hi) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_m128(${quote(lo)}, ${quote(hi)})")
-    case MM256_SETR_M128D(lo, hi) =>
+    case iDef@MM256_SETR_M128D(lo, hi) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_m128d(${quote(lo)}, ${quote(hi)})")
-    case MM256_SETR_M128I(lo, hi) =>
+    case iDef@MM256_SETR_M128I(lo, hi) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_setr_m128i(${quote(lo)}, ${quote(hi)})")
-    case MM256_LOADU2_M128(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
-      emitValDef(sym, s"_mm256_loadu2_m128(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
-    case MM256_LOADU2_M128D(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
-      emitValDef(sym, s"_mm256_loadu2_m128d(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
-    case MM256_LOADU2_M128I(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
-      emitValDef(sym, s"_mm256_loadu2_m128i(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
-    case MM256_STOREU2_M128(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
-      stream.println(s"_mm256_storeu2_m128(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
-    case MM256_STOREU2_M128D(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
-      stream.println(s"_mm256_storeu2_m128d(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
-    case MM256_STOREU2_M128I(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
-      stream.println(s"_mm256_storeu2_m128i(${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
+    case iDef@MM256_LOADU2_M128(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu2_m128((float const*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (float const*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
+    case iDef@MM256_LOADU2_M128D(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu2_m128d((double const*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (double const*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
+    case iDef@MM256_LOADU2_M128I(hiaddr, loaddr, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm256_loadu2_m128i((__m128i const*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (__m128i const*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))})")
+    case iDef@MM256_STOREU2_M128(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu2_m128((float*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (float*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
+    case iDef@MM256_STOREU2_M128D(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu2_m128d((double*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (double*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
+    case iDef@MM256_STOREU2_M128I(hiaddr, loaddr, a, hiaddrOffset, loaddrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_storeu2_m128i((__m128i*) ${quote(hiaddr) + (if(hiaddrOffset == Const(0)) "" else " + " + quote(hiaddrOffset))}, (__m128i*) ${quote(loaddr) + (if(loaddrOffset == Const(0)) "" else " + " + quote(loaddrOffset))}, ${quote(a)});")
     case _ => super.emitNode(sym, rhs)
   }
 }

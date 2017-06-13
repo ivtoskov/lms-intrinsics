@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -2600,6 +2626,7 @@ trait MMX extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_UNPACKLO_PI16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_UNPACKLO_PI32 (a, b), u, es) =>
       reflectMirrored(Reflect(MM_UNPACKLO_PI32 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -2610,253 +2637,377 @@ trait CGenMMX extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case M_FROM_INT64(a) =>
+    case iDef@M_FROM_INT64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_from_int64(${quote(a)})")
-    case M_TO_INT64(a) =>
+    case iDef@M_TO_INT64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_to_int64(${quote(a)})")
-    case M_EMPTY() =>
+    case iDef@M_EMPTY() =>
+      headers += iDef.header
       stream.println(s"_m_empty();")
-    case M_FROM_INT(a) =>
+    case iDef@M_FROM_INT(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_from_int(${quote(a)})")
-    case M_TO_INT(a) =>
+    case iDef@M_TO_INT(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_to_int(${quote(a)})")
-    case M_PACKSSWB(a, b) =>
+    case iDef@M_PACKSSWB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_packsswb(${quote(a)}, ${quote(b)})")
-    case M_PACKSSDW(a, b) =>
+    case iDef@M_PACKSSDW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_packssdw(${quote(a)}, ${quote(b)})")
-    case M_PACKUSWB(a, b) =>
+    case iDef@M_PACKUSWB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_packuswb(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKHBW(a, b) =>
+    case iDef@M_PUNPCKHBW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpckhbw(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKHWD(a, b) =>
+    case iDef@M_PUNPCKHWD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpckhwd(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKHDQ(a, b) =>
+    case iDef@M_PUNPCKHDQ(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpckhdq(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKLBW(a, b) =>
+    case iDef@M_PUNPCKLBW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpcklbw(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKLWD(a, b) =>
+    case iDef@M_PUNPCKLWD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpcklwd(${quote(a)}, ${quote(b)})")
-    case M_PUNPCKLDQ(a, b) =>
+    case iDef@M_PUNPCKLDQ(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_punpckldq(${quote(a)}, ${quote(b)})")
-    case M_PADDB(a, b) =>
+    case iDef@M_PADDB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddb(${quote(a)}, ${quote(b)})")
-    case M_PADDW(a, b) =>
+    case iDef@M_PADDW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddw(${quote(a)}, ${quote(b)})")
-    case M_PADDD(a, b) =>
+    case iDef@M_PADDD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddd(${quote(a)}, ${quote(b)})")
-    case M_PADDSB(a, b) =>
+    case iDef@M_PADDSB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddsb(${quote(a)}, ${quote(b)})")
-    case M_PADDSW(a, b) =>
+    case iDef@M_PADDSW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddsw(${quote(a)}, ${quote(b)})")
-    case M_PADDUSB(a, b) =>
+    case iDef@M_PADDUSB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddusb(${quote(a)}, ${quote(b)})")
-    case M_PADDUSW(a, b) =>
+    case iDef@M_PADDUSW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_paddusw(${quote(a)}, ${quote(b)})")
-    case M_PSUBB(a, b) =>
+    case iDef@M_PSUBB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubb(${quote(a)}, ${quote(b)})")
-    case M_PSUBW(a, b) =>
+    case iDef@M_PSUBW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubw(${quote(a)}, ${quote(b)})")
-    case M_PSUBD(a, b) =>
+    case iDef@M_PSUBD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubd(${quote(a)}, ${quote(b)})")
-    case M_PSUBSB(a, b) =>
+    case iDef@M_PSUBSB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubsb(${quote(a)}, ${quote(b)})")
-    case M_PSUBSW(a, b) =>
+    case iDef@M_PSUBSW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubsw(${quote(a)}, ${quote(b)})")
-    case M_PSUBUSB(a, b) =>
+    case iDef@M_PSUBUSB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubusb(${quote(a)}, ${quote(b)})")
-    case M_PSUBUSW(a, b) =>
+    case iDef@M_PSUBUSW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psubusw(${quote(a)}, ${quote(b)})")
-    case M_PMADDWD(a, b) =>
+    case iDef@M_PMADDWD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pmaddwd(${quote(a)}, ${quote(b)})")
-    case M_PMULHW(a, b) =>
+    case iDef@M_PMULHW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pmulhw(${quote(a)}, ${quote(b)})")
-    case M_PMULLW(a, b) =>
+    case iDef@M_PMULLW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pmullw(${quote(a)}, ${quote(b)})")
-    case M_PSLLW(a, count) =>
+    case iDef@M_PSLLW(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psllw(${quote(a)}, ${quote(count)})")
-    case M_PSLLWI(a, imm8) =>
+    case iDef@M_PSLLWI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psllwi(${quote(a)}, ${quote(imm8)})")
-    case M_PSLLD(a, count) =>
+    case iDef@M_PSLLD(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pslld(${quote(a)}, ${quote(count)})")
-    case M_PSLLDI(a, imm8) =>
+    case iDef@M_PSLLDI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pslldi(${quote(a)}, ${quote(imm8)})")
-    case M_PSLLQ(a, count) =>
+    case iDef@M_PSLLQ(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psllq(${quote(a)}, ${quote(count)})")
-    case M_PSLLQI(a, imm8) =>
+    case iDef@M_PSLLQI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psllqi(${quote(a)}, ${quote(imm8)})")
-    case M_PSRAW(a, count) =>
+    case iDef@M_PSRAW(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psraw(${quote(a)}, ${quote(count)})")
-    case M_PSRAWI(a, imm8) =>
+    case iDef@M_PSRAWI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrawi(${quote(a)}, ${quote(imm8)})")
-    case M_PSRAD(a, count) =>
+    case iDef@M_PSRAD(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrad(${quote(a)}, ${quote(count)})")
-    case M_PSRADI(a, imm8) =>
+    case iDef@M_PSRADI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psradi(${quote(a)}, ${quote(imm8)})")
-    case M_PSRLW(a, count) =>
+    case iDef@M_PSRLW(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrlw(${quote(a)}, ${quote(count)})")
-    case M_PSRLWI(a, imm8) =>
+    case iDef@M_PSRLWI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrlwi(${quote(a)}, ${quote(imm8)})")
-    case M_PSRLD(a, count) =>
+    case iDef@M_PSRLD(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrld(${quote(a)}, ${quote(count)})")
-    case M_PSRLDI(a, imm8) =>
+    case iDef@M_PSRLDI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrldi(${quote(a)}, ${quote(imm8)})")
-    case M_PSRLQ(a, count) =>
+    case iDef@M_PSRLQ(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrlq(${quote(a)}, ${quote(count)})")
-    case M_PSRLQI(a, imm8) =>
+    case iDef@M_PSRLQI(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_psrlqi(${quote(a)}, ${quote(imm8)})")
-    case M_PAND(a, b) =>
+    case iDef@M_PAND(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pand(${quote(a)}, ${quote(b)})")
-    case M_PANDN(a, b) =>
+    case iDef@M_PANDN(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pandn(${quote(a)}, ${quote(b)})")
-    case M_POR(a, b) =>
+    case iDef@M_POR(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_por(${quote(a)}, ${quote(b)})")
-    case M_PXOR(a, b) =>
+    case iDef@M_PXOR(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pxor(${quote(a)}, ${quote(b)})")
-    case M_PCMPEQB(a, b) =>
+    case iDef@M_PCMPEQB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpeqb(${quote(a)}, ${quote(b)})")
-    case M_PCMPEQW(a, b) =>
+    case iDef@M_PCMPEQW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpeqw(${quote(a)}, ${quote(b)})")
-    case M_PCMPEQD(a, b) =>
+    case iDef@M_PCMPEQD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpeqd(${quote(a)}, ${quote(b)})")
-    case M_PCMPGTB(a, b) =>
+    case iDef@M_PCMPGTB(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpgtb(${quote(a)}, ${quote(b)})")
-    case M_PCMPGTW(a, b) =>
+    case iDef@M_PCMPGTW(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpgtw(${quote(a)}, ${quote(b)})")
-    case M_PCMPGTD(a, b) =>
+    case iDef@M_PCMPGTD(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_m_pcmpgtd(${quote(a)}, ${quote(b)})")
-    case MM_EMPTY() =>
+    case iDef@MM_EMPTY() =>
+      headers += iDef.header
       stream.println(s"_mm_empty();")
-    case MM_ADD_PI8(a, b) =>
+    case iDef@MM_ADD_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_add_pi8(${quote(a)}, ${quote(b)})")
-    case MM_ADD_PI16(a, b) =>
+    case iDef@MM_ADD_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_add_pi16(${quote(a)}, ${quote(b)})")
-    case MM_ADD_PI32(a, b) =>
+    case iDef@MM_ADD_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_add_pi32(${quote(a)}, ${quote(b)})")
-    case MM_ADDS_PI8(a, b) =>
+    case iDef@MM_ADDS_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_adds_pi8(${quote(a)}, ${quote(b)})")
-    case MM_ADDS_PI16(a, b) =>
+    case iDef@MM_ADDS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_adds_pi16(${quote(a)}, ${quote(b)})")
-    case MM_ADDS_PU8(a, b) =>
+    case iDef@MM_ADDS_PU8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_adds_pu8(${quote(a)}, ${quote(b)})")
-    case MM_ADDS_PU16(a, b) =>
+    case iDef@MM_ADDS_PU16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_adds_pu16(${quote(a)}, ${quote(b)})")
-    case MM_SUB_PI8(a, b) =>
+    case iDef@MM_SUB_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sub_pi8(${quote(a)}, ${quote(b)})")
-    case MM_SUB_PI16(a, b) =>
+    case iDef@MM_SUB_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sub_pi16(${quote(a)}, ${quote(b)})")
-    case MM_SUB_PI32(a, b) =>
+    case iDef@MM_SUB_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sub_pi32(${quote(a)}, ${quote(b)})")
-    case MM_SUBS_PI8(a, b) =>
+    case iDef@MM_SUBS_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_subs_pi8(${quote(a)}, ${quote(b)})")
-    case MM_SUBS_PI16(a, b) =>
+    case iDef@MM_SUBS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_subs_pi16(${quote(a)}, ${quote(b)})")
-    case MM_SUBS_PU8(a, b) =>
+    case iDef@MM_SUBS_PU8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_subs_pu8(${quote(a)}, ${quote(b)})")
-    case MM_SUBS_PU16(a, b) =>
+    case iDef@MM_SUBS_PU16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_subs_pu16(${quote(a)}, ${quote(b)})")
-    case MM_MADD_PI16(a, b) =>
+    case iDef@MM_MADD_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_madd_pi16(${quote(a)}, ${quote(b)})")
-    case MM_MULHI_PI16(a, b) =>
+    case iDef@MM_MULHI_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mulhi_pi16(${quote(a)}, ${quote(b)})")
-    case MM_MULLO_PI16(a, b) =>
+    case iDef@MM_MULLO_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mullo_pi16(${quote(a)}, ${quote(b)})")
-    case MM_SLL_PI16(a, count) =>
+    case iDef@MM_SLL_PI16(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sll_pi16(${quote(a)}, ${quote(count)})")
-    case MM_SLLI_PI16(a, imm8) =>
+    case iDef@MM_SLLI_PI16(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_slli_pi16(${quote(a)}, ${quote(imm8)})")
-    case MM_SLL_PI32(a, count) =>
+    case iDef@MM_SLL_PI32(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sll_pi32(${quote(a)}, ${quote(count)})")
-    case MM_SLLI_PI32(a, imm8) =>
+    case iDef@MM_SLLI_PI32(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_slli_pi32(${quote(a)}, ${quote(imm8)})")
-    case MM_SLL_SI64(a, count) =>
+    case iDef@MM_SLL_SI64(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sll_si64(${quote(a)}, ${quote(count)})")
-    case MM_SLLI_SI64(a, imm8) =>
+    case iDef@MM_SLLI_SI64(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_slli_si64(${quote(a)}, ${quote(imm8)})")
-    case MM_SRA_PI16(a, count) =>
+    case iDef@MM_SRA_PI16(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sra_pi16(${quote(a)}, ${quote(count)})")
-    case MM_SRAI_PI16(a, imm8) =>
+    case iDef@MM_SRAI_PI16(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srai_pi16(${quote(a)}, ${quote(imm8)})")
-    case MM_SRA_PI32(a, count) =>
+    case iDef@MM_SRA_PI32(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_sra_pi32(${quote(a)}, ${quote(count)})")
-    case MM_SRAI_PI32(a, imm8) =>
+    case iDef@MM_SRAI_PI32(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srai_pi32(${quote(a)}, ${quote(imm8)})")
-    case MM_SRL_PI16(a, count) =>
+    case iDef@MM_SRL_PI16(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srl_pi16(${quote(a)}, ${quote(count)})")
-    case MM_SRLI_PI16(a, imm8) =>
+    case iDef@MM_SRLI_PI16(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srli_pi16(${quote(a)}, ${quote(imm8)})")
-    case MM_SRL_PI32(a, count) =>
+    case iDef@MM_SRL_PI32(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srl_pi32(${quote(a)}, ${quote(count)})")
-    case MM_SRLI_PI32(a, imm8) =>
+    case iDef@MM_SRLI_PI32(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srli_pi32(${quote(a)}, ${quote(imm8)})")
-    case MM_SRL_SI64(a, count) =>
+    case iDef@MM_SRL_SI64(a, count) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srl_si64(${quote(a)}, ${quote(count)})")
-    case MM_SRLI_SI64(a, imm8) =>
+    case iDef@MM_SRLI_SI64(a, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_srli_si64(${quote(a)}, ${quote(imm8)})")
-    case MM_AND_SI64(a, b) =>
+    case iDef@MM_AND_SI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_and_si64(${quote(a)}, ${quote(b)})")
-    case MM_ANDNOT_SI64(a, b) =>
+    case iDef@MM_ANDNOT_SI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_andnot_si64(${quote(a)}, ${quote(b)})")
-    case MM_OR_SI64(a, b) =>
+    case iDef@MM_OR_SI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_or_si64(${quote(a)}, ${quote(b)})")
-    case MM_XOR_SI64(a, b) =>
+    case iDef@MM_XOR_SI64(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_xor_si64(${quote(a)}, ${quote(b)})")
-    case MM_CMPEQ_PI8(a, b) =>
+    case iDef@MM_CMPEQ_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpeq_pi8(${quote(a)}, ${quote(b)})")
-    case MM_CMPEQ_PI16(a, b) =>
+    case iDef@MM_CMPEQ_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpeq_pi16(${quote(a)}, ${quote(b)})")
-    case MM_CMPEQ_PI32(a, b) =>
+    case iDef@MM_CMPEQ_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpeq_pi32(${quote(a)}, ${quote(b)})")
-    case MM_CMPGT_PI8(a, b) =>
+    case iDef@MM_CMPGT_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpgt_pi8(${quote(a)}, ${quote(b)})")
-    case MM_CMPGT_PI16(a, b) =>
+    case iDef@MM_CMPGT_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpgt_pi16(${quote(a)}, ${quote(b)})")
-    case MM_CMPGT_PI32(a, b) =>
+    case iDef@MM_CMPGT_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmpgt_pi32(${quote(a)}, ${quote(b)})")
-    case MM_CVTSI32_SI64(a) =>
+    case iDef@MM_CVTSI32_SI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsi32_si64(${quote(a)})")
-    case MM_CVTSI64_SI32(a) =>
+    case iDef@MM_CVTSI64_SI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsi64_si32(${quote(a)})")
-    case MM_CVTM64_SI64(a) =>
+    case iDef@MM_CVTM64_SI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtm64_si64(${quote(a)})")
-    case MM_CVTSI64_M64(a) =>
+    case iDef@MM_CVTSI64_M64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtsi64_m64(${quote(a)})")
-    case MM_SETZERO_SI64() =>
+    case iDef@MM_SETZERO_SI64() =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_setzero_si64()")
-    case MM_SET_PI32(e1, e0) =>
+    case iDef@MM_SET_PI32(e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set_pi32(${quote(e1)}, ${quote(e0)})")
-    case MM_SET_PI16(e3, e2, e1, e0) =>
+    case iDef@MM_SET_PI16(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set_pi16(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM_SET_PI8(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM_SET_PI8(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set_pi8(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM_SET1_PI32(a) =>
+    case iDef@MM_SET1_PI32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set1_pi32(${quote(a)})")
-    case MM_SET1_PI16(a) =>
+    case iDef@MM_SET1_PI16(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set1_pi16(${quote(a)})")
-    case MM_SET1_PI8(a) =>
+    case iDef@MM_SET1_PI8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_set1_pi8(${quote(a)})")
-    case MM_SETR_PI32(e1, e0) =>
+    case iDef@MM_SETR_PI32(e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_setr_pi32(${quote(e1)}, ${quote(e0)})")
-    case MM_SETR_PI16(e3, e2, e1, e0) =>
+    case iDef@MM_SETR_PI16(e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_setr_pi16(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM_SETR_PI8(e7, e6, e5, e4, e3, e2, e1, e0) =>
+    case iDef@MM_SETR_PI8(e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_setr_pi8(${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
-    case MM_PACKS_PI16(a, b) =>
+    case iDef@MM_PACKS_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_packs_pi16(${quote(a)}, ${quote(b)})")
-    case MM_PACKS_PI32(a, b) =>
+    case iDef@MM_PACKS_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_packs_pi32(${quote(a)}, ${quote(b)})")
-    case MM_PACKS_PU16(a, b) =>
+    case iDef@MM_PACKS_PU16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_packs_pu16(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKHI_PI8(a, b) =>
+    case iDef@MM_UNPACKHI_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpackhi_pi8(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKHI_PI16(a, b) =>
+    case iDef@MM_UNPACKHI_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpackhi_pi16(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKHI_PI32(a, b) =>
+    case iDef@MM_UNPACKHI_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpackhi_pi32(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKLO_PI8(a, b) =>
+    case iDef@MM_UNPACKLO_PI8(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpacklo_pi8(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKLO_PI16(a, b) =>
+    case iDef@MM_UNPACKLO_PI16(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpacklo_pi16(${quote(a)}, ${quote(b)})")
-    case MM_UNPACKLO_PI32(a, b) =>
+    case iDef@MM_UNPACKLO_PI32(a, b) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_unpacklo_pi32(${quote(a)}, ${quote(b)})")
     case _ => super.emitNode(sym, rhs)
   }

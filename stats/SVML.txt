@@ -1,0 +1,19 @@
+SVML statistics:
+
+
+Number of SVML intrinsics: 406
+Number of intrinsics with pointer arguments: 5
+_mm_idivrem_epi32
+_mm_sincos_pd
+_mm_sincos_ps
+_mm_udivrem_epi32
+_mm256_idivrem_epi32
+Number of intrinsics with pointer arguments: 3
+_mm256_sincos_pd
+_mm256_sincos_ps
+_mm256_udivrem_epi32
+Number of intrinsics with pointer arguments: 4
+_mm512_sincos_pd
+_mm512_mask_sincos_pd
+_mm512_sincos_ps
+_mm512_mask_sincos_ps

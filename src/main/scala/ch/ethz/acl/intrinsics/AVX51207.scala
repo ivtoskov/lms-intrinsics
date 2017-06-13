@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+    
 package ch.ethz.acl.intrinsics
 
 import ch.ethz.acl.intrinsics.MicroArchType._
@@ -3884,365 +3910,541 @@ trait AVX51207 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_MASKZ_CVT_ROUNDEPI64_PS (f(k), f(a), f(rounding)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_MASKZ_CVTEPI64_PS (k, a), u, es) =>
       reflectMirrored(Reflect(MM512_MASKZ_CVTEPI64_PS (f(k), f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenAVX51207 extends CGenIntrinsics {
+trait CGenAVX51207 extends CGenIntrinsics {
 
   val IR: AVX512
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM512_BROADCAST_F32X2(a) =>
+    case iDef@MM512_BROADCAST_F32X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_f32x2(${quote(a)})")
-    case MM512_MASK_BROADCAST_F32X2(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_F32X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_f32x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_F32X2(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_F32X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_f32x2(${quote(k)}, ${quote(a)})")
-    case MM256_BROADCAST_F32X4(a) =>
+    case iDef@MM256_BROADCAST_F32X4(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_broadcast_f32x4(${quote(a)})")
-    case MM256_MASK_BROADCAST_F32X4(src, k, a) =>
+    case iDef@MM256_MASK_BROADCAST_F32X4(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcast_f32x4(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCAST_F32X4(k, a) =>
+    case iDef@MM256_MASKZ_BROADCAST_F32X4(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcast_f32x4(${quote(k)}, ${quote(a)})")
-    case MM512_BROADCAST_F32X8(a) =>
+    case iDef@MM512_BROADCAST_F32X8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_f32x8(${quote(a)})")
-    case MM512_MASK_BROADCAST_F32X8(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_F32X8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_f32x8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_F32X8(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_F32X8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_f32x8(${quote(k)}, ${quote(a)})")
-    case MM256_BROADCAST_F64X2(a) =>
+    case iDef@MM256_BROADCAST_F64X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_broadcast_f64x2(${quote(a)})")
-    case MM256_MASK_BROADCAST_F64X2(src, k, a) =>
+    case iDef@MM256_MASK_BROADCAST_F64X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcast_f64x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCAST_F64X2(k, a) =>
+    case iDef@MM256_MASKZ_BROADCAST_F64X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcast_f64x2(${quote(k)}, ${quote(a)})")
-    case MM512_BROADCAST_F64X2(a) =>
+    case iDef@MM512_BROADCAST_F64X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_f64x2(${quote(a)})")
-    case MM512_MASK_BROADCAST_F64X2(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_F64X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_f64x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_F64X2(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_F64X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_f64x2(${quote(k)}, ${quote(a)})")
-    case MM256_BROADCAST_I32X2(a) =>
+    case iDef@MM256_BROADCAST_I32X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_broadcast_i32x2(${quote(a)})")
-    case MM256_MASK_BROADCAST_I32X2(src, k, a) =>
+    case iDef@MM256_MASK_BROADCAST_I32X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcast_i32x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCAST_I32X2(k, a) =>
+    case iDef@MM256_MASKZ_BROADCAST_I32X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcast_i32x2(${quote(k)}, ${quote(a)})")
-    case MM512_BROADCAST_I32X2(a) =>
+    case iDef@MM512_BROADCAST_I32X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_i32x2(${quote(a)})")
-    case MM512_MASK_BROADCAST_I32X2(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_I32X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_i32x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_I32X2(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_I32X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_i32x2(${quote(k)}, ${quote(a)})")
-    case MM_BROADCAST_I32X2(a) =>
+    case iDef@MM_BROADCAST_I32X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_broadcast_i32x2(${quote(a)})")
-    case MM_MASK_BROADCAST_I32X2(src, k, a) =>
+    case iDef@MM_MASK_BROADCAST_I32X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_broadcast_i32x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_BROADCAST_I32X2(k, a) =>
+    case iDef@MM_MASKZ_BROADCAST_I32X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_broadcast_i32x2(${quote(k)}, ${quote(a)})")
-    case MM256_BROADCAST_I32X4(a) =>
+    case iDef@MM256_BROADCAST_I32X4(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_broadcast_i32x4(${quote(a)})")
-    case MM256_MASK_BROADCAST_I32X4(src, k, a) =>
+    case iDef@MM256_MASK_BROADCAST_I32X4(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcast_i32x4(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCAST_I32X4(k, a) =>
+    case iDef@MM256_MASKZ_BROADCAST_I32X4(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcast_i32x4(${quote(k)}, ${quote(a)})")
-    case MM512_BROADCAST_I32X8(a) =>
+    case iDef@MM512_BROADCAST_I32X8(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_i32x8(${quote(a)})")
-    case MM512_MASK_BROADCAST_I32X8(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_I32X8(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_i32x8(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_I32X8(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_I32X8(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_i32x8(${quote(k)}, ${quote(a)})")
-    case MM256_BROADCAST_I64X2(a) =>
+    case iDef@MM256_BROADCAST_I64X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_broadcast_i64x2(${quote(a)})")
-    case MM256_MASK_BROADCAST_I64X2(src, k, a) =>
+    case iDef@MM256_MASK_BROADCAST_I64X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcast_i64x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCAST_I64X2(k, a) =>
+    case iDef@MM256_MASKZ_BROADCAST_I64X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcast_i64x2(${quote(k)}, ${quote(a)})")
-    case MM512_BROADCAST_I64X2(a) =>
+    case iDef@MM512_BROADCAST_I64X2(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_broadcast_i64x2(${quote(a)})")
-    case MM512_MASK_BROADCAST_I64X2(src, k, a) =>
+    case iDef@MM512_MASK_BROADCAST_I64X2(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_broadcast_i64x2(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_BROADCAST_I64X2(k, a) =>
+    case iDef@MM512_MASKZ_BROADCAST_I64X2(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_broadcast_i64x2(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_BROADCASTSD_PD(src, k, a) =>
+    case iDef@MM256_MASK_BROADCASTSD_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcastsd_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCASTSD_PD(k, a) =>
+    case iDef@MM256_MASKZ_BROADCASTSD_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcastsd_pd(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_BROADCASTSS_PS(src, k, a) =>
+    case iDef@MM256_MASK_BROADCASTSS_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_broadcastss_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_BROADCASTSS_PS(k, a) =>
+    case iDef@MM256_MASKZ_BROADCASTSS_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_broadcastss_ps(${quote(k)}, ${quote(a)})")
-    case MM_MASK_BROADCASTSS_PS(src, k, a) =>
+    case iDef@MM_MASK_BROADCASTSS_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_broadcastss_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_BROADCASTSS_PS(k, a) =>
+    case iDef@MM_MASKZ_BROADCASTSS_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_broadcastss_ps(${quote(k)}, ${quote(a)})")
-    case MM256_CMP_PD_MASK(a, b, imm8) =>
+    case iDef@MM256_CMP_PD_MASK(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cmp_pd_mask(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_MASK_CMP_PD_MASK(k1, a, b, imm8) =>
+    case iDef@MM256_MASK_CMP_PD_MASK(k1, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cmp_pd_mask(${quote(k1)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMP_PD_MASK(a, b, imm8) =>
+    case iDef@MM_CMP_PD_MASK(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_pd_mask(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_MASK_CMP_PD_MASK(k1, a, b, imm8) =>
+    case iDef@MM_MASK_CMP_PD_MASK(k1, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cmp_pd_mask(${quote(k1)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_CMP_PS_MASK(a, b, imm8) =>
+    case iDef@MM256_CMP_PS_MASK(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cmp_ps_mask(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_MASK_CMP_PS_MASK(k1, a, b, imm8) =>
+    case iDef@MM256_MASK_CMP_PS_MASK(k1, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cmp_ps_mask(${quote(k1)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_CMP_PS_MASK(a, b, imm8) =>
+    case iDef@MM_CMP_PS_MASK(a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cmp_ps_mask(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM_MASK_CMP_PS_MASK(k1, a, b, imm8) =>
+    case iDef@MM_MASK_CMP_PS_MASK(k1, a, b, imm8) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cmp_ps_mask(${quote(k1)}, ${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case MM256_MASK_COMPRESS_PD(src, k, a) =>
+    case iDef@MM256_MASK_COMPRESS_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_compress_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_COMPRESSSTOREU_PD(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_compressstoreu_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_COMPRESS_PD(k, a) =>
+    case iDef@MM256_MASK_COMPRESSSTOREU_PD(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_compressstoreu_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_COMPRESS_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_compress_pd(${quote(k)}, ${quote(a)})")
-    case MM_MASK_COMPRESS_PD(src, k, a) =>
+    case iDef@MM_MASK_COMPRESS_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_compress_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_COMPRESSSTOREU_PD(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_compressstoreu_pd(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_COMPRESS_PD(k, a) =>
+    case iDef@MM_MASK_COMPRESSSTOREU_PD(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_compressstoreu_pd((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_COMPRESS_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_compress_pd(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_COMPRESS_PS(src, k, a) =>
+    case iDef@MM256_MASK_COMPRESS_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_compress_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASK_COMPRESSSTOREU_PS(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm256_mask_compressstoreu_ps(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM256_MASKZ_COMPRESS_PS(k, a) =>
+    case iDef@MM256_MASK_COMPRESSSTOREU_PS(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm256_mask_compressstoreu_ps((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM256_MASKZ_COMPRESS_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_compress_ps(${quote(k)}, ${quote(a)})")
-    case MM_MASK_COMPRESS_PS(src, k, a) =>
+    case iDef@MM_MASK_COMPRESS_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_compress_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASK_COMPRESSSTOREU_PS(base_addr, k, a, base_addrOffset) =>
-      stream.println(s"_mm_mask_compressstoreu_ps(${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
-    case MM_MASKZ_COMPRESS_PS(k, a) =>
+    case iDef@MM_MASK_COMPRESSSTOREU_PS(base_addr, k, a, base_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_mask_compressstoreu_ps((void*) ${quote(base_addr) + (if(base_addrOffset == Const(0)) "" else " + " + quote(base_addrOffset))}, ${quote(k)}, ${quote(a)});")
+    case iDef@MM_MASKZ_COMPRESS_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_compress_ps(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI32_PD(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI32_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi32_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI32_PD(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI32_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi32_pd(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI32_PD(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI32_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi32_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI32_PD(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI32_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi32_pd(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTEPI32_PS(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI32_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi32_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI32_PS(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI32_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi32_ps(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTEPI32_PS(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI32_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi32_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI32_PS(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI32_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi32_ps(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTPD_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTPD_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtpd_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPD_EPI32(k, a) =>
+    case iDef@MM256_MASKZ_CVTPD_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtpd_epi32(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTPD_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTPD_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtpd_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPD_EPI32(k, a) =>
+    case iDef@MM_MASKZ_CVTPD_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtpd_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTPD_PS(src, k, a) =>
+    case iDef@MM256_MASK_CVTPD_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtpd_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPD_PS(k, a) =>
+    case iDef@MM256_MASKZ_CVTPD_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtpd_ps(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTPD_PS(src, k, a) =>
+    case iDef@MM_MASK_CVTPD_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtpd_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPD_PS(k, a) =>
+    case iDef@MM_MASKZ_CVTPD_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtpd_ps(${quote(k)}, ${quote(a)})")
-    case MM256_CVTPD_EPI64(a) =>
+    case iDef@MM256_CVTPD_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtpd_epi64(${quote(a)})")
-    case MM256_MASK_CVTPD_EPI64(src, k, a) =>
+    case iDef@MM256_MASK_CVTPD_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtpd_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPD_EPI64(k, a) =>
+    case iDef@MM256_MASKZ_CVTPD_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtpd_epi64(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDPD_EPI64(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDPD_EPI64(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundpd_epi64(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTPD_EPI64(a) =>
+    case iDef@MM512_CVTPD_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtpd_epi64(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDPD_EPI64(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDPD_EPI64(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundpd_epi64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTPD_EPI64(src, k, a) =>
+    case iDef@MM512_MASK_CVTPD_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtpd_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDPD_EPI64(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDPD_EPI64(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundpd_epi64(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTPD_EPI64(k, a) =>
+    case iDef@MM512_MASKZ_CVTPD_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtpd_epi64(${quote(k)}, ${quote(a)})")
-    case MM_CVTPD_EPI64(a) =>
+    case iDef@MM_CVTPD_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtpd_epi64(${quote(a)})")
-    case MM_MASK_CVTPD_EPI64(src, k, a) =>
+    case iDef@MM_MASK_CVTPD_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtpd_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPD_EPI64(k, a) =>
+    case iDef@MM_MASKZ_CVTPD_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtpd_epi64(${quote(k)}, ${quote(a)})")
-    case MM256_CVTPD_EPU32(a) =>
+    case iDef@MM256_CVTPD_EPU32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtpd_epu32(${quote(a)})")
-    case MM256_MASK_CVTPD_EPU32(src, k, a) =>
+    case iDef@MM256_MASK_CVTPD_EPU32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtpd_epu32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPD_EPU32(k, a) =>
+    case iDef@MM256_MASKZ_CVTPD_EPU32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtpd_epu32(${quote(k)}, ${quote(a)})")
-    case MM_CVTPD_EPU32(a) =>
+    case iDef@MM_CVTPD_EPU32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtpd_epu32(${quote(a)})")
-    case MM_MASK_CVTPD_EPU32(src, k, a) =>
+    case iDef@MM_MASK_CVTPD_EPU32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtpd_epu32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPD_EPU32(k, a) =>
+    case iDef@MM_MASKZ_CVTPD_EPU32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtpd_epu32(${quote(k)}, ${quote(a)})")
-    case MM256_CVTPD_EPU64(a) =>
+    case iDef@MM256_CVTPD_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtpd_epu64(${quote(a)})")
-    case MM256_MASK_CVTPD_EPU64(src, k, a) =>
+    case iDef@MM256_MASK_CVTPD_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtpd_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPD_EPU64(k, a) =>
+    case iDef@MM256_MASKZ_CVTPD_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtpd_epu64(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDPD_EPU64(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDPD_EPU64(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundpd_epu64(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTPD_EPU64(a) =>
+    case iDef@MM512_CVTPD_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtpd_epu64(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDPD_EPU64(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDPD_EPU64(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundpd_epu64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTPD_EPU64(src, k, a) =>
+    case iDef@MM512_MASK_CVTPD_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtpd_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDPD_EPU64(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDPD_EPU64(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundpd_epu64(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTPD_EPU64(k, a) =>
+    case iDef@MM512_MASKZ_CVTPD_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtpd_epu64(${quote(k)}, ${quote(a)})")
-    case MM_CVTPD_EPU64(a) =>
+    case iDef@MM_CVTPD_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtpd_epu64(${quote(a)})")
-    case MM_MASK_CVTPD_EPU64(src, k, a) =>
+    case iDef@MM_MASK_CVTPD_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtpd_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPD_EPU64(k, a) =>
+    case iDef@MM_MASKZ_CVTPD_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtpd_epu64(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTPH_PS(src, k, a) =>
+    case iDef@MM256_MASK_CVTPH_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtph_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPH_PS(k, a) =>
+    case iDef@MM256_MASKZ_CVTPH_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtph_ps(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTPH_PS(src, k, a) =>
+    case iDef@MM_MASK_CVTPH_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtph_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPH_PS(k, a) =>
+    case iDef@MM_MASKZ_CVTPH_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtph_ps(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVTPS_EPI32(src, k, a) =>
+    case iDef@MM256_MASK_CVTPS_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtps_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPS_EPI32(k, a) =>
+    case iDef@MM256_MASKZ_CVTPS_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtps_epi32(${quote(k)}, ${quote(a)})")
-    case MM_MASK_CVTPS_EPI32(src, k, a) =>
+    case iDef@MM_MASK_CVTPS_EPI32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtps_epi32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPS_EPI32(k, a) =>
+    case iDef@MM_MASKZ_CVTPS_EPI32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtps_epi32(${quote(k)}, ${quote(a)})")
-    case MM256_MASK_CVT_ROUNDPS_PH(src, k, a, rounding) =>
+    case iDef@MM256_MASK_CVT_ROUNDPS_PH(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvt_roundps_ph(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM256_MASK_CVTPS_PH(src, k, a, rounding) =>
+    case iDef@MM256_MASK_CVTPS_PH(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtps_ph(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM256_MASKZ_CVT_ROUNDPS_PH(k, a, rounding) =>
+    case iDef@MM256_MASKZ_CVT_ROUNDPS_PH(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvt_roundps_ph(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM256_MASKZ_CVTPS_PH(k, a, rounding) =>
+    case iDef@MM256_MASKZ_CVTPS_PH(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtps_ph(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM_MASK_CVT_ROUNDPS_PH(src, k, a, rounding) =>
+    case iDef@MM_MASK_CVT_ROUNDPS_PH(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvt_roundps_ph(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM_MASK_CVTPS_PH(src, k, a, rounding) =>
+    case iDef@MM_MASK_CVTPS_PH(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtps_ph(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM_MASKZ_CVT_ROUNDPS_PH(k, a, rounding) =>
+    case iDef@MM_MASKZ_CVT_ROUNDPS_PH(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvt_roundps_ph(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM_MASKZ_CVTPS_PH(k, a, rounding) =>
+    case iDef@MM_MASKZ_CVTPS_PH(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtps_ph(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM256_CVTPS_EPI64(a) =>
+    case iDef@MM256_CVTPS_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_epi64(${quote(a)})")
-    case MM256_MASK_CVTPS_EPI64(src, k, a) =>
+    case iDef@MM256_MASK_CVTPS_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtps_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPS_EPI64(k, a) =>
+    case iDef@MM256_MASKZ_CVTPS_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtps_epi64(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDPS_EPI64(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDPS_EPI64(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundps_epi64(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTPS_EPI64(a) =>
+    case iDef@MM512_CVTPS_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtps_epi64(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDPS_EPI64(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDPS_EPI64(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundps_epi64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTPS_EPI64(src, k, a) =>
+    case iDef@MM512_MASK_CVTPS_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtps_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDPS_EPI64(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDPS_EPI64(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundps_epi64(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTPS_EPI64(k, a) =>
+    case iDef@MM512_MASKZ_CVTPS_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtps_epi64(${quote(k)}, ${quote(a)})")
-    case MM_CVTPS_EPI64(a) =>
+    case iDef@MM_CVTPS_EPI64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtps_epi64(${quote(a)})")
-    case MM_MASK_CVTPS_EPI64(src, k, a) =>
+    case iDef@MM_MASK_CVTPS_EPI64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtps_epi64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPS_EPI64(k, a) =>
+    case iDef@MM_MASKZ_CVTPS_EPI64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtps_epi64(${quote(k)}, ${quote(a)})")
-    case MM256_CVTPS_EPU32(a) =>
+    case iDef@MM256_CVTPS_EPU32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_epu32(${quote(a)})")
-    case MM256_MASK_CVTPS_EPU32(src, k, a) =>
+    case iDef@MM256_MASK_CVTPS_EPU32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtps_epu32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPS_EPU32(k, a) =>
+    case iDef@MM256_MASKZ_CVTPS_EPU32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtps_epu32(${quote(k)}, ${quote(a)})")
-    case MM_CVTPS_EPU32(a) =>
+    case iDef@MM_CVTPS_EPU32(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtps_epu32(${quote(a)})")
-    case MM_MASK_CVTPS_EPU32(src, k, a) =>
+    case iDef@MM_MASK_CVTPS_EPU32(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtps_epu32(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPS_EPU32(k, a) =>
+    case iDef@MM_MASKZ_CVTPS_EPU32(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtps_epu32(${quote(k)}, ${quote(a)})")
-    case MM256_CVTPS_EPU64(a) =>
+    case iDef@MM256_CVTPS_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtps_epu64(${quote(a)})")
-    case MM256_MASK_CVTPS_EPU64(src, k, a) =>
+    case iDef@MM256_MASK_CVTPS_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtps_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTPS_EPU64(k, a) =>
+    case iDef@MM256_MASKZ_CVTPS_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtps_epu64(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDPS_EPU64(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDPS_EPU64(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundps_epu64(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTPS_EPU64(a) =>
+    case iDef@MM512_CVTPS_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtps_epu64(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDPS_EPU64(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDPS_EPU64(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundps_epu64(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTPS_EPU64(src, k, a) =>
+    case iDef@MM512_MASK_CVTPS_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtps_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDPS_EPU64(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDPS_EPU64(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundps_epu64(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTPS_EPU64(k, a) =>
+    case iDef@MM512_MASKZ_CVTPS_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtps_epu64(${quote(k)}, ${quote(a)})")
-    case MM_CVTPS_EPU64(a) =>
+    case iDef@MM_CVTPS_EPU64(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtps_epu64(${quote(a)})")
-    case MM_MASK_CVTPS_EPU64(src, k, a) =>
+    case iDef@MM_MASK_CVTPS_EPU64(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtps_epu64(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTPS_EPU64(k, a) =>
+    case iDef@MM_MASKZ_CVTPS_EPU64(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtps_epu64(${quote(k)}, ${quote(a)})")
-    case MM256_CVTEPI64_PD(a) =>
+    case iDef@MM256_CVTEPI64_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi64_pd(${quote(a)})")
-    case MM256_MASK_CVTEPI64_PD(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi64_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI64_PD(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI64_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi64_pd(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDEPI64_PD(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDEPI64_PD(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundepi64_pd(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTEPI64_PD(a) =>
+    case iDef@MM512_CVTEPI64_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtepi64_pd(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDEPI64_PD(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDEPI64_PD(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundepi64_pd(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTEPI64_PD(src, k, a) =>
+    case iDef@MM512_MASK_CVTEPI64_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtepi64_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDEPI64_PD(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDEPI64_PD(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundepi64_pd(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTEPI64_PD(k, a) =>
+    case iDef@MM512_MASKZ_CVTEPI64_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtepi64_pd(${quote(k)}, ${quote(a)})")
-    case MM_CVTEPI64_PD(a) =>
+    case iDef@MM_CVTEPI64_PD(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_cvtepi64_pd(${quote(a)})")
-    case MM_MASK_CVTEPI64_PD(src, k, a) =>
+    case iDef@MM_MASK_CVTEPI64_PD(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_mask_cvtepi64_pd(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM_MASKZ_CVTEPI64_PD(k, a) =>
+    case iDef@MM_MASKZ_CVTEPI64_PD(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm_maskz_cvtepi64_pd(${quote(k)}, ${quote(a)})")
-    case MM256_CVTEPI64_PS(a) =>
+    case iDef@MM256_CVTEPI64_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_cvtepi64_ps(${quote(a)})")
-    case MM256_MASK_CVTEPI64_PS(src, k, a) =>
+    case iDef@MM256_MASK_CVTEPI64_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_mask_cvtepi64_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM256_MASKZ_CVTEPI64_PS(k, a) =>
+    case iDef@MM256_MASKZ_CVTEPI64_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm256_maskz_cvtepi64_ps(${quote(k)}, ${quote(a)})")
-    case MM512_CVT_ROUNDEPI64_PS(a, rounding) =>
+    case iDef@MM512_CVT_ROUNDEPI64_PS(a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvt_roundepi64_ps(${quote(a)}, ${quote(rounding)})")
-    case MM512_CVTEPI64_PS(a) =>
+    case iDef@MM512_CVTEPI64_PS(a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_cvtepi64_ps(${quote(a)})")
-    case MM512_MASK_CVT_ROUNDEPI64_PS(src, k, a, rounding) =>
+    case iDef@MM512_MASK_CVT_ROUNDEPI64_PS(src, k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvt_roundepi64_ps(${quote(src)}, ${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASK_CVTEPI64_PS(src, k, a) =>
+    case iDef@MM512_MASK_CVTEPI64_PS(src, k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_mask_cvtepi64_ps(${quote(src)}, ${quote(k)}, ${quote(a)})")
-    case MM512_MASKZ_CVT_ROUNDEPI64_PS(k, a, rounding) =>
+    case iDef@MM512_MASKZ_CVT_ROUNDEPI64_PS(k, a, rounding) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvt_roundepi64_ps(${quote(k)}, ${quote(a)}, ${quote(rounding)})")
-    case MM512_MASKZ_CVTEPI64_PS(k, a) =>
+    case iDef@MM512_MASKZ_CVTEPI64_PS(k, a) =>
+      headers += iDef.header
       emitValDef(sym, s"_mm512_maskz_cvtepi64_ps(${quote(k)}, ${quote(a)})")
     case _ => super.emitNode(sym, rhs)
   }
