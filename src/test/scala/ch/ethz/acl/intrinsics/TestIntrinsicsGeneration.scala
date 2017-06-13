@@ -5,8 +5,8 @@ import org.scalatest.FunSpec
 class TestIntrinsicsGeneration extends FunSpec {
 
   describe("Generate intrinsics") {
-//    val zgen = new ch.ethz.acl.intrinsics.IntrinsicsGenerator
-//    zgen.generate()
+    val zgen = new ch.ethz.acl.intrinsics.IntrinsicsGenerator
+    zgen.generate()
   }
 
   describe("Vector product with intrinsics test") {

@@ -1,3 +1,29 @@
+/**
+  *  Intel Intrinsics for Lightweight Modular Staging Framework
+  *  https://github.com/ivtoskov/lms-intrinsics
+  *  Department of Computer Science, ETH Zurich, Switzerland
+  *      __                         _         __         _               _
+  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+  *
+  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *  http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+
 package ch.ethz.acl.intrinsics
 
 import java.io.{File, FileOutputStream, PrintStream}
@@ -594,6 +620,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     }
     val path = srcPath + name + ".scala"
     val out = new PrintStream(new FileOutputStream(path))
+    out.println(getLogo)
     out.println("package ch.ethz.acl.intrinsics")
     out.println()
     out.print(s"trait $name extends IntrinsicsBase")
@@ -619,25 +646,25 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     val nodes = (xml \\ "intrinsic").toList
 
     val intrinsics = parseIntrinsics(nodes)
-        createISA("MMX", intrinsics)
+//        createISA("MMX", intrinsics)
 
-        createISA("SSE", intrinsics)
+//        createISA("SSE", intrinsics)
         createISA("SSE2", intrinsics)
-        createISA("SSE3", intrinsics)
-        createISA("SSSE3", intrinsics)
-        createISA("SSE41", intrinsics)
-        createISA("SSE42", intrinsics)
-
-        createISA("AVX", intrinsics)
-        createISA("AVX2", intrinsics)
-
-        createISA("AVX512_KNC", intrinsics)
-        createISA("AVX512", intrinsics)
-        createISA("FMA", intrinsics)
-        createISA("KNC", intrinsics)
-        createISA("SVML", intrinsics)
-
-        createISA("Other", intrinsics)
+//        createISA("SSE3", intrinsics)
+//        createISA("SSSE3", intrinsics)
+//        createISA("SSE41", intrinsics)
+//        createISA("SSE42", intrinsics)
+//
+//        createISA("AVX", intrinsics)
+//        createISA("AVX2", intrinsics)
+//
+//        createISA("AVX512_KNC", intrinsics)
+//        createISA("AVX512", intrinsics)
+//        createISA("FMA", intrinsics)
+//        createISA("KNC", intrinsics)
+//        createISA("SVML", intrinsics)
+//
+//        createISA("Other", intrinsics)
   }
 
   def strToMicroArchType(s: String): MicroArchType = s match {
@@ -686,7 +713,8 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
   }
 
   def getPreamble = {
-    """package ch.ethz.acl.intrinsics
+    getLogo + """
+      |package ch.ethz.acl.intrinsics
       |
       |import ch.ethz.acl.intrinsics.MicroArchType._
       |import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
@@ -694,6 +722,35 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
       |import scala.reflect.SourceContext
       |import scala.language.higherKinds
       |
+    """.stripMargin
+  }
+
+  def getLogo = {
+    """/**
+      |  *  Intel Intrinsics for Lightweight Modular Staging Framework
+      |  *  https://github.com/ivtoskov/lms-intrinsics
+      |  *  Department of Computer Science, ETH Zurich, Switzerland
+      |  *      __                         _         __         _               _
+      |  *     / /____ ___   _____        (_)____   / /_ _____ (_)____   _____ (_)_____ _____
+      |  *    / // __ `__ \ / ___/______ / // __ \ / __// ___// // __ \ / ___// // ___// ___/
+      |  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
+      |  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
+      |  *
+      |  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+      |  *                     Alen Stojanov (astojanov@inf.ethz.ch)
+      |  *
+      |  *  Licensed under the Apache License, Version 2.0 (the "License");
+      |  *  you may not use this file except in compliance with the License.
+      |  *  You may obtain a copy of the License at
+      |  *
+      |  *  http://www.apache.org/licenses/LICENSE-2.0
+      |  *
+      |  *  Unless required by applicable law or agreed to in writing, software
+      |  *  distributed under the License is distributed on an "AS IS" BASIS,
+      |  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      |  *  See the License for the specific language governing permissions and
+      |  *  limitations under the License.
+      |  */
     """.stripMargin
   }
 
