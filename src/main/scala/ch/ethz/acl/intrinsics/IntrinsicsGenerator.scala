@@ -500,7 +500,8 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     }
 
     intrinsics foreach { in =>
-      out.println(s"    case ${in.getDefName}(${in.getParams}) =>")
+      out.println(s"    case iDef@${in.getDefName}(${in.getParams}) =>")
+      out.println("      headers += iDef.header")
       if (in.getReturnType == "Unit")
         out.println("      stream.println(%s)".format(s"""s\"${in.name}(${in.nonOffsetParams.map(paramPlusOffset).mkString(", ")});\""""))
       else
@@ -648,25 +649,25 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     val nodes = (xml \\ "intrinsic").toList
 
     val intrinsics = parseIntrinsics(nodes)
-//        createISA("MMX", intrinsics)
+        createISA("MMX", intrinsics)
 
-//        createISA("SSE", intrinsics)
+        createISA("SSE", intrinsics)
         createISA("SSE2", intrinsics)
-//        createISA("SSE3", intrinsics)
-//        createISA("SSSE3", intrinsics)
-//        createISA("SSE41", intrinsics)
-//        createISA("SSE42", intrinsics)
-//
-//        createISA("AVX", intrinsics)
-//        createISA("AVX2", intrinsics)
-//
-//        createISA("AVX512_KNC", intrinsics)
-//        createISA("AVX512", intrinsics)
-//        createISA("FMA", intrinsics)
-//        createISA("KNC", intrinsics)
-//        createISA("SVML", intrinsics)
-//
-//        createISA("Other", intrinsics)
+        createISA("SSE3", intrinsics)
+        createISA("SSSE3", intrinsics)
+        createISA("SSE41", intrinsics)
+        createISA("SSE42", intrinsics)
+
+        createISA("AVX", intrinsics)
+        createISA("AVX2", intrinsics)
+
+        createISA("AVX512_KNC", intrinsics)
+        createISA("AVX512", intrinsics)
+        createISA("FMA", intrinsics)
+        createISA("KNC", intrinsics)
+        createISA("SVML", intrinsics)
+
+        createISA("Other", intrinsics)
   }
 
   def strToMicroArchType(s: String): MicroArchType = s match {
