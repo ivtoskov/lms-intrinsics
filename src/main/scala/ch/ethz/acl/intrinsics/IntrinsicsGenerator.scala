@@ -350,8 +350,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     if (parent == "") statsOutput.println(s"$isa statistics:\n\n")
 
     out.println(getPreamble)
-    val optionalProtectedModifier = if (parent == "") "" else "protected "
-    out.println(optionalProtectedModifier + "trait " + isa + " extends IntrinsicsBase {")
+    out.println("trait " + isa + " extends IntrinsicsBase {")
 
     var numberOfPointerArguments = 0
     var pointerArgumentsNames: List[String] = List()
@@ -456,7 +455,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
 
     // Generate trait for code generation
     out.println(
-      s"""${optionalProtectedModifier}trait CGen$isa extends CGenIntrinsics {
+      s"""trait CGen$isa extends CGenIntrinsics {
           |
           |  val IR: ${if (parent == "") isa else parent}
           |  import IR._
@@ -620,8 +619,6 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     val nodes = (xml \\ "intrinsic").toList
 
     val intrinsics = parseIntrinsics(nodes)
-    //    generateISAs(ch.ethz.acl.intrinsics)
-
         createISA("MMX", intrinsics)
 
         createISA("SSE", intrinsics)

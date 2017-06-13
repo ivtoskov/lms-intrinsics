@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait SSE201 extends IntrinsicsBase {
+trait SSE201 extends IntrinsicsBase {
   /**
    * Compare the lower double-precision (64-bit) floating-point element in "a" and
    * "b" for less-than-or-equal, and return the boolean result (0 or 1). This
@@ -1316,11 +1316,10 @@ protected trait SSE201 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM512_CVTSD_F64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM512_CVTSI512_SI32 (a), u, es) =>
       reflectMirrored(Reflect(MM512_CVTSI512_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenSSE201 extends CGenIntrinsics {
+trait CGenSSE201 extends CGenIntrinsics {
 
   val IR: SSE2
   import IR._

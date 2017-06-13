@@ -7,7 +7,7 @@ import scala.reflect.SourceContext
 import scala.language.higherKinds
 
     
-protected trait SSE200 extends IntrinsicsBase {
+trait SSE200 extends IntrinsicsBase {
   /**
    * Provide a hint to the processor that the code sequence is a spin-wait loop.
    * This can help improve the performance and power consumption of spin-wait
@@ -3719,19 +3719,17 @@ protected trait SSE200 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_UCOMIEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_UCOMILT_SD (a, b), u, es) =>
       reflectMirrored(Reflect(MM_UCOMILT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
-protected trait CGenSSE200 extends CGenIntrinsics {
+trait CGenSSE200 extends CGenIntrinsics {
 
   val IR: SSE2
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case iDef@MM_PAUSE() =>
-      headers += iDef.header
+    case MM_PAUSE() =>
       stream.println(s"_mm_pause();")
     case MM_CLFLUSH(p, pOffset) =>
       stream.println(s"_mm_clflush(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")
