@@ -161,6 +161,7 @@ trait IntrinsicsArrays extends IntrinsicsBase with ArrayOps {
 }
 
 trait CGenIntrinsics extends CCodegen {
+  val headers = scala.collection.mutable.Set[String]()
 
   val IR: IntrinsicsBase
   import IR._
@@ -184,4 +185,6 @@ trait CGenIntrinsics extends CCodegen {
   override def isPrimitiveType[T](m: Typ[T]): Boolean = {
     isIntrinsicType(m) || super.isPrimitiveType(m)
   }
+
+  def getHeaders = headers
 }

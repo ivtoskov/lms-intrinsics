@@ -3719,6 +3719,7 @@ protected trait SSE200 extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_UCOMIEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_UCOMILT_SD (a, b), u, es) =>
       reflectMirrored(Reflect(MM_UCOMILT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]] // why??
 }
 
@@ -3729,7 +3730,8 @@ protected trait CGenSSE200 extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case MM_PAUSE() =>
+    case iDef@MM_PAUSE() =>
+      headers += iDef.header
       stream.println(s"_mm_pause();")
     case MM_CLFLUSH(p, pOffset) =>
       stream.println(s"_mm_clflush(${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))});")

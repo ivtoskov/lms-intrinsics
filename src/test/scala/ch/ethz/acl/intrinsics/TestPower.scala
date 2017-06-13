@@ -13,7 +13,7 @@ class TestPower extends FunSpec {
 }
 
 
-class PowerIr extends TestIr with AVX with AVX2 { q =>
+class PowerIr extends TestIr with AVX with AVX2 with IntrinsicsArrays { q =>
 
   case class Address[T:Typ](of: Exp[T]) extends Def[Array[T]]
 

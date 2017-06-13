@@ -15,7 +15,7 @@ class TestIntrinsicsGeneration extends FunSpec {
   }
 }
 
-class VectorProductIr extends SSE2 with TestIr { q =>
+class VectorProductIr extends SSE2 with TestIr with IntrinsicsArrays { q =>
 
   def vecProdIntrinsics(
                          arr1:   Rep[Array[Double]],

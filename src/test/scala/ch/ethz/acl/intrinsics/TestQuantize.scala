@@ -12,7 +12,7 @@ class TestQuantize extends FunSpec {
 
 }
 
-class QuantizeIr extends TestIr with AVX { q =>
+class QuantizeIr extends TestIr with AVX with IntrinsicsArrays { q =>
   val codegen = new BaseTestCgen with CGenAVX {
     override val IR: q.type = q
 
