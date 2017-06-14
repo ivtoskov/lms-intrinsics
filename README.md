@@ -22,11 +22,14 @@ This implementation of `lms-intrinsics` is work done by [Ivaylo Toskov](https://
 ```Scala
 resolvers += Resolver.sonatypeRepo("snapshots")
 
+// LMS dependency
+libraryDependencies += "org.scala-lang.lms" % "lms-core_2.11" % "1.0.0-SNAPSHOT"
+
 // support for unsigned primives in Scala
 libraryDependencies += "ch.ethz.acl" %% "scala-unsigned" % "0.1-SNAPSHOT"
 
 // the main lms-intrinsics package
-libraryDependencies += "ch.ethz.acl" %% "lms-intrinsics" % "0.0.1-SNAPSHOT"
+libraryDependencies += "ch.ethz.acl" %% "lms-intrinsics" % "0.0.2-SNAPSHOT"
 ```
 If you like to use the latest version of the `lms-intrinsics` GitHub repository, add project dependency in your `Build.scala` file:
 
