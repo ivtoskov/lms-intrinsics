@@ -42,7 +42,39 @@ Note that the `lms-intrinsics` package contains the definition of more than 5000
 
 # Quick Start
 
-A minimal example of the intrinsics is available in the [lms-intrinsics-example](https://github.com/ivtoskov/lms-intrinsics-example) repository.
+A minimal example of how `lms-intrinsics` can be used, can be illustrated in 3 steps:
+
+Import LMS, the support for unsigned primives, and import `lms-intrinsics`:
+
+```Scala
+import scala.lms.common._
+import ch.ethz.acl.passera.unsigned._
+import ch.ethz.acl.intrinsics._
+```
+
+Then, create an IR that spports AVX and AVX2 instructons:
+
+``` Scala
+val AVX2_IR = new BaseExp
+  with ...
+  with IntrinsicsBase
+  with AVX
+  with AVX2 { }
+```  
+
+Stage a simple function that takes two arrays of floats, a and b asarguments. Extracts the first 8 elements from the first array, adds them, and writes the result to the first 8 elements of array b:
+  
+```Scala  
+import AVX2_IR._
+def add_first_8elements(a: Rep[Array[Float]], b: Rep[Array[Float]]): Rep[Unit] = {
+  val b_write = reflectMutableSym(b.asInstanceOf[Sym[Array[Float]]])
+  val tmp1 = _mm256_loadu_ps(a, Const(0))
+  val tmp2 = _mm256_add_ps(tmp1, tmp1)
+  _mm256_storeu_ps(b_write, tmp2, Const(0))
+}
+```
+
+That's it. A complete example reflecting these steps is available in the [lms-intrinsics-example](https://github.com/ivtoskov/lms-intrinsics-example) repository.
 
 
 # Contribution policy
