@@ -212,5 +212,9 @@ trait CGenIntrinsics extends CCodegen {
     isIntrinsicType(m) || super.isPrimitiveType(m)
   }
 
-  def getHeaders = headers
+  def getIntrinsicsHeaders() = headers
+
+  def resetIntrinsicsHeaders() = {
+    headers.clear()
+  }
 }
