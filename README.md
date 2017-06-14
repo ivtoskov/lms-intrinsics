@@ -37,7 +37,7 @@ If you like to use the latest version of the `lms-intrinsics` GitHub repository,
 .dependsOn(RootProject(uri("https://github.com/ivtoskov/lms-intrinsics")))
 ```
 
-Note that the `lms-intrinsics` package contains the definition of more than 5000 Intel Intrinsics and other SIMD functions, therefore compilation time with Scala can be quite substential.
+Note that the `lms-intrinsics` package contains the definition of more than 5000 Intel Intrinsics and other SIMD functions, therefore compilation time with Scala can be quite substantial.
 
 
 # Quick Start
