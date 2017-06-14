@@ -739,7 +739,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
       |  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
       |  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
       |  *
-      |  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
+      |  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@student.ethz.ch)
       |  *                     Alen Stojanov (astojanov@inf.ethz.ch)
       |  *
       |  *  Licensed under the Apache License, Version 2.0 (the "License");
