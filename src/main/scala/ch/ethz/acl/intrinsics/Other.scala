@@ -35,19 +35,6 @@ import scala.language.higherKinds
     
 trait Other extends IntrinsicsBase {
   /**
-   * Fetch the line of data from memory that contains address "p" to a location in
-   * the cache heirarchy specified by the locality hint "i".
-   * p: char const*, i: int, pOffset: int
-   */
-  case class MM_PREFETCH[A[_], U:Integral](p: Exp[A[Byte]], i: Exp[Int], pOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.GeneralSupport)
-    val intrinsicType = List()
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "xmmintrin.h"
-  }
-      
-
-  /**
    * Allocate "size" bytes of memory, aligned to the alignment specified in
    * "align", and return a pointer to the allocated memory. "_mm_free" should be
    * used to free memory that is allocated with "_mm_malloc".
@@ -2101,10 +2088,6 @@ trait Other extends IntrinsicsBase {
   }
       
 
-  def _mm_prefetch[A[_], U:Integral](p: Exp[A[Byte]], i: Exp[Int], pOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(p)(MM_PREFETCH(p, i, pOffset)(implicitly[Integral[U]], cont))
-  }
-            
   def _mm_malloc(size: Exp[Int], align: Exp[Int]): Exp[VoidPointer] = {
     reflectMutable(MM_MALLOC(size, align))
   }
@@ -2702,8 +2685,6 @@ trait Other extends IntrinsicsBase {
   }
             
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case iDef@MM_PREFETCH (p, i, pOffset) =>
-      _mm_prefetch(iDef.cont.applyTransformer(p, f), iDef.cont.applyTransformer(i, f), iDef.cont.applyTransformer(pOffset, f))(iDef.integralType, iDef.cont)
     case MM_MALLOC (size, align) =>
       _mm_malloc(f(size), f(align))
     case iDef@MM_FREE (mem_addr, mem_addrOffset) =>
@@ -3003,8 +2984,6 @@ trait Other extends IntrinsicsBase {
     case MM_TZCNT_64 (a) =>
       _mm_tzcnt_64(f(a))
 
-    case Reflect(iDef@MM_PREFETCH (p, i, pOffset), u, es) =>
-      reflectMirrored(Reflect(MM_PREFETCH (iDef.cont.applyTransformer(p, f), iDef.cont.applyTransformer(i, f), iDef.cont.applyTransformer(pOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MALLOC (size, align), u, es) =>
       reflectMirrored(Reflect(MM_MALLOC (f(size), f(align)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(iDef@MM_FREE (mem_addr, mem_addrOffset), u, es) =>
@@ -3314,9 +3293,6 @@ trait CGenOther extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case iDef@MM_PREFETCH(p, i, pOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_prefetch((char const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
     case iDef@MM_MALLOC(size, align) =>
       headers += iDef.header
       emitValDef(sym, s"_mm_malloc(${quote(size)}, ${quote(align)})")

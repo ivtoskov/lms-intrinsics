@@ -193,19 +193,6 @@ trait SSE extends IntrinsicsBase {
       
 
   /**
-   * Fetch the line of data from memory that contains address "p" to a location in
-   * the cache heirarchy specified by the locality hint "i".
-   * p: char const*, i: int, pOffset: int
-   */
-  case class MM_PREFETCH[A[_], U:Integral](p: Exp[A[Byte]], i: Exp[Int], pOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.GeneralSupport)
-    val intrinsicType = List()
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "xmmintrin.h"
-  }
-      
-
-  /**
    * Perform a serializing operation on all store-to-memory instructions that were
    * issued prior to this instruction. Guarantees that every store instruction that
    * precedes, in program order, is globally visible before any store instruction
@@ -2171,10 +2158,6 @@ trait SSE extends IntrinsicsBase {
     reflectEffect(MM_SET_FLUSH_ZERO_MODE(a))
   }
             
-  def _mm_prefetch[A[_], U:Integral](p: Exp[A[Byte]], i: Exp[Int], pOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(p)(MM_PREFETCH(p, i, pOffset)(implicitly[Integral[U]], cont))
-  }
-            
   def _mm_sfence(): Exp[Unit] = {
     reflectEffect(MM_SFENCE())
   }
@@ -2766,8 +2749,6 @@ trait SSE extends IntrinsicsBase {
       _MM_GET_FLUSH_ZERO_MODE()
     case MM_SET_FLUSH_ZERO_MODE (a) =>
       _MM_SET_FLUSH_ZERO_MODE(f(a))
-    case iDef@MM_PREFETCH (p, i, pOffset) =>
-      _mm_prefetch(iDef.cont.applyTransformer(p, f), iDef.cont.applyTransformer(i, f), iDef.cont.applyTransformer(pOffset, f))(iDef.integralType, iDef.cont)
     case MM_SFENCE () =>
       _mm_sfence()
     case MM_MAX_PI16 (a, b) =>
@@ -3075,8 +3056,6 @@ trait SSE extends IntrinsicsBase {
       reflectMirrored(Reflect(MM_GET_FLUSH_ZERO_MODE (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_SET_FLUSH_ZERO_MODE (a), u, es) =>
       reflectMirrored(Reflect(MM_SET_FLUSH_ZERO_MODE (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_PREFETCH (p, i, pOffset), u, es) =>
-      reflectMirrored(Reflect(MM_PREFETCH (iDef.cont.applyTransformer(p, f), iDef.cont.applyTransformer(i, f), iDef.cont.applyTransformer(pOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_SFENCE (), u, es) =>
       reflectMirrored(Reflect(MM_SFENCE (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MAX_PI16 (a, b), u, es) =>
@@ -3405,9 +3384,6 @@ trait CGenSSE extends CGenIntrinsics {
     case iDef@MM_SET_FLUSH_ZERO_MODE(a) =>
       headers += iDef.header
       stream.println(s"_MM_SET_FLUSH_ZERO_MODE(${quote(a)});")
-    case iDef@MM_PREFETCH(p, i, pOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_prefetch((char const*) ${quote(p) + (if(pOffset == Const(0)) "" else " + " + quote(pOffset))}, ${quote(i)});")
     case iDef@MM_SFENCE() =>
       headers += iDef.header
       stream.println(s"_mm_sfence();")
