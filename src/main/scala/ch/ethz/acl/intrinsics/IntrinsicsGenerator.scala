@@ -31,6 +31,7 @@ import java.io.{File, FileOutputStream, PrintStream}
 import ch.ethz.acl.intrinsics.MicroArchType._
 import ch.ethz.acl.passera.unsigned.{UByte, UInt, ULong, UShort}
 
+import scala.language.postfixOps
 import scala.xml.{Node, XML}
 import scala.lms.common.{ArrayOpsExp, BooleanOpsExp, PrimitiveOpsExp, SeqOpsExp}
 
@@ -46,6 +47,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
   val resourcePath = rootPath + "/src/main/resources/"
   val xmlFile = resourcePath + "data-3.3.16.xml"
   val nrIntrinsicsPerFile = 175
+  var intrinsicsNames = scala.collection.mutable.Set[String]()
 
   case class Parameter (varName: String, pType: String)
 
@@ -260,6 +262,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     "__m128d const *" -> typ[Array[__m128d]],
 
     "__m128i"         -> typ[__m128i],
+    "_m128i *"        -> typ[Array[__m128i]],
     "__m128i*"        -> typ[Array[__m128i]],
     "__m128i *"       -> typ[Array[__m128i]],
     "const __m128i*"  -> typ[Array[__m128i]],
@@ -277,13 +280,16 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
     "__m256i const*"  -> typ[Array[__m256i]],
 
     "__m512"          -> typ[__m512],
+    "_m512"          -> typ[__m512],
     "__m512 *"        -> typ[Array[__m512]],
     "__m512d"         -> typ[__m512d],
     "__m512d *"       -> typ[Array[__m512d]],
     "__m512i"         -> typ[__m512i],
+    "_m512i"         -> typ[__m512i],
 
     "__mmask8"        -> typ[Int],
     "__mmask16"       -> typ[Int],
+    "_mmask16"       -> typ[Int],
     "__mmask16 *"     -> typ[Array[Int]],
     "__mmask32"       -> typ[Int],
     "__mmask64"       -> typ[Long],
@@ -490,13 +496,15 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
          |  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        """.stripMargin)
 
-    def paramPlusOffset(parameter: Parameter) = {
-      val optionalCast = if (isArrayParam(parameter)) s"(${parameter.pType}) " else ""
-      val basis = optionalCast + "${quote(" + parameter.varName + ")"
-      if (isArrayParam(parameter))
-        basis + " + (if(" + parameter.varName + "Offset == Const(0)) \"\" else \" + \" + quote(" + parameter.varName + "Offset))}"
-      else
-        basis + "}"
+    def paramPlusOffset(parameter: Parameter): String = {
+      if (!isArrayParam(parameter)) {
+        return "${quote(" + parameter.varName + ")}"
+      }
+
+      val cast = s"(${parameter.pType}) "
+      val basis = "${quote(" + parameter.varName + ")"
+      val offset = " + (if(" + parameter.varName + "Offset == Const(0)) \"\" else \" + \" + quote(" + parameter.varName + "Offset))}"
+      cast + s"($basis $offset)"
     }
 
     intrinsics foreach { in =>
@@ -553,7 +561,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
             val varName = santizeParamName(getAttribute(param, "varname"))
             Some(Parameter(varName, pType))
         }
-      }
+      } distinct
       val arrayParams = primitiveParams.filter(isArrayParam).map(p => Parameter(p.varName + "Offset", "int"))
 
       val performance = (node \ "perfdata").toList.flatMap({ perf =>
@@ -583,7 +591,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
 
       // Cleanup
       val tech = techRaw.replace(".", "").replace("-", "").replace("/", "_")
-      val description = descriptionList.head
+      val description = descriptionList.headOption.getOrElse("No description available for this intrinsic")
       val header = headerList.head
 
       Intrinsic (node, name, tech, CPUID, returnType, intrinsicType, category,
@@ -594,7 +602,13 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
   }
 
   def createISA(name: String, allIntrinsics: List[Intrinsic]) = {
-    val intrinsics = allIntrinsics.filter(in => in.tech.equals(name))
+    val intrinsics = allIntrinsics
+      .filter(in => in.tech.equals(name) && !intrinsicsNames.contains(in.name))
+      .groupBy(_.name)
+      .mapValues(_.head)
+      .values
+      .toList
+    intrinsicsNames ++= intrinsics.map(in => in.name)
     if (intrinsics.size < nrIntrinsicsPerFile) {
       val path = srcPath + name + ".scala"
       val output = new PrintStream(new FileOutputStream(path))
@@ -739,7 +753,7 @@ protected class IntrinsicsGenerator extends IntrinsicsBase with ArrayOpsExp with
       |  *   / // / / / / /(__  )/_____// // / / // /_ / /   / // / / /(__  )/ // /__ (__  )
       |  *  /_//_/ /_/ /_//____/       /_//_/ /_/ \__//_/   /_//_/ /_//____//_/ \___//____/
       |  *
-      |  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@student.ethz.ch)
+      |  *  Copyright (C) 2017 Ivaylo Toskov (itoskov@ethz.ch)
       |  *                     Alen Stojanov (astojanov@inf.ethz.ch)
       |  *
       |  *  Licensed under the Apache License, Version 2.0 (the "License");

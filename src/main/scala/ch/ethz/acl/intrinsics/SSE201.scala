@@ -35,12 +35,172 @@ import scala.language.higherKinds
     
 trait SSE201 extends IntrinsicsBase {
   /**
-   * Compare the lower double-precision (64-bit) floating-point element in "a" and
-   * "b" for less-than-or-equal, and return the boolean result (0 or 1). This
-   * instruction will not signal an exception for QNaNs.
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-less-than-or-equal, and store the results in "dst".
    * a: __m128d, b: __m128d
    */
-  case class MM_UCOMILE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
+  case class MM_CMPNLE_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Convert packed double-precision (64-bit) floating-point elements in "a" to
+   * packed 32-bit integers with truncation, and store the results in "dst".
+   * a: __m128d
+   */
+  case class MM_CVTTPD_PI32(a: Exp[__m128d]) extends IntrinsicsDef[__m64] {
+    val category = List(IntrinsicsCategory.Convert)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Multiply the packed unsigned 16-bit integers in "a" and "b", producing
+   * intermediate 32-bit integers, and store the high 16 bits of the intermediate
+   * integers in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_MULHI_EPU16(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b" to see if neither is NaN, and store the results in "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPORD_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Shift packed 16-bit integers in "a" right by "imm8" while shifting in zeros,
+   * and store the results in "dst".
+   * a: __m128i, imm8: int
+   */
+  case class MM_SRLI_EPI16(a: Exp[__m128i], imm8: Exp[Int]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Shift)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare the lower double-precision (64-bit) floating-point elements in "a" and
+   * "b", store the maximum value in the lower element of "dst", and copy the upper
+   * element from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_MAX_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.SpecialMathFunctions)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Broadcast 16-bit integer "a" to all all elements of "dst". This intrinsic may
+   * generate "vpbroadcastw".
+   * a: short
+   */
+  case class MM_SET1_EPI16(a: Exp[Short]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Store the lower double-precision (64-bit) floating-point element from "a" into
+   * memory. "mem_addr" does not need to be aligned on any particular boundary.
+   * mem_addr: double*, a: __m128d, mem_addrOffset: int
+   */
+  case class MM_STORE_SD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
+    val category = List(IntrinsicsCategory.Store)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Subtract packed 32-bit integers in "b" from packed 32-bit integers in "a", and
+   * store the results in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_SUB_EPI32(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Load a double-precision (64-bit) floating-point element from memory into the
+   * upper element of "dst", and copy the lower element from "a" to "dst".
+   * "mem_addr" does not need to be aligned on any particular boundary.
+   * a: __m128d, mem_addr: double const*, mem_addrOffset: int
+   */
+  case class MM_LOADH_PD[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
+    val category = List(IntrinsicsCategory.Load)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Shuffle 16-bit integers in the high 64 bits of "a" using the control in
+   * "imm8". Store the results in the high 64 bits of "dst", with the low 64 bits
+   * being copied from from "a" to "dst".
+   * a: __m128i, imm8: int
+   */
+  case class MM_SHUFFLEHI_EPI16(a: Exp[__m128i], imm8: Exp[Int]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Swizzle)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Shift packed 32-bit integers in "a" left by "count" while shifting in zeros,
+   * and store the results in "dst".
+   * a: __m128i, count: __m128i
+   */
+  case class MM_SLL_EPI32(a: Exp[__m128i], count: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Shift)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare the lower double-precision (64-bit) floating-point elements in "a" and
+   * "b" to see if neither is NaN, store the result in the lower element of "dst",
+   * and copy the upper element from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPORD_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
     val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
@@ -63,12 +223,23 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Compare the lower double-precision (64-bit) floating-point element in "a" and
-   * "b" for greater-than-or-equal, and return the boolean result (0 or 1). This
-   * instruction will not signal an exception for QNaNs.
+   * Return vector of type __m128d with all elements set to zero.
+
+   */
+  case class MM_SETZERO_PD() extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-equal, and store the results in "dst".
    * a: __m128d, b: __m128d
    */
-  case class MM_UCOMIGE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
+  case class MM_CMPNEQ_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
     val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
@@ -77,13 +248,25 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Compare the lower double-precision (64-bit) floating-point element in "a" and
-   * "b" for not-equal, and return the boolean result (0 or 1). This instruction
-   * will not signal an exception for QNaNs.
+   * Subtract packed 8-bit integers in "b" from packed 8-bit integers in "a" using
+   * saturation, and store the results in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_SUBS_EPI8(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compute the bitwise NOT of packed double-precision (64-bit) floating-point
+   * elements in "a" and then AND with "b", and store the results in "dst".
    * a: __m128d, b: __m128d
    */
-  case class MM_UCOMINEQ_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
-    val category = List(IntrinsicsCategory.Compare)
+  case class MM_ANDNOT_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Logical)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -91,14 +274,80 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Convert packed double-precision (64-bit) floating-point elements in "a" to
-   * packed single-precision (32-bit) floating-point elements, and store the
-   * results in "dst".
-   * a: __m128d
+   * Copy 32-bit integer "a" to the lower elements of "dst", and zero the upper
+   * elements of "dst".
+   * a: int
    */
-  case class MM_CVTPD_PS(a: Exp[__m128d]) extends IntrinsicsDef[__m128] {
+  case class MM_CVTSI32_SI128(a: Exp[Int]) extends IntrinsicsDef[__m128i] {
     val category = List(IntrinsicsCategory.Convert)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Load a double-precision (64-bit) floating-point element from memory into both
+   * elements of "dst".
+   * mem_addr: double const*, mem_addrOffset: int
+   */
+  case class MM_LOAD1_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
+    val category = List(IntrinsicsCategory.Load)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Return vector of type __m128i with all elements set to zero.
+
+   */
+  case class MM_SETZERO_SI128() extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Perform a serializing operation on all load-from-memory and store-to-memory
+   * instructions that were issued prior to this instruction. Guarantees that every
+   * memory access that precedes, in program order, the memory fence instruction is
+   * globally visible before any memory instruction which follows the fence in
+   * program order.
+
+   */
+  case class MM_MFENCE() extends IntrinsicsDef[Unit] {
+    val category = List(IntrinsicsCategory.GeneralSupport)
+    val intrinsicType = List()
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed unsigned 8-bit integers in "a" and "b", and store packed
+   * maximum values in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_MAX_EPU8(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.SpecialMathFunctions)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Broadcast 32-bit integer "a" to all elements of "dst". This intrinsic may
+   * generate "vpbroadcastd".
+   * a: int
+   */
+  case class MM_SET1_EPI32(a: Exp[Int]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
   }
@@ -119,66 +368,12 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Convert packed double-precision (64-bit) floating-point elements in "a" to
-   * packed 32-bit integers, and store the results in "dst".
-   * a: __m128d
+   * Compare the lower double-precision (64-bit) floating-point element in "a" and
+   * "b" for equality, and return the boolean result (0 or 1).
+   * a: __m128d, b: __m128d
    */
-  case class MM_CVTPD_EPI32(a: Exp[__m128d]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 32-bit integer, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTSD_SI32(a: Exp[__m128d]) extends IntrinsicsDef[Int] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 64-bit integer, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTSD_SI64(a: Exp[__m128d]) extends IntrinsicsDef[Long] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 64-bit integer, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTSD_SI64X(a: Exp[__m128d]) extends IntrinsicsDef[Long] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "b" to a
-   * single-precision (32-bit) floating-point element, store the result in the
-   * lower element of "dst", and copy the upper element from "a" to the upper
-   * element of "dst".
-   * a: __m128, b: __m128d
-   */
-  case class MM_CVTSD_SS(a: Exp[__m128], b: Exp[__m128d]) extends IntrinsicsDef[__m128] {
-    val category = List(IntrinsicsCategory.Convert)
+  case class MM_COMIEQ_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
+    val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -186,393 +381,12 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Copy the lower double-precision (64-bit) floating-point element of "a" to
-   * "dst".
-   * a: __m128d
+   * Set packed 64-bit integers in "dst" with the supplied values.
+   * e1: __m64, e0: __m64
    */
-  case class MM_CVTSD_F64(a: Exp[__m128d]) extends IntrinsicsDef[Double] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower single-precision (32-bit) floating-point element in "b" to a
-   * double-precision (64-bit) floating-point element, store the result in the
-   * lower element of "dst", and copy the upper element from "a" to the upper
-   * element of "dst".
-   * a: __m128d, b: __m128
-   */
-  case class MM_CVTSS_SD(a: Exp[__m128d], b: Exp[__m128]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert packed double-precision (64-bit) floating-point elements in "a" to
-   * packed 32-bit integers with truncation, and store the results in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTTPD_EPI32(a: Exp[__m128d]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 32-bit integer with truncation, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTTSD_SI32(a: Exp[__m128d]) extends IntrinsicsDef[Int] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 64-bit integer with truncation, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTTSD_SI64(a: Exp[__m128d]) extends IntrinsicsDef[Long] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert the lower double-precision (64-bit) floating-point element in "a" to a
-   * 64-bit integer with truncation, and store the result in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTTSD_SI64X(a: Exp[__m128d]) extends IntrinsicsDef[Long] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert packed single-precision (32-bit) floating-point elements in "a" to
-   * packed 32-bit integers, and store the results in "dst".
-   * a: __m128
-   */
-  case class MM_CVTPS_EPI32(a: Exp[__m128]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert packed single-precision (32-bit) floating-point elements in "a" to
-   * packed 32-bit integers with truncation, and store the results in "dst".
-   * a: __m128
-   */
-  case class MM_CVTTPS_EPI32(a: Exp[__m128]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert packed double-precision (64-bit) floating-point elements in "a" to
-   * packed 32-bit integers, and store the results in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTPD_PI32(a: Exp[__m128d]) extends IntrinsicsDef[__m64] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Convert packed double-precision (64-bit) floating-point elements in "a" to
-   * packed 32-bit integers with truncation, and store the results in "dst".
-   * a: __m128d
-   */
-  case class MM_CVTTPD_PI32(a: Exp[__m128d]) extends IntrinsicsDef[__m64] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Copy double-precision (64-bit) floating-point element "a" to the lower element
-   * of "dst", and zero the upper element.
-   * a: double
-   */
-  case class MM_SET_SD(a: Exp[Double]) extends IntrinsicsDef[__m128d] {
+  case class MM_SET_EPI64(e1: Exp[__m64], e0: Exp[__m64]) extends IntrinsicsDef[__m128i] {
     val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Broadcast double-precision (64-bit) floating-point value "a" to all elements
-   * of "dst".
-   * a: double
-   */
-  case class MM_SET1_PD(a: Exp[Double]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Broadcast double-precision (64-bit) floating-point value "a" to all elements
-   * of "dst".
-   * a: double
-   */
-  case class MM_SET_PD1(a: Exp[Double]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Set packed double-precision (64-bit) floating-point elements in "dst" with the
-   * supplied values.
-   * e1: double, e0: double
-   */
-  case class MM_SET_PD(e1: Exp[Double], e0: Exp[Double]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Set packed double-precision (64-bit) floating-point elements in "dst" with the
-   * supplied values in reverse order.
-   * e1: double, e0: double
-   */
-  case class MM_SETR_PD(e1: Exp[Double], e0: Exp[Double]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Return vector of type __m128d with all elements set to zero.
-
-   */
-  case class MM_SETZERO_PD() extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.IntrinsicsSet)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load 128-bits (composed of 2 packed double-precision (64-bit) floating-point
-   * elements) from memory into "dst".
-   * 	"mem_addr" must be aligned on a 16-byte
-   * boundary or a general-protection exception may be generated.
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOAD_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load a double-precision (64-bit) floating-point element from memory into both
-   * elements of "dst".
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOAD1_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load a double-precision (64-bit) floating-point element from memory into both
-   * elements of "dst".
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOAD_PD1[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load 2 double-precision (64-bit) floating-point elements from memory into
-   * "dst" in reverse order. mem_addr must be aligned on a 16-byte boundary or a
-   * general-protection exception may be generated.
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOADR_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load 128-bits (composed of 2 packed double-precision (64-bit) floating-point
-   * elements) from memory into "dst".
-   * 	"mem_addr" does not need to be aligned on
-   * any particular boundary.
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOADU_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load a double-precision (64-bit) floating-point element from memory into the
-   * lower of "dst", and zero the upper element. "mem_addr" does not need to be
-   * aligned on any particular boundary.
-   * mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOAD_SD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load a double-precision (64-bit) floating-point element from memory into the
-   * upper element of "dst", and copy the lower element from "a" to "dst".
-   * "mem_addr" does not need to be aligned on any particular boundary.
-   * a: __m128d, mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOADH_PD[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Load a double-precision (64-bit) floating-point element from memory into the
-   * lower element of "dst", and copy the upper element from "a" to "dst".
-   * "mem_addr" does not need to be aligned on any particular boundary.
-   * a: __m128d, mem_addr: double const*, mem_addrOffset: int
-   */
-  case class MM_LOADL_PD[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
-    val category = List(IntrinsicsCategory.Load)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store 128-bits (composed of 2 packed double-precision (64-bit) floating-point
-   * elements) from "a" into memory using a non-temporal memory hint.
-   * 	"mem_addr"
-   * must be aligned on a 16-byte boundary or a general-protection exception may be
-   * generated.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STREAM_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store the lower double-precision (64-bit) floating-point element from "a" into
-   * memory. "mem_addr" does not need to be aligned on any particular boundary.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STORE_SD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store the lower double-precision (64-bit) floating-point element from "a" into
-   * 2 contiguous elements in memory. "mem_addr" must be aligned on a 16-byte
-   * boundary or a general-protection exception may be generated.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STORE1_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store the lower double-precision (64-bit) floating-point element from "a" into
-   * 2 contiguous elements in memory. "mem_addr" must be aligned on a 16-byte
-   * boundary or a general-protection exception may be generated.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STORE_PD1[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store 128-bits (composed of 2 packed double-precision (64-bit) floating-point
-   * elements) from "a" into memory.
-   * 	"mem_addr" must be aligned on a 16-byte
-   * boundary or a general-protection exception may be generated.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STORE_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
   }
@@ -594,14 +408,13 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Store 2 double-precision (64-bit) floating-point elements from "a" into memory
-   * in reverse order.
-   * 	"mem_addr" must be aligned on a 16-byte boundary or a
+   * Load 2 double-precision (64-bit) floating-point elements from memory into
+   * "dst" in reverse order. mem_addr must be aligned on a 16-byte boundary or a
    * general-protection exception may be generated.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
+   * mem_addr: double const*, mem_addrOffset: int
    */
-  case class MM_STORER_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
+  case class MM_LOADR_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
+    val category = List(IntrinsicsCategory.Load)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -609,38 +422,13 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Store the upper double-precision (64-bit) floating-point element from "a" into
-   * memory.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STOREH_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Store the lower double-precision (64-bit) floating-point element from "a" into
-   * memory.
-   * mem_addr: double*, a: __m128d, mem_addrOffset: int
-   */
-  case class MM_STOREL_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
-    val category = List(IntrinsicsCategory.Store)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Unpack and interleave double-precision (64-bit) floating-point elements from
-   * the high half of "a" and "b", and store the results in "dst".
+   * Compare the lower double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-greater-than-or-equal, store the result in the lower element of
+   * "dst", and copy the upper element from "a" to the upper element of "dst".
    * a: __m128d, b: __m128d
    */
-  case class MM_UNPACKHI_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Swizzle)
+  case class MM_CMPNGE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -648,13 +436,40 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Unpack and interleave double-precision (64-bit) floating-point elements from
-   * the low half of "a" and "b", and store the results in "dst".
+   * Add packed double-precision (64-bit) floating-point elements in "a" and "b",
+   * and store the results in "dst".
    * a: __m128d, b: __m128d
    */
-  case class MM_UNPACKLO_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Swizzle)
+  case class MM_ADD_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Arithmetic)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Store 32-bit integer "a" into memory using a non-temporal hint to minimize
+   * cache pollution. If the cache line containing address "mem_addr" is already in
+   * the cache, the cache will be updated.
+   * mem_addr: int*, a: int, mem_addrOffset: int
+   */
+  case class MM_STREAM_SI32[A[_], U:Integral](mem_addr: Exp[A[Int]], a: Exp[Int], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
+    val category = List(IntrinsicsCategory.Store)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Subtract packed unsigned 16-bit integers in "b" from packed unsigned 16-bit
+   * integers in "a" using saturation, and store the results in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_SUBS_EPU16(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
   }
@@ -674,26 +489,24 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Shuffle double-precision (64-bit) floating-point elements using the control in
-   * "imm8", and store the results in "dst".
-   * a: __m128d, b: __m128d, imm8: int
+   * Add 64-bit integers "a" and "b", and store the result in "dst".
+   * a: __m64, b: __m64
    */
-  case class MM_SHUFFLE_PD(a: Exp[__m128d], b: Exp[__m128d], imm8: Exp[Int]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Swizzle)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+  case class MM_ADD_SI64(a: Exp[__m64], b: Exp[__m64]) extends IntrinsicsDef[__m64] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
   }
       
 
   /**
-   * Move the lower double-precision (64-bit) floating-point element from "b" to
-   * the lower element of "dst", and copy the upper element from "a" to the upper
-   * element of "dst".
+   * Compare the lower double-precision (64-bit) floating-point element in "a" and
+   * "b" for less-than-or-equal, and return the boolean result (0 or 1).
    * a: __m128d, b: __m128d
    */
-  case class MM_MOVE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Move)
+  case class MM_COMILE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
+    val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -701,64 +514,13 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Cast vector of type __m128d to type __m128. This intrinsic is only used for
-   * compilation and does not generate any instructions, thus it has zero latency.
-   * a: __m128d
+   * Add the lower double-precision (64-bit) floating-point element in "a" and "b",
+   * store the result in the lower element of "dst", and copy the upper element
+   * from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
    */
-  case class MM_CASTPD_PS(a: Exp[__m128d]) extends IntrinsicsDef[__m128] {
-    val category = List(IntrinsicsCategory.Cast)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Cast vector of type __m128d to type __m128i. This intrinsic is only used for
-   * compilation and does not generate any instructions, thus it has zero latency.
-   * a: __m128d
-   */
-  case class MM_CASTPD_SI128(a: Exp[__m128d]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Cast)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Cast vector of type __m128 to type __m128d. This intrinsic is only used for
-   * compilation and does not generate any instructions, thus it has zero latency.
-   * a: __m128
-   */
-  case class MM_CASTPS_PD(a: Exp[__m128]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Cast)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Cast vector of type __m128 to type __m128i. This intrinsic is only used for
-   * compilation and does not generate any instructions, thus it has zero latency.
-   * a: __m128
-   */
-  case class MM_CASTPS_SI128(a: Exp[__m128]) extends IntrinsicsDef[__m128i] {
-    val category = List(IntrinsicsCategory.Cast)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "emmintrin.h"
-  }
-      
-
-  /**
-   * Cast vector of type __m128i to type __m128d. This intrinsic is only used for
-   * compilation and does not generate any instructions, thus it has zero latency.
-   * a: __m128i
-   */
-  case class MM_CASTSI128_PD(a: Exp[__m128i]) extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.Cast)
+  case class MM_ADD_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Arithmetic)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
     val header = "emmintrin.h"
@@ -779,14 +541,67 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Return vector of type __m128d with undefined elements.
-
+   * Convert the 64-bit integer "b" to a double-precision (64-bit) floating-point
+   * element, store the result in the lower element of "dst", and copy the upper
+   * element from "a" to the upper element of "dst".
+   * a: __m128d, b: __int64
    */
-  case class MM_UNDEFINED_PD() extends IntrinsicsDef[__m128d] {
-    val category = List(IntrinsicsCategory.GeneralSupport)
+  case class MM_CVTSI64X_SD(a: Exp[__m128d], b: Exp[Long]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Convert)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint, IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Set packed 32-bit integers in "dst" with the supplied values.
+   * e3: int, e2: int, e1: int, e0: int
+   */
+  case class MM_SET_EPI32(e3: Exp[Int], e2: Exp[Int], e1: Exp[Int], e0: Exp[Int]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-greater-than, and store the results in "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPNGT_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
-    val header = "immintrin.h"
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b", and store packed maximum values in "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_MAX_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.SpecialMathFunctions)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed 16-bit integers in "a" and "b", and store packed maximum values
+   * in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_MAX_EPI16(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.SpecialMathFunctions)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
       
 
@@ -803,545 +618,718 @@ trait SSE201 extends IntrinsicsBase {
       
 
   /**
-   * Copy the lower double-precision (64-bit) floating-point element of "a" to
-   * "dst".
-   * a: __m256d
+   * Compare the lower double-precision (64-bit) floating-point element in "a" and
+   * "b" for equality, and return the boolean result (0 or 1). This instruction
+   * will not signal an exception for QNaNs.
+   * a: __m128d, b: __m128d
    */
-  case class MM256_CVTSD_F64(a: Exp[__m256d]) extends IntrinsicsDef[Double] {
-    val category = List(IntrinsicsCategory.Convert)
+  case class MM_UCOMIEQ_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[Int] {
+    val category = List(IntrinsicsCategory.Compare)
     val intrinsicType = List(IntrinsicsType.FloatingPoint)
     val performance = Map.empty[MicroArchType, Performance]
-    val header = "immintrin.h"
+    val header = "emmintrin.h"
   }
       
 
   /**
-   * Copy the lower 32-bit integer in "a" to "dst".
-   * a: __m256i
+   * Set packed 64-bit integers in "dst" with the supplied values.
+   * e1: __int64, e0: __int64
    */
-  case class MM256_CVTSI256_SI32(a: Exp[__m256i]) extends IntrinsicsDef[Int] {
+  case class MM_SET_EPI64X(e1: Exp[Long], e0: Exp[Long]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Shift packed 64-bit integers in "a" left by "count" while shifting in zeros,
+   * and store the results in "dst".
+   * a: __m128i, count: __m128i
+   */
+  case class MM_SLL_EPI64(a: Exp[__m128i], count: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Shift)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Cast vector of type __m128d to type __m128. This intrinsic is only used for
+   * compilation and does not generate any instructions, thus it has zero latency.
+   * a: __m128d
+   */
+  case class MM_CASTPD_PS(a: Exp[__m128d]) extends IntrinsicsDef[__m128] {
+    val category = List(IntrinsicsCategory.Cast)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Subtract 64-bit integer "b" from 64-bit integer "a", and store the result in
+   * "dst".
+   * a: __m64, b: __m64
+   */
+  case class MM_SUB_SI64(a: Exp[__m64], b: Exp[__m64]) extends IntrinsicsDef[__m64] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compute the square root of the lower double-precision (64-bit) floating-point
+   * element in "b", store the result in the lower element of "dst", and copy the
+   * upper element from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_SQRT_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.ElementaryMathFunctions)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare the lower double-precision (64-bit) floating-point elements in "a" and
+   * "b" for less-than-or-equal, store the result in the lower element of "dst",
+   * and copy the upper element from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPLE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Set packed 8-bit integers in "dst" with the supplied values in reverse order.
+   * e15: char, e14: char, e13: char, e12: char, e11: char, e10: char, e9: char, e8: char, e7: char, e6: char, e5: char, e4: char, e3: char, e2: char, e1: char, e0: char
+   */
+  case class MM_SET_EPI8(e15: Exp[Byte], e14: Exp[Byte], e13: Exp[Byte], e12: Exp[Byte], e11: Exp[Byte], e10: Exp[Byte], e9: Exp[Byte], e8: Exp[Byte], e7: Exp[Byte], e6: Exp[Byte], e5: Exp[Byte], e4: Exp[Byte], e3: Exp[Byte], e2: Exp[Byte], e1: Exp[Byte], e0: Exp[Byte]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.IntrinsicsSet)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Compare packed 16-bit integers in "a" and "b" for greater-than, and store the
+   * results in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_CMPGT_EPI16(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
+  }
+      
+
+  /**
+   * Copy 64-bit integer "a" to the lower element of "dst", and zero the upper
+   * element.
+   * a: __int64
+   */
+  case class MM_CVTSI64_SI128(a: Exp[Long]) extends IntrinsicsDef[__m128i] {
     val category = List(IntrinsicsCategory.Convert)
     val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
-    val header = "immintrin.h"
+    val header = "emmintrin.h"
   }
       
 
   /**
-   * Copy the lower double-precision (64-bit) floating-point element of "a" to
-   * "dst".
-   * a: __m512d
+   * Average packed unsigned 8-bit integers in "a" and "b", and store the results
+   * in "dst".
+   * a: __m128i, b: __m128i
    */
-  case class MM512_CVTSD_F64(a: Exp[__m512d]) extends IntrinsicsDef[Double] {
-    val category = List(IntrinsicsCategory.Convert)
-    val intrinsicType = List(IntrinsicsType.FloatingPoint)
-    val performance = Map.empty[MicroArchType, Performance]
-    val header = "immintrin.h"
-  }
-      
-
-  /**
-   * Copy the lower 32-bit integer in "a" to "dst".
-   * a: __m512i
-   */
-  case class MM512_CVTSI512_SI32(a: Exp[__m512i]) extends IntrinsicsDef[Int] {
-    val category = List(IntrinsicsCategory.Convert)
+  case class MM_AVG_EPU8(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.ProbabilityStatistics)
     val intrinsicType = List(IntrinsicsType.Integer)
     val performance = Map.empty[MicroArchType, Performance]
-    val header = "immintrin.h"
+    val header = "emmintrin.h"
   }
       
 
-  def _mm_ucomile_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
-    MM_UCOMILE_SD(a, b)
+  /**
+   * Add packed 16-bit integers in "a" and "b", and store the results in "dst".
+   * a: __m128i, b: __m128i
+   */
+  case class MM_ADD_EPI16(a: Exp[__m128i], b: Exp[__m128i]) extends IntrinsicsDef[__m128i] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.Integer)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_ucomigt_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
-    MM_UCOMIGT_SD(a, b)
+      
+
+  /**
+   * Store the lower double-precision (64-bit) floating-point element from "a" into
+   * 2 contiguous elements in memory. "mem_addr" must be aligned on a 16-byte
+   * boundary or a general-protection exception may be generated.
+   * mem_addr: double*, a: __m128d, mem_addrOffset: int
+   */
+  case class MM_STORE1_PD[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, Unit] {
+    val category = List(IntrinsicsCategory.Store)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_ucomige_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
-    MM_UCOMIGE_SD(a, b)
+      
+
+  /**
+   * Divide packed double-precision (64-bit) floating-point elements in "a" by
+   * packed elements in "b", and store the results in "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_DIV_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Arithmetic)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_ucomineq_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
-    MM_UCOMINEQ_SD(a, b)
+      
+
+  /**
+   * Load a double-precision (64-bit) floating-point element from memory into both
+   * elements of "dst".
+   * mem_addr: double const*, mem_addrOffset: int
+   */
+  case class MM_LOAD_PD1[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit val cont: Container[A]) extends PointerIntrinsicsDef[U, __m128d] {
+    val category = List(IntrinsicsCategory.Load)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_cvtpd_ps(a: Exp[__m128d]): Exp[__m128] = {
-    MM_CVTPD_PS(a)
+      
+
+  /**
+   * Compare the lower double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-less-than-or-equal, store the result in the lower element of
+   * "dst", and copy the upper element from "a" to the upper element of "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPNLE_SD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_cvtps_pd(a: Exp[__m128]): Exp[__m128d] = {
-    MM_CVTPS_PD(a)
+      
+
+  /**
+   * Compare packed double-precision (64-bit) floating-point elements in "a" and
+   * "b" for not-greater-than-or-equal, and store the results in "dst".
+   * a: __m128d, b: __m128d
+   */
+  case class MM_CMPNGE_PD(a: Exp[__m128d], b: Exp[__m128d]) extends IntrinsicsDef[__m128d] {
+    val category = List(IntrinsicsCategory.Compare)
+    val intrinsicType = List(IntrinsicsType.FloatingPoint)
+    val performance = Map.empty[MicroArchType, Performance]
+    val header = "emmintrin.h"
   }
-            
-  def _mm_cvtpd_epi32(a: Exp[__m128d]): Exp[__m128i] = {
-    MM_CVTPD_EPI32(a)
-  }
-            
-  def _mm_cvtsd_si32(a: Exp[__m128d]): Exp[Int] = {
-    MM_CVTSD_SI32(a)
-  }
-            
-  def _mm_cvtsd_si64(a: Exp[__m128d]): Exp[Long] = {
-    MM_CVTSD_SI64(a)
-  }
-            
-  def _mm_cvtsd_si64x(a: Exp[__m128d]): Exp[Long] = {
-    MM_CVTSD_SI64X(a)
-  }
-            
-  def _mm_cvtsd_ss(a: Exp[__m128], b: Exp[__m128d]): Exp[__m128] = {
-    MM_CVTSD_SS(a, b)
-  }
-            
-  def _mm_cvtsd_f64(a: Exp[__m128d]): Exp[Double] = {
-    MM_CVTSD_F64(a)
-  }
-            
-  def _mm_cvtss_sd(a: Exp[__m128d], b: Exp[__m128]): Exp[__m128d] = {
-    MM_CVTSS_SD(a, b)
-  }
-            
-  def _mm_cvttpd_epi32(a: Exp[__m128d]): Exp[__m128i] = {
-    MM_CVTTPD_EPI32(a)
-  }
-            
-  def _mm_cvttsd_si32(a: Exp[__m128d]): Exp[Int] = {
-    MM_CVTTSD_SI32(a)
-  }
-            
-  def _mm_cvttsd_si64(a: Exp[__m128d]): Exp[Long] = {
-    MM_CVTTSD_SI64(a)
-  }
-            
-  def _mm_cvttsd_si64x(a: Exp[__m128d]): Exp[Long] = {
-    MM_CVTTSD_SI64X(a)
-  }
-            
-  def _mm_cvtps_epi32(a: Exp[__m128]): Exp[__m128i] = {
-    MM_CVTPS_EPI32(a)
-  }
-            
-  def _mm_cvttps_epi32(a: Exp[__m128]): Exp[__m128i] = {
-    MM_CVTTPS_EPI32(a)
-  }
-            
-  def _mm_cvtpd_pi32(a: Exp[__m128d]): Exp[__m64] = {
-    MM_CVTPD_PI32(a)
+      
+
+  def _mm_cmpnle_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNLE_PD(a, b)
   }
             
   def _mm_cvttpd_pi32(a: Exp[__m128d]): Exp[__m64] = {
     MM_CVTTPD_PI32(a)
   }
             
-  def _mm_set_sd(a: Exp[Double]): Exp[__m128d] = {
-    MM_SET_SD(a)
+  def _mm_mulhi_epu16(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_MULHI_EPU16(a, b)
   }
             
-  def _mm_set1_pd(a: Exp[Double]): Exp[__m128d] = {
-    MM_SET1_PD(a)
+  def _mm_cmpord_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPORD_PD(a, b)
   }
             
-  def _mm_set_pd1(a: Exp[Double]): Exp[__m128d] = {
-    MM_SET_PD1(a)
+  def _mm_srli_epi16(a: Exp[__m128i], imm8: Exp[Int]): Exp[__m128i] = {
+    MM_SRLI_EPI16(a, imm8)
   }
             
-  def _mm_set_pd(e1: Exp[Double], e0: Exp[Double]): Exp[__m128d] = {
-    MM_SET_PD(e1, e0)
+  def _mm_max_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_MAX_SD(a, b)
   }
             
-  def _mm_setr_pd(e1: Exp[Double], e0: Exp[Double]): Exp[__m128d] = {
-    MM_SETR_PD(e1, e0)
-  }
-            
-  def _mm_setzero_pd(): Exp[__m128d] = {
-    MM_SETZERO_PD()
-  }
-            
-  def _mm_load_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOAD_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_load1_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOAD1_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_load_pd1[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOAD_PD1(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_loadr_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOADR_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_loadu_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOADU_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_load_sd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOAD_SD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_loadh_pd[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOADH_PD(a, mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_loadl_pd[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
-    cont.read(mem_addr)(MM_LOADL_PD(a, mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
-  }
-            
-  def _mm_stream_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STREAM_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_set1_epi16(a: Exp[Short]): Exp[__m128i] = {
+    MM_SET1_EPI16(a)
   }
             
   def _mm_store_sd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
     cont.write(mem_addr)(MM_STORE_SD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
   }
             
-  def _mm_store1_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STORE1_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_sub_epi32(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_SUB_EPI32(a, b)
   }
             
-  def _mm_store_pd1[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STORE_PD1(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_loadh_pd[A[_], U:Integral](a: Exp[__m128d], mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
+    cont.read(mem_addr)(MM_LOADH_PD(a, mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
   }
             
-  def _mm_store_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STORE_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_shufflehi_epi16(a: Exp[__m128i], imm8: Exp[Int]): Exp[__m128i] = {
+    MM_SHUFFLEHI_EPI16(a, imm8)
+  }
+            
+  def _mm_sll_epi32(a: Exp[__m128i], count: Exp[__m128i]): Exp[__m128i] = {
+    MM_SLL_EPI32(a, count)
+  }
+            
+  def _mm_cmpord_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPORD_SD(a, b)
+  }
+            
+  def _mm_ucomigt_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
+    MM_UCOMIGT_SD(a, b)
+  }
+            
+  def _mm_setzero_pd(): Exp[__m128d] = {
+    MM_SETZERO_PD()
+  }
+            
+  def _mm_cmpneq_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNEQ_PD(a, b)
+  }
+            
+  def _mm_subs_epi8(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_SUBS_EPI8(a, b)
+  }
+            
+  def _mm_andnot_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_ANDNOT_PD(a, b)
+  }
+            
+  def _mm_cvtsi32_si128(a: Exp[Int]): Exp[__m128i] = {
+    MM_CVTSI32_SI128(a)
+  }
+            
+  def _mm_load1_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
+    cont.read(mem_addr)(MM_LOAD1_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
+  }
+            
+  def _mm_setzero_si128(): Exp[__m128i] = {
+    MM_SETZERO_SI128()
+  }
+            
+  def _mm_mfence(): Exp[Unit] = {
+    reflectEffect(MM_MFENCE())
+  }
+            
+  def _mm_max_epu8(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_MAX_EPU8(a, b)
+  }
+            
+  def _mm_set1_epi32(a: Exp[Int]): Exp[__m128i] = {
+    MM_SET1_EPI32(a)
+  }
+            
+  def _mm_cvtps_pd(a: Exp[__m128]): Exp[__m128d] = {
+    MM_CVTPS_PD(a)
+  }
+            
+  def _mm_comieq_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
+    MM_COMIEQ_SD(a, b)
+  }
+            
+  def _mm_set_epi64(e1: Exp[__m64], e0: Exp[__m64]): Exp[__m128i] = {
+    MM_SET_EPI64(e1, e0)
   }
             
   def _mm_storeu_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
     cont.write(mem_addr)(MM_STOREU_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
   }
             
-  def _mm_storer_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STORER_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_loadr_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
+    cont.read(mem_addr)(MM_LOADR_PD(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
   }
             
-  def _mm_storeh_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STOREH_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_cmpnge_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNGE_SD(a, b)
   }
             
-  def _mm_storel_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
-    cont.write(mem_addr)(MM_STOREL_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  def _mm_add_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_ADD_PD(a, b)
   }
             
-  def _mm_unpackhi_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
-    MM_UNPACKHI_PD(a, b)
+  def _mm_stream_si32[A[_], U:Integral](mem_addr: Exp[A[Int]], a: Exp[Int], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
+    cont.write(mem_addr)(MM_STREAM_SI32(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
   }
             
-  def _mm_unpacklo_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
-    MM_UNPACKLO_PD(a, b)
+  def _mm_subs_epu16(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_SUBS_EPU16(a, b)
   }
             
   def _mm_movemask_pd(a: Exp[__m128d]): Exp[Int] = {
     MM_MOVEMASK_PD(a)
   }
             
-  def _mm_shuffle_pd(a: Exp[__m128d], b: Exp[__m128d], imm8: Exp[Int]): Exp[__m128d] = {
-    MM_SHUFFLE_PD(a, b, imm8)
+  def _mm_add_si64(a: Exp[__m64], b: Exp[__m64]): Exp[__m64] = {
+    MM_ADD_SI64(a, b)
   }
             
-  def _mm_move_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
-    MM_MOVE_SD(a, b)
+  def _mm_comile_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
+    MM_COMILE_SD(a, b)
   }
             
-  def _mm_castpd_ps(a: Exp[__m128d]): Exp[__m128] = {
-    MM_CASTPD_PS(a)
-  }
-            
-  def _mm_castpd_si128(a: Exp[__m128d]): Exp[__m128i] = {
-    MM_CASTPD_SI128(a)
-  }
-            
-  def _mm_castps_pd(a: Exp[__m128]): Exp[__m128d] = {
-    MM_CASTPS_PD(a)
-  }
-            
-  def _mm_castps_si128(a: Exp[__m128]): Exp[__m128i] = {
-    MM_CASTPS_SI128(a)
-  }
-            
-  def _mm_castsi128_pd(a: Exp[__m128i]): Exp[__m128d] = {
-    MM_CASTSI128_PD(a)
+  def _mm_add_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_ADD_SD(a, b)
   }
             
   def _mm_castsi128_ps(a: Exp[__m128i]): Exp[__m128] = {
     MM_CASTSI128_PS(a)
   }
             
-  def _mm_undefined_pd(): Exp[__m128d] = {
-    MM_UNDEFINED_PD()
+  def _mm_cvtsi64x_sd(a: Exp[__m128d], b: Exp[Long]): Exp[__m128d] = {
+    MM_CVTSI64X_SD(a, b)
+  }
+            
+  def _mm_set_epi32(e3: Exp[Int], e2: Exp[Int], e1: Exp[Int], e0: Exp[Int]): Exp[__m128i] = {
+    MM_SET_EPI32(e3, e2, e1, e0)
+  }
+            
+  def _mm_cmpngt_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNGT_PD(a, b)
+  }
+            
+  def _mm_max_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_MAX_PD(a, b)
+  }
+            
+  def _mm_max_epi16(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_MAX_EPI16(a, b)
   }
             
   def _mm_undefined_si128(): Exp[__m128i] = {
     MM_UNDEFINED_SI128()
   }
             
-  def _mm256_cvtsd_f64(a: Exp[__m256d]): Exp[Double] = {
-    MM256_CVTSD_F64(a)
+  def _mm_ucomieq_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[Int] = {
+    MM_UCOMIEQ_SD(a, b)
   }
             
-  def _mm256_cvtsi256_si32(a: Exp[__m256i]): Exp[Int] = {
-    MM256_CVTSI256_SI32(a)
+  def _mm_set_epi64x(e1: Exp[Long], e0: Exp[Long]): Exp[__m128i] = {
+    MM_SET_EPI64X(e1, e0)
   }
             
-  def _mm512_cvtsd_f64(a: Exp[__m512d]): Exp[Double] = {
-    MM512_CVTSD_F64(a)
+  def _mm_sll_epi64(a: Exp[__m128i], count: Exp[__m128i]): Exp[__m128i] = {
+    MM_SLL_EPI64(a, count)
   }
             
-  def _mm512_cvtsi512_si32(a: Exp[__m512i]): Exp[Int] = {
-    MM512_CVTSI512_SI32(a)
+  def _mm_castpd_ps(a: Exp[__m128d]): Exp[__m128] = {
+    MM_CASTPD_PS(a)
+  }
+            
+  def _mm_sub_si64(a: Exp[__m64], b: Exp[__m64]): Exp[__m64] = {
+    MM_SUB_SI64(a, b)
+  }
+            
+  def _mm_sqrt_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_SQRT_SD(a, b)
+  }
+            
+  def _mm_cmple_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPLE_SD(a, b)
+  }
+            
+  def _mm_set_epi8(e15: Exp[Byte], e14: Exp[Byte], e13: Exp[Byte], e12: Exp[Byte], e11: Exp[Byte], e10: Exp[Byte], e9: Exp[Byte], e8: Exp[Byte], e7: Exp[Byte], e6: Exp[Byte], e5: Exp[Byte], e4: Exp[Byte], e3: Exp[Byte], e2: Exp[Byte], e1: Exp[Byte], e0: Exp[Byte]): Exp[__m128i] = {
+    MM_SET_EPI8(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0)
+  }
+            
+  def _mm_cmpgt_epi16(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_CMPGT_EPI16(a, b)
+  }
+            
+  def _mm_cvtsi64_si128(a: Exp[Long]): Exp[__m128i] = {
+    MM_CVTSI64_SI128(a)
+  }
+            
+  def _mm_avg_epu8(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_AVG_EPU8(a, b)
+  }
+            
+  def _mm_add_epi16(a: Exp[__m128i], b: Exp[__m128i]): Exp[__m128i] = {
+    MM_ADD_EPI16(a, b)
+  }
+            
+  def _mm_store1_pd[A[_], U:Integral](mem_addr: Exp[A[Double]], a: Exp[__m128d], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[Unit] = {
+    cont.write(mem_addr)(MM_STORE1_PD(mem_addr, a, mem_addrOffset)(implicitly[Integral[U]], cont))
+  }
+            
+  def _mm_div_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_DIV_PD(a, b)
+  }
+            
+  def _mm_load_pd1[A[_], U:Integral](mem_addr: Exp[A[Double]], mem_addrOffset: Exp[U])(implicit cont: Container[A]): Exp[__m128d] = {
+    cont.read(mem_addr)(MM_LOAD_PD1(mem_addr, mem_addrOffset)(implicitly[Integral[U]], cont))
+  }
+            
+  def _mm_cmpnle_sd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNLE_SD(a, b)
+  }
+            
+  def _mm_cmpnge_pd(a: Exp[__m128d], b: Exp[__m128d]): Exp[__m128d] = {
+    MM_CMPNGE_PD(a, b)
   }
             
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case MM_UCOMILE_SD (a, b) =>
-      _mm_ucomile_sd(f(a), f(b))
-    case MM_UCOMIGT_SD (a, b) =>
-      _mm_ucomigt_sd(f(a), f(b))
-    case MM_UCOMIGE_SD (a, b) =>
-      _mm_ucomige_sd(f(a), f(b))
-    case MM_UCOMINEQ_SD (a, b) =>
-      _mm_ucomineq_sd(f(a), f(b))
-    case MM_CVTPD_PS (a) =>
-      _mm_cvtpd_ps(f(a))
-    case MM_CVTPS_PD (a) =>
-      _mm_cvtps_pd(f(a))
-    case MM_CVTPD_EPI32 (a) =>
-      _mm_cvtpd_epi32(f(a))
-    case MM_CVTSD_SI32 (a) =>
-      _mm_cvtsd_si32(f(a))
-    case MM_CVTSD_SI64 (a) =>
-      _mm_cvtsd_si64(f(a))
-    case MM_CVTSD_SI64X (a) =>
-      _mm_cvtsd_si64x(f(a))
-    case MM_CVTSD_SS (a, b) =>
-      _mm_cvtsd_ss(f(a), f(b))
-    case MM_CVTSD_F64 (a) =>
-      _mm_cvtsd_f64(f(a))
-    case MM_CVTSS_SD (a, b) =>
-      _mm_cvtss_sd(f(a), f(b))
-    case MM_CVTTPD_EPI32 (a) =>
-      _mm_cvttpd_epi32(f(a))
-    case MM_CVTTSD_SI32 (a) =>
-      _mm_cvttsd_si32(f(a))
-    case MM_CVTTSD_SI64 (a) =>
-      _mm_cvttsd_si64(f(a))
-    case MM_CVTTSD_SI64X (a) =>
-      _mm_cvttsd_si64x(f(a))
-    case MM_CVTPS_EPI32 (a) =>
-      _mm_cvtps_epi32(f(a))
-    case MM_CVTTPS_EPI32 (a) =>
-      _mm_cvttps_epi32(f(a))
-    case MM_CVTPD_PI32 (a) =>
-      _mm_cvtpd_pi32(f(a))
+    case MM_CMPNLE_PD (a, b) =>
+      _mm_cmpnle_pd(f(a), f(b))
     case MM_CVTTPD_PI32 (a) =>
       _mm_cvttpd_pi32(f(a))
-    case MM_SET_SD (a) =>
-      _mm_set_sd(f(a))
-    case MM_SET1_PD (a) =>
-      _mm_set1_pd(f(a))
-    case MM_SET_PD1 (a) =>
-      _mm_set_pd1(f(a))
-    case MM_SET_PD (e1, e0) =>
-      _mm_set_pd(f(e1), f(e0))
-    case MM_SETR_PD (e1, e0) =>
-      _mm_setr_pd(f(e1), f(e0))
-    case MM_SETZERO_PD () =>
-      _mm_setzero_pd()
-    case iDef@MM_LOAD_PD (mem_addr, mem_addrOffset) =>
-      _mm_load_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOAD1_PD (mem_addr, mem_addrOffset) =>
-      _mm_load1_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOAD_PD1 (mem_addr, mem_addrOffset) =>
-      _mm_load_pd1(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOADR_PD (mem_addr, mem_addrOffset) =>
-      _mm_loadr_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOADU_PD (mem_addr, mem_addrOffset) =>
-      _mm_loadu_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOAD_SD (mem_addr, mem_addrOffset) =>
-      _mm_load_sd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOADH_PD (a, mem_addr, mem_addrOffset) =>
-      _mm_loadh_pd(iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_LOADL_PD (a, mem_addr, mem_addrOffset) =>
-      _mm_loadl_pd(iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STREAM_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_stream_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_MULHI_EPU16 (a, b) =>
+      _mm_mulhi_epu16(f(a), f(b))
+    case MM_CMPORD_PD (a, b) =>
+      _mm_cmpord_pd(f(a), f(b))
+    case MM_SRLI_EPI16 (a, imm8) =>
+      _mm_srli_epi16(f(a), f(imm8))
+    case MM_MAX_SD (a, b) =>
+      _mm_max_sd(f(a), f(b))
+    case MM_SET1_EPI16 (a) =>
+      _mm_set1_epi16(f(a))
     case iDef@MM_STORE_SD (mem_addr, a, mem_addrOffset) =>
       _mm_store_sd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STORE1_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_store1_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STORE_PD1 (mem_addr, a, mem_addrOffset) =>
-      _mm_store_pd1(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STORE_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_store_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_SUB_EPI32 (a, b) =>
+      _mm_sub_epi32(f(a), f(b))
+    case iDef@MM_LOADH_PD (a, mem_addr, mem_addrOffset) =>
+      _mm_loadh_pd(iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_SHUFFLEHI_EPI16 (a, imm8) =>
+      _mm_shufflehi_epi16(f(a), f(imm8))
+    case MM_SLL_EPI32 (a, count) =>
+      _mm_sll_epi32(f(a), f(count))
+    case MM_CMPORD_SD (a, b) =>
+      _mm_cmpord_sd(f(a), f(b))
+    case MM_UCOMIGT_SD (a, b) =>
+      _mm_ucomigt_sd(f(a), f(b))
+    case MM_SETZERO_PD () =>
+      _mm_setzero_pd()
+    case MM_CMPNEQ_PD (a, b) =>
+      _mm_cmpneq_pd(f(a), f(b))
+    case MM_SUBS_EPI8 (a, b) =>
+      _mm_subs_epi8(f(a), f(b))
+    case MM_ANDNOT_PD (a, b) =>
+      _mm_andnot_pd(f(a), f(b))
+    case MM_CVTSI32_SI128 (a) =>
+      _mm_cvtsi32_si128(f(a))
+    case iDef@MM_LOAD1_PD (mem_addr, mem_addrOffset) =>
+      _mm_load1_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_SETZERO_SI128 () =>
+      _mm_setzero_si128()
+    case MM_MFENCE () =>
+      _mm_mfence()
+    case MM_MAX_EPU8 (a, b) =>
+      _mm_max_epu8(f(a), f(b))
+    case MM_SET1_EPI32 (a) =>
+      _mm_set1_epi32(f(a))
+    case MM_CVTPS_PD (a) =>
+      _mm_cvtps_pd(f(a))
+    case MM_COMIEQ_SD (a, b) =>
+      _mm_comieq_sd(f(a), f(b))
+    case MM_SET_EPI64 (e1, e0) =>
+      _mm_set_epi64(f(e1), f(e0))
     case iDef@MM_STOREU_PD (mem_addr, a, mem_addrOffset) =>
       _mm_storeu_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STORER_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_storer_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STOREH_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_storeh_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case iDef@MM_STOREL_PD (mem_addr, a, mem_addrOffset) =>
-      _mm_storel_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
-    case MM_UNPACKHI_PD (a, b) =>
-      _mm_unpackhi_pd(f(a), f(b))
-    case MM_UNPACKLO_PD (a, b) =>
-      _mm_unpacklo_pd(f(a), f(b))
+    case iDef@MM_LOADR_PD (mem_addr, mem_addrOffset) =>
+      _mm_loadr_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_CMPNGE_SD (a, b) =>
+      _mm_cmpnge_sd(f(a), f(b))
+    case MM_ADD_PD (a, b) =>
+      _mm_add_pd(f(a), f(b))
+    case iDef@MM_STREAM_SI32 (mem_addr, a, mem_addrOffset) =>
+      _mm_stream_si32(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_SUBS_EPU16 (a, b) =>
+      _mm_subs_epu16(f(a), f(b))
     case MM_MOVEMASK_PD (a) =>
       _mm_movemask_pd(f(a))
-    case MM_SHUFFLE_PD (a, b, imm8) =>
-      _mm_shuffle_pd(f(a), f(b), f(imm8))
-    case MM_MOVE_SD (a, b) =>
-      _mm_move_sd(f(a), f(b))
-    case MM_CASTPD_PS (a) =>
-      _mm_castpd_ps(f(a))
-    case MM_CASTPD_SI128 (a) =>
-      _mm_castpd_si128(f(a))
-    case MM_CASTPS_PD (a) =>
-      _mm_castps_pd(f(a))
-    case MM_CASTPS_SI128 (a) =>
-      _mm_castps_si128(f(a))
-    case MM_CASTSI128_PD (a) =>
-      _mm_castsi128_pd(f(a))
+    case MM_ADD_SI64 (a, b) =>
+      _mm_add_si64(f(a), f(b))
+    case MM_COMILE_SD (a, b) =>
+      _mm_comile_sd(f(a), f(b))
+    case MM_ADD_SD (a, b) =>
+      _mm_add_sd(f(a), f(b))
     case MM_CASTSI128_PS (a) =>
       _mm_castsi128_ps(f(a))
-    case MM_UNDEFINED_PD () =>
-      _mm_undefined_pd()
+    case MM_CVTSI64X_SD (a, b) =>
+      _mm_cvtsi64x_sd(f(a), f(b))
+    case MM_SET_EPI32 (e3, e2, e1, e0) =>
+      _mm_set_epi32(f(e3), f(e2), f(e1), f(e0))
+    case MM_CMPNGT_PD (a, b) =>
+      _mm_cmpngt_pd(f(a), f(b))
+    case MM_MAX_PD (a, b) =>
+      _mm_max_pd(f(a), f(b))
+    case MM_MAX_EPI16 (a, b) =>
+      _mm_max_epi16(f(a), f(b))
     case MM_UNDEFINED_SI128 () =>
       _mm_undefined_si128()
-    case MM256_CVTSD_F64 (a) =>
-      _mm256_cvtsd_f64(f(a))
-    case MM256_CVTSI256_SI32 (a) =>
-      _mm256_cvtsi256_si32(f(a))
-    case MM512_CVTSD_F64 (a) =>
-      _mm512_cvtsd_f64(f(a))
-    case MM512_CVTSI512_SI32 (a) =>
-      _mm512_cvtsi512_si32(f(a))
+    case MM_UCOMIEQ_SD (a, b) =>
+      _mm_ucomieq_sd(f(a), f(b))
+    case MM_SET_EPI64X (e1, e0) =>
+      _mm_set_epi64x(f(e1), f(e0))
+    case MM_SLL_EPI64 (a, count) =>
+      _mm_sll_epi64(f(a), f(count))
+    case MM_CASTPD_PS (a) =>
+      _mm_castpd_ps(f(a))
+    case MM_SUB_SI64 (a, b) =>
+      _mm_sub_si64(f(a), f(b))
+    case MM_SQRT_SD (a, b) =>
+      _mm_sqrt_sd(f(a), f(b))
+    case MM_CMPLE_SD (a, b) =>
+      _mm_cmple_sd(f(a), f(b))
+    case MM_SET_EPI8 (e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      _mm_set_epi8(f(e15), f(e14), f(e13), f(e12), f(e11), f(e10), f(e9), f(e8), f(e7), f(e6), f(e5), f(e4), f(e3), f(e2), f(e1), f(e0))
+    case MM_CMPGT_EPI16 (a, b) =>
+      _mm_cmpgt_epi16(f(a), f(b))
+    case MM_CVTSI64_SI128 (a) =>
+      _mm_cvtsi64_si128(f(a))
+    case MM_AVG_EPU8 (a, b) =>
+      _mm_avg_epu8(f(a), f(b))
+    case MM_ADD_EPI16 (a, b) =>
+      _mm_add_epi16(f(a), f(b))
+    case iDef@MM_STORE1_PD (mem_addr, a, mem_addrOffset) =>
+      _mm_store1_pd(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_DIV_PD (a, b) =>
+      _mm_div_pd(f(a), f(b))
+    case iDef@MM_LOAD_PD1 (mem_addr, mem_addrOffset) =>
+      _mm_load_pd1(iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont)
+    case MM_CMPNLE_SD (a, b) =>
+      _mm_cmpnle_sd(f(a), f(b))
+    case MM_CMPNGE_PD (a, b) =>
+      _mm_cmpnge_pd(f(a), f(b))
 
-    case Reflect(MM_UCOMILE_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UCOMILE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UCOMIGT_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UCOMIGT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UCOMIGE_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UCOMIGE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UCOMINEQ_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UCOMINEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTPD_PS (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTPD_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTPS_PD (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTPS_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTPD_EPI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTPD_EPI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSD_SI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSD_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSD_SI64 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSD_SI64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSD_SI64X (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSD_SI64X (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSD_SS (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSD_SS (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSD_F64 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSD_F64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTSS_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_CVTSS_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTTPD_EPI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTTPD_EPI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTTSD_SI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTTSD_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTTSD_SI64 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTTSD_SI64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTTSD_SI64X (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTTSD_SI64X (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTPS_EPI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTPS_EPI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTTPS_EPI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTTPS_EPI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CVTPD_PI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CVTPD_PI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNLE_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNLE_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_CVTTPD_PI32 (a), u, es) =>
       reflectMirrored(Reflect(MM_CVTTPD_PI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SET_SD (a), u, es) =>
-      reflectMirrored(Reflect(MM_SET_SD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SET1_PD (a), u, es) =>
-      reflectMirrored(Reflect(MM_SET1_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SET_PD1 (a), u, es) =>
-      reflectMirrored(Reflect(MM_SET_PD1 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SET_PD (e1, e0), u, es) =>
-      reflectMirrored(Reflect(MM_SET_PD (f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SETR_PD (e1, e0), u, es) =>
-      reflectMirrored(Reflect(MM_SETR_PD (f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SETZERO_PD (), u, es) =>
-      reflectMirrored(Reflect(MM_SETZERO_PD (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOAD_PD (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOAD_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOAD1_PD (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOAD1_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOAD_PD1 (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOAD_PD1 (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOADR_PD (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOADR_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOADU_PD (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOADU_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOAD_SD (mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOAD_SD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOADH_PD (a, mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOADH_PD (iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_LOADL_PD (a, mem_addr, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_LOADL_PD (iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STREAM_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STREAM_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MULHI_EPU16 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_MULHI_EPU16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPORD_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPORD_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SRLI_EPI16 (a, imm8), u, es) =>
+      reflectMirrored(Reflect(MM_SRLI_EPI16 (f(a), f(imm8)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MAX_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_MAX_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET1_EPI16 (a), u, es) =>
+      reflectMirrored(Reflect(MM_SET1_EPI16 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(iDef@MM_STORE_SD (mem_addr, a, mem_addrOffset), u, es) =>
       reflectMirrored(Reflect(MM_STORE_SD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STORE1_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STORE1_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STORE_PD1 (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STORE_PD1 (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STORE_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STORE_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SUB_EPI32 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_SUB_EPI32 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_LOADH_PD (a, mem_addr, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_LOADH_PD (iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SHUFFLEHI_EPI16 (a, imm8), u, es) =>
+      reflectMirrored(Reflect(MM_SHUFFLEHI_EPI16 (f(a), f(imm8)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SLL_EPI32 (a, count), u, es) =>
+      reflectMirrored(Reflect(MM_SLL_EPI32 (f(a), f(count)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPORD_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPORD_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_UCOMIGT_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_UCOMIGT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SETZERO_PD (), u, es) =>
+      reflectMirrored(Reflect(MM_SETZERO_PD (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNEQ_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNEQ_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SUBS_EPI8 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_SUBS_EPI8 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_ANDNOT_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_ANDNOT_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CVTSI32_SI128 (a), u, es) =>
+      reflectMirrored(Reflect(MM_CVTSI32_SI128 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_LOAD1_PD (mem_addr, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_LOAD1_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SETZERO_SI128 (), u, es) =>
+      reflectMirrored(Reflect(MM_SETZERO_SI128 (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MFENCE (), u, es) =>
+      reflectMirrored(Reflect(MM_MFENCE (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MAX_EPU8 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_MAX_EPU8 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET1_EPI32 (a), u, es) =>
+      reflectMirrored(Reflect(MM_SET1_EPI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CVTPS_PD (a), u, es) =>
+      reflectMirrored(Reflect(MM_CVTPS_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_COMIEQ_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_COMIEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET_EPI64 (e1, e0), u, es) =>
+      reflectMirrored(Reflect(MM_SET_EPI64 (f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(iDef@MM_STOREU_PD (mem_addr, a, mem_addrOffset), u, es) =>
       reflectMirrored(Reflect(MM_STOREU_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STORER_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STORER_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STOREH_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STOREH_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(iDef@MM_STOREL_PD (mem_addr, a, mem_addrOffset), u, es) =>
-      reflectMirrored(Reflect(MM_STOREL_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UNPACKHI_PD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UNPACKHI_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UNPACKLO_PD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_UNPACKLO_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_LOADR_PD (mem_addr, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_LOADR_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNGE_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNGE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_ADD_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_ADD_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_STREAM_SI32 (mem_addr, a, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_STREAM_SI32 (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SUBS_EPU16 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_SUBS_EPU16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_MOVEMASK_PD (a), u, es) =>
       reflectMirrored(Reflect(MM_MOVEMASK_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_SHUFFLE_PD (a, b, imm8), u, es) =>
-      reflectMirrored(Reflect(MM_SHUFFLE_PD (f(a), f(b), f(imm8)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_MOVE_SD (a, b), u, es) =>
-      reflectMirrored(Reflect(MM_MOVE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CASTPD_PS (a), u, es) =>
-      reflectMirrored(Reflect(MM_CASTPD_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CASTPD_SI128 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CASTPD_SI128 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CASTPS_PD (a), u, es) =>
-      reflectMirrored(Reflect(MM_CASTPS_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CASTPS_SI128 (a), u, es) =>
-      reflectMirrored(Reflect(MM_CASTPS_SI128 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_CASTSI128_PD (a), u, es) =>
-      reflectMirrored(Reflect(MM_CASTSI128_PD (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_ADD_SI64 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_ADD_SI64 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_COMILE_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_COMILE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_ADD_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_ADD_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_CASTSI128_PS (a), u, es) =>
       reflectMirrored(Reflect(MM_CASTSI128_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM_UNDEFINED_PD (), u, es) =>
-      reflectMirrored(Reflect(MM_UNDEFINED_PD (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CVTSI64X_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CVTSI64X_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET_EPI32 (e3, e2, e1, e0), u, es) =>
+      reflectMirrored(Reflect(MM_SET_EPI32 (f(e3), f(e2), f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNGT_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNGT_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MAX_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_MAX_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_MAX_EPI16 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_MAX_EPI16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case Reflect(MM_UNDEFINED_SI128 (), u, es) =>
       reflectMirrored(Reflect(MM_UNDEFINED_SI128 (), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM256_CVTSD_F64 (a), u, es) =>
-      reflectMirrored(Reflect(MM256_CVTSD_F64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM256_CVTSI256_SI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM256_CVTSI256_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM512_CVTSD_F64 (a), u, es) =>
-      reflectMirrored(Reflect(MM512_CVTSD_F64 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
-    case Reflect(MM512_CVTSI512_SI32 (a), u, es) =>
-      reflectMirrored(Reflect(MM512_CVTSI512_SI32 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_UCOMIEQ_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_UCOMIEQ_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET_EPI64X (e1, e0), u, es) =>
+      reflectMirrored(Reflect(MM_SET_EPI64X (f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SLL_EPI64 (a, count), u, es) =>
+      reflectMirrored(Reflect(MM_SLL_EPI64 (f(a), f(count)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CASTPD_PS (a), u, es) =>
+      reflectMirrored(Reflect(MM_CASTPD_PS (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SUB_SI64 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_SUB_SI64 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SQRT_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_SQRT_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPLE_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPLE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_SET_EPI8 (e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0), u, es) =>
+      reflectMirrored(Reflect(MM_SET_EPI8 (f(e15), f(e14), f(e13), f(e12), f(e11), f(e10), f(e9), f(e8), f(e7), f(e6), f(e5), f(e4), f(e3), f(e2), f(e1), f(e0)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPGT_EPI16 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPGT_EPI16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CVTSI64_SI128 (a), u, es) =>
+      reflectMirrored(Reflect(MM_CVTSI64_SI128 (f(a)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_AVG_EPU8 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_AVG_EPU8 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_ADD_EPI16 (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_ADD_EPI16 (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_STORE1_PD (mem_addr, a, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_STORE1_PD (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(a, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_DIV_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_DIV_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(iDef@MM_LOAD_PD1 (mem_addr, mem_addrOffset), u, es) =>
+      reflectMirrored(Reflect(MM_LOAD_PD1 (iDef.cont.applyTransformer(mem_addr, f), iDef.cont.applyTransformer(mem_addrOffset, f))(iDef.integralType, iDef.cont), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNLE_SD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNLE_SD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
+    case Reflect(MM_CMPNGE_PD (a, b), u, es) =>
+      reflectMirrored(Reflect(MM_CMPNGE_PD (f(a), f(b)), mapOver(f,u), f(es)))(mtype(typ[A]), pos)
     case _ => super.mirror(e, f)
   }).asInstanceOf[Exp[A]] // why??
 }
@@ -1353,189 +1341,189 @@ trait CGenSSE201 extends CGenIntrinsics {
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
        
-    case iDef@MM_UCOMILE_SD(a, b) =>
+    case iDef@MM_CMPNLE_PD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_ucomile_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_UCOMIGT_SD(a, b) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_ucomigt_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_UCOMIGE_SD(a, b) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_ucomige_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_UCOMINEQ_SD(a, b) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_ucomineq_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_CVTPD_PS(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtpd_ps(${quote(a)})")
-    case iDef@MM_CVTPS_PD(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtps_pd(${quote(a)})")
-    case iDef@MM_CVTPD_EPI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtpd_epi32(${quote(a)})")
-    case iDef@MM_CVTSD_SI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtsd_si32(${quote(a)})")
-    case iDef@MM_CVTSD_SI64(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtsd_si64(${quote(a)})")
-    case iDef@MM_CVTSD_SI64X(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtsd_si64x(${quote(a)})")
-    case iDef@MM_CVTSD_SS(a, b) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtsd_ss(${quote(a)}, ${quote(b)})")
-    case iDef@MM_CVTSD_F64(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtsd_f64(${quote(a)})")
-    case iDef@MM_CVTSS_SD(a, b) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtss_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_CVTTPD_EPI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvttpd_epi32(${quote(a)})")
-    case iDef@MM_CVTTSD_SI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvttsd_si32(${quote(a)})")
-    case iDef@MM_CVTTSD_SI64(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvttsd_si64(${quote(a)})")
-    case iDef@MM_CVTTSD_SI64X(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvttsd_si64x(${quote(a)})")
-    case iDef@MM_CVTPS_EPI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtps_epi32(${quote(a)})")
-    case iDef@MM_CVTTPS_EPI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvttps_epi32(${quote(a)})")
-    case iDef@MM_CVTPD_PI32(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_cvtpd_pi32(${quote(a)})")
+      emitValDef(sym, s"_mm_cmpnle_pd(${quote(a)}, ${quote(b)})")
     case iDef@MM_CVTTPD_PI32(a) =>
       headers += iDef.header
       emitValDef(sym, s"_mm_cvttpd_pi32(${quote(a)})")
-    case iDef@MM_SET_SD(a) =>
+    case iDef@MM_MULHI_EPU16(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_set_sd(${quote(a)})")
-    case iDef@MM_SET1_PD(a) =>
+      emitValDef(sym, s"_mm_mulhi_epu16(${quote(a)}, ${quote(b)})")
+    case iDef@MM_CMPORD_PD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_set1_pd(${quote(a)})")
-    case iDef@MM_SET_PD1(a) =>
+      emitValDef(sym, s"_mm_cmpord_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SRLI_EPI16(a, imm8) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_set_pd1(${quote(a)})")
-    case iDef@MM_SET_PD(e1, e0) =>
+      emitValDef(sym, s"_mm_srli_epi16(${quote(a)}, ${quote(imm8)})")
+    case iDef@MM_MAX_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_set_pd(${quote(e1)}, ${quote(e0)})")
-    case iDef@MM_SETR_PD(e1, e0) =>
+      emitValDef(sym, s"_mm_max_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET1_EPI16(a) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_setr_pd(${quote(e1)}, ${quote(e0)})")
+      emitValDef(sym, s"_mm_set1_epi16(${quote(a)})")
+    case iDef@MM_STORE_SD(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_store_sd((double*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}), ${quote(a)});")
+    case iDef@MM_SUB_EPI32(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_sub_epi32(${quote(a)}, ${quote(b)})")
+    case iDef@MM_LOADH_PD(a, mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_loadh_pd(${quote(a)}, (double const*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}))")
+    case iDef@MM_SHUFFLEHI_EPI16(a, imm8) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_shufflehi_epi16(${quote(a)}, ${quote(imm8)})")
+    case iDef@MM_SLL_EPI32(a, count) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_sll_epi32(${quote(a)}, ${quote(count)})")
+    case iDef@MM_CMPORD_SD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmpord_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_UCOMIGT_SD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_ucomigt_sd(${quote(a)}, ${quote(b)})")
     case iDef@MM_SETZERO_PD() =>
       headers += iDef.header
       emitValDef(sym, s"_mm_setzero_pd()")
-    case iDef@MM_LOAD_PD(mem_addr, mem_addrOffset) =>
+    case iDef@MM_CMPNEQ_PD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_load_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
+      emitValDef(sym, s"_mm_cmpneq_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SUBS_EPI8(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_subs_epi8(${quote(a)}, ${quote(b)})")
+    case iDef@MM_ANDNOT_PD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_andnot_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_CVTSI32_SI128(a) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cvtsi32_si128(${quote(a)})")
     case iDef@MM_LOAD1_PD(mem_addr, mem_addrOffset) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_load1_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOAD_PD1(mem_addr, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_load1_pd((double const*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}))")
+    case iDef@MM_SETZERO_SI128() =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_load_pd1((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOADR_PD(mem_addr, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_setzero_si128()")
+    case iDef@MM_MFENCE() =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_loadr_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOADU_PD(mem_addr, mem_addrOffset) =>
+      stream.println(s"_mm_mfence();")
+    case iDef@MM_MAX_EPU8(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_loadu_pd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOAD_SD(mem_addr, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_max_epu8(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET1_EPI32(a) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_load_sd((double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOADH_PD(a, mem_addr, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_set1_epi32(${quote(a)})")
+    case iDef@MM_CVTPS_PD(a) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_loadh_pd(${quote(a)}, (double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_LOADL_PD(a, mem_addr, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_cvtps_pd(${quote(a)})")
+    case iDef@MM_COMIEQ_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_loadl_pd(${quote(a)}, (double const*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))})")
-    case iDef@MM_STREAM_PD(mem_addr, a, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_comieq_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET_EPI64(e1, e0) =>
       headers += iDef.header
-      stream.println(s"_mm_stream_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STORE_SD(mem_addr, a, mem_addrOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_store_sd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STORE1_PD(mem_addr, a, mem_addrOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_store1_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STORE_PD1(mem_addr, a, mem_addrOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_store_pd1((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STORE_PD(mem_addr, a, mem_addrOffset) =>
-      headers += iDef.header
-      stream.println(s"_mm_store_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
+      emitValDef(sym, s"_mm_set_epi64(${quote(e1)}, ${quote(e0)})")
     case iDef@MM_STOREU_PD(mem_addr, a, mem_addrOffset) =>
       headers += iDef.header
-      stream.println(s"_mm_storeu_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STORER_PD(mem_addr, a, mem_addrOffset) =>
+      stream.println(s"_mm_storeu_pd((double*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}), ${quote(a)});")
+    case iDef@MM_LOADR_PD(mem_addr, mem_addrOffset) =>
       headers += iDef.header
-      stream.println(s"_mm_storer_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STOREH_PD(mem_addr, a, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_loadr_pd((double const*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}))")
+    case iDef@MM_CMPNGE_SD(a, b) =>
       headers += iDef.header
-      stream.println(s"_mm_storeh_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_STOREL_PD(mem_addr, a, mem_addrOffset) =>
+      emitValDef(sym, s"_mm_cmpnge_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_ADD_PD(a, b) =>
       headers += iDef.header
-      stream.println(s"_mm_storel_pd((double*) ${quote(mem_addr) + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}, ${quote(a)});")
-    case iDef@MM_UNPACKHI_PD(a, b) =>
+      emitValDef(sym, s"_mm_add_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_STREAM_SI32(mem_addr, a, mem_addrOffset) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_unpackhi_pd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_UNPACKLO_PD(a, b) =>
+      stream.println(s"_mm_stream_si32((int*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}), ${quote(a)});")
+    case iDef@MM_SUBS_EPU16(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_unpacklo_pd(${quote(a)}, ${quote(b)})")
+      emitValDef(sym, s"_mm_subs_epu16(${quote(a)}, ${quote(b)})")
     case iDef@MM_MOVEMASK_PD(a) =>
       headers += iDef.header
       emitValDef(sym, s"_mm_movemask_pd(${quote(a)})")
-    case iDef@MM_SHUFFLE_PD(a, b, imm8) =>
+    case iDef@MM_ADD_SI64(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_shuffle_pd(${quote(a)}, ${quote(b)}, ${quote(imm8)})")
-    case iDef@MM_MOVE_SD(a, b) =>
+      emitValDef(sym, s"_mm_add_si64(${quote(a)}, ${quote(b)})")
+    case iDef@MM_COMILE_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_move_sd(${quote(a)}, ${quote(b)})")
-    case iDef@MM_CASTPD_PS(a) =>
+      emitValDef(sym, s"_mm_comile_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_ADD_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_castpd_ps(${quote(a)})")
-    case iDef@MM_CASTPD_SI128(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_castpd_si128(${quote(a)})")
-    case iDef@MM_CASTPS_PD(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_castps_pd(${quote(a)})")
-    case iDef@MM_CASTPS_SI128(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_castps_si128(${quote(a)})")
-    case iDef@MM_CASTSI128_PD(a) =>
-      headers += iDef.header
-      emitValDef(sym, s"_mm_castsi128_pd(${quote(a)})")
+      emitValDef(sym, s"_mm_add_sd(${quote(a)}, ${quote(b)})")
     case iDef@MM_CASTSI128_PS(a) =>
       headers += iDef.header
       emitValDef(sym, s"_mm_castsi128_ps(${quote(a)})")
-    case iDef@MM_UNDEFINED_PD() =>
+    case iDef@MM_CVTSI64X_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm_undefined_pd()")
+      emitValDef(sym, s"_mm_cvtsi64x_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET_EPI32(e3, e2, e1, e0) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_set_epi32(${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
+    case iDef@MM_CMPNGT_PD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmpngt_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_MAX_PD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_max_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_MAX_EPI16(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_max_epi16(${quote(a)}, ${quote(b)})")
     case iDef@MM_UNDEFINED_SI128() =>
       headers += iDef.header
       emitValDef(sym, s"_mm_undefined_si128()")
-    case iDef@MM256_CVTSD_F64(a) =>
+    case iDef@MM_UCOMIEQ_SD(a, b) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm256_cvtsd_f64(${quote(a)})")
-    case iDef@MM256_CVTSI256_SI32(a) =>
+      emitValDef(sym, s"_mm_ucomieq_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET_EPI64X(e1, e0) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm256_cvtsi256_si32(${quote(a)})")
-    case iDef@MM512_CVTSD_F64(a) =>
+      emitValDef(sym, s"_mm_set_epi64x(${quote(e1)}, ${quote(e0)})")
+    case iDef@MM_SLL_EPI64(a, count) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm512_cvtsd_f64(${quote(a)})")
-    case iDef@MM512_CVTSI512_SI32(a) =>
+      emitValDef(sym, s"_mm_sll_epi64(${quote(a)}, ${quote(count)})")
+    case iDef@MM_CASTPD_PS(a) =>
       headers += iDef.header
-      emitValDef(sym, s"_mm512_cvtsi512_si32(${quote(a)})")
+      emitValDef(sym, s"_mm_castpd_ps(${quote(a)})")
+    case iDef@MM_SUB_SI64(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_sub_si64(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SQRT_SD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_sqrt_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_CMPLE_SD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmple_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_SET_EPI8(e15, e14, e13, e12, e11, e10, e9, e8, e7, e6, e5, e4, e3, e2, e1, e0) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_set_epi8(${quote(e15)}, ${quote(e14)}, ${quote(e13)}, ${quote(e12)}, ${quote(e11)}, ${quote(e10)}, ${quote(e9)}, ${quote(e8)}, ${quote(e7)}, ${quote(e6)}, ${quote(e5)}, ${quote(e4)}, ${quote(e3)}, ${quote(e2)}, ${quote(e1)}, ${quote(e0)})")
+    case iDef@MM_CMPGT_EPI16(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmpgt_epi16(${quote(a)}, ${quote(b)})")
+    case iDef@MM_CVTSI64_SI128(a) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cvtsi64_si128(${quote(a)})")
+    case iDef@MM_AVG_EPU8(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_avg_epu8(${quote(a)}, ${quote(b)})")
+    case iDef@MM_ADD_EPI16(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_add_epi16(${quote(a)}, ${quote(b)})")
+    case iDef@MM_STORE1_PD(mem_addr, a, mem_addrOffset) =>
+      headers += iDef.header
+      stream.println(s"_mm_store1_pd((double*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}), ${quote(a)});")
+    case iDef@MM_DIV_PD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_div_pd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_LOAD_PD1(mem_addr, mem_addrOffset) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_load_pd1((double const*) (${quote(mem_addr)  + (if(mem_addrOffset == Const(0)) "" else " + " + quote(mem_addrOffset))}))")
+    case iDef@MM_CMPNLE_SD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmpnle_sd(${quote(a)}, ${quote(b)})")
+    case iDef@MM_CMPNGE_PD(a, b) =>
+      headers += iDef.header
+      emitValDef(sym, s"_mm_cmpnge_pd(${quote(a)}, ${quote(b)})")
     case _ => super.emitNode(sym, rhs)
   }
 }
