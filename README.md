@@ -29,7 +29,7 @@ libraryDependencies += "org.scala-lang.lms" % "lms-core_2.11" % "1.0.0-SNAPSHOT"
 libraryDependencies += "ch.ethz.acl" %% "scala-unsigned" % "0.1-SNAPSHOT"
 
 // the main lms-intrinsics package
-libraryDependencies += "ch.ethz.acl" %% "lms-intrinsics" % "0.0.2-SNAPSHOT"
+libraryDependencies += "ch.ethz.acl" %% "lms-intrinsics" % "0.0.5-SNAPSHOT"
 ```
 If you like to use the latest version of the `lms-intrinsics` GitHub repository, add project dependency in your `Build.scala` file:
 
