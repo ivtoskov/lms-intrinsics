@@ -25,7 +25,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 // LMS dependency
 libraryDependencies += "org.scala-lang.lms" % "lms-core_2.11" % "1.0.0-SNAPSHOT"
 
-// support for unsigned primives in Scala
+// support for unsigned primitives in Scala
 libraryDependencies += "ch.ethz.acl" %% "scala-unsigned" % "0.1-SNAPSHOT"
 
 // the main lms-intrinsics package
@@ -44,7 +44,7 @@ Note that the `lms-intrinsics` package contains the definition of more than 5000
 
 A minimal example of how `lms-intrinsics` can be used, can be illustrated in 3 steps:
 
-Import LMS, the support for unsigned primives, and import `lms-intrinsics`:
+Import LMS, the support for unsigned primitives, and import `lms-intrinsics`:
 
 ```Scala
 import scala.lms.common._
